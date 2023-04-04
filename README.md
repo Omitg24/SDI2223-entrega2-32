@@ -16,7 +16,7 @@
 ## Descripción del proyecto:
 
 <p align="justify">
-Este proyecto forma parte de la entrega 1 de la asignatura de Sistemas Distribuidos e Intenet (SDI), se basa en la app de compra-venta de Wallapop, dando una simulación de interacción entre usuarios a través de las ofertas que se suban o las conversaciones que se lleven a cabo entre usuarios.
+Este proyecto forma parte de la entrega 2 de la asignatura de Sistemas Distribuidos e Intenet (SDI), se basa en la app de compra-venta de Wallapop, dando una simulación de interacción entre usuarios a través de las ofertas que se suban o las conversaciones que se lleven a cabo entre usuarios.
 </p>
 
 ## Asignación de tareas:
