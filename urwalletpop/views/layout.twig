@@ -1,10 +1,120 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>{{ title }}</title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-  </head>
-  <body>
-    {% block body %}{% endblock %}
-  </body>
+<html lang="en">
+<head>
+    <title>{% block title %} UrWalletPop {% endblock %}</title>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+    <link href="/images/Symbol.png" rel="shortcut icon" type="image/png"/>
+    <!-- Bootstrap CSS -->
+    <link href="/stylesheets/custom.css" rel="stylesheet">
+    <link href="/stylesheets/bootstrap.css" rel="stylesheet"/>
+    <!-- Font Awesome CSS -->
+    <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css"
+          integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" rel="stylesheet">
+    <!-- JS files: jQuery first, then Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    {% block scripts %} {% endblock %}
+</head>
+<body>
+
+<!-- Barra de Navegación superior -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="/">
+        <img alt="logo" height="48" src="/images/Logo.png"/>
+    </a>
+    <button aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler"
+            data-target="#my-navbarColor02" data-toggle="collapse" type="button">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="my-navbarColor02">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item ">
+                <a class="nav-link" href="/home">Home<span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item dropdown">
+                <a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown"
+                   href="#" id="userDropdown" role="button">
+                    Gestión de usuarios
+                </a>
+                <div aria-labelledby="navbarDropdown" class="dropdown-menu">
+                    <a class="dropdown-item" href="/user/list">
+                        Ver todos los usuarios
+                    </a>
+                </div>
+            </li>
+            <li class="nav-item dropdown" id="offer-menu">
+                <a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown"
+                   href="#" id="navbarDropdown" role="button">
+                    Ofertas
+                </a>
+                <div aria-labelledby="navbarDropdown" class="dropdown-menu">
+                    <a class="dropdown-item" href="/offer/add">Añadir una oferta</a>
+                    <a class="dropdown-item" href="/offer/ownedList">Ver tus ofertas</a>
+                    <a class="dropdown-item" href="/offer/purchasedList">Ver tus ofertas compradas</a>
+                    <a class="dropdown-item" href="/offer/searchList">Ver las ofertas publicadas</a>
+                </div>
+            </li>
+            <li class="nav-item ">
+                <a class="nav-link" href="/conversation/list">
+                    Conversaciones
+                    <span class="sr-only">(current)</span>
+                </a>
+            </li>
+            <li class="nav-item ">
+                <a class="nav-link" href="/log">
+                    Registro
+                    <span class="sr-only">(current)</span>
+                </a>
+            </li>
+        </ul>
+        <ul class="navbar-nav justify-content-end">
+            <li class="nav-item">
+                <a class="nav-link" href="/signup">
+                    <i class='fas fa-user-alt' style='font-size:16px'></i>
+                    <span>Registrarse</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/login">
+                    <i class='fas fa-sign-in-alt' style='font-size:16px'></i>
+                    <span>Login</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/logout">
+                    <i class='fas fa-sign-out-alt' style='font-size:16px'></i>
+                    <span>Desconectar</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="container">
+        <script>
+            let params = new URLSearchParams(location.search);
+            let message = params.get("message");
+            let messageType = params.get("messageType");
+            if (message !== null && message !== "") {
+                if (messageType === "") {
+                    messageType = 'alert-info';
+                }
+                $(".container")
+                    .append("<div class='alert " + messageType + "'>" + message + " </div>");
+            }
+        </script>
+        <!-- Contenido -->
+        {% block main_container %}
+            <!-- Posible contenido por defecto -->
+        {% endblock %}
+    </div>
+</div>
+<footer class="footer">
+    <div class="container">
+        <span class="text-white bg-dark">©SDI - UrWalletPop, creado por Álvaro, Israel, Omar & David.</span>
+    </div>
+</footer>
+</body>
 </html>
