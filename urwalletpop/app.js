@@ -21,7 +21,21 @@ let bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-require("./routes/users.js")(app);
+const { MongoClient } = require("mongodb");
+const url = 'mongodb://localhost:27017';
+app.set('connectionStrings', url);
+
+const userSessionRouter = require('./routes/userSessionRouter');
+app.use('/home', userSessionRouter);
+app.use('/user/*', userSessionRouter);
+app.use('/offer/*', userSessionRouter);
+app.use('/conversation/*', userSessionRouter);
+app.use('/log', userSessionRouter);
+app.use('/logout', userSessionRouter);
+
+const usersRepository = require("./repositories/usersRepository.js");
+usersRepository.init(app, MongoClient);
+require("./routes/users.js")(app, usersRepository);
 
 let indexRouter = require('./routes/index');
 app.use('/', indexRouter);
@@ -47,9 +61,10 @@ app.use(function(err, req, res, next) {
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
+  errors = [{field: "Error", message: err.message}];
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.render('error', {errors: errors});
 });
 
 module.exports = app;

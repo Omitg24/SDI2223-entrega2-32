@@ -1,7 +1,32 @@
 {% extends 'layout.twig' %}
 
-{% block body %}
-  <h1>{{message}}</h1>
-  <h2>{{error.status}}</h2>
-  <pre>{{error.stack}}</pre>
+{% block main_container %}
+    <h2>Errores</h2>
+    <p>Aquí encontrará los errores producidos en la aplicación, en caso de que se haya producido alguno:</p>
+    {% if errors != null %}
+        <div class="alert alert-danger table-responsive">
+            <table class="table table-hover table-borderless">
+                <thead class="thead-dark">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Campo</th>
+                    <th scope="col">Mensaje</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for error in errors %}
+                    <tr>
+                        <th scope="row">{{ loop.index }}</th>
+                        <td>{{ error.field }}</td>
+                        <td>{{ error.message }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <p>No hay errores.</p>
+        </div>
+    {% endif %}
 {% endblock %}
