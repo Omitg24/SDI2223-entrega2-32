@@ -29,64 +29,93 @@
     </button>
     <div class="collapse navbar-collapse" id="my-navbarColor02">
         <ul class="navbar-nav mr-auto">
-            <li class="nav-item ">
-                <a class="nav-link" href="/home">Home<span class="sr-only">(current)</span></a>
-            </li>
-            <li class="nav-item dropdown">
-                <a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown"
-                   href="#" id="userDropdown" role="button">
-                    Gestión de usuarios
-                </a>
-                <div aria-labelledby="navbarDropdown" class="dropdown-menu">
-                    <a class="dropdown-item" href="/user/list">
-                        Ver todos los usuarios
+            {% if user is defined %}
+                <li class="nav-item ">
+                    <a class="nav-link" href="/home">Home<span class="sr-only">(current)</span></a>
+                </li>
+            {% endif %}
+            {% if role == "admin" %}
+                <li class="nav-item dropdown">
+                    <a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle"
+                       data-toggle="dropdown"
+                       href="#" id="userDropdown" role="button">
+                        Gestión de usuarios
                     </a>
-                </div>
-            </li>
-            <li class="nav-item dropdown" id="offer-menu">
-                <a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown"
-                   href="#" id="navbarDropdown" role="button">
-                    Ofertas
-                </a>
-                <div aria-labelledby="navbarDropdown" class="dropdown-menu">
-                    <a class="dropdown-item" href="/offer/add">Añadir una oferta</a>
-                    <a class="dropdown-item" href="/offer/ownedList">Ver tus ofertas</a>
-                    <a class="dropdown-item" href="/offer/purchasedList">Ver tus ofertas compradas</a>
-                    <a class="dropdown-item" href="/offer/searchList">Ver las ofertas publicadas</a>
-                </div>
-            </li>
-            <li class="nav-item ">
-                <a class="nav-link" href="/conversation/list">
-                    Conversaciones
-                    <span class="sr-only">(current)</span>
-                </a>
-            </li>
-            <li class="nav-item ">
-                <a class="nav-link" href="/log">
-                    Registro
-                    <span class="sr-only">(current)</span>
-                </a>
-            </li>
+                    <div aria-labelledby="navbarDropdown" class="dropdown-menu">
+                        <a class="dropdown-item" href="/user/list">
+                            Ver todos los usuarios
+                        </a>
+                    </div>
+                </li>
+            {% endif %}
+            {% if user is defined %}
+                <li class="nav-item dropdown" id="offer-menu">
+                    <a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle"
+                       data-toggle="dropdown"
+                       href="#" id="navbarDropdown" role="button">
+                        Ofertas
+                    </a>
+                    <div aria-labelledby="navbarDropdown" class="dropdown-menu">
+                        {% if role == "standard" %}
+                            <a class="dropdown-item" href="/offer/add">Añadir una oferta</a>
+                            <a class="dropdown-item" href="/offer/ownedList">Ver tus ofertas</a>
+                            <a class="dropdown-item" href="/offer/purchasedList">Ver tus ofertas compradas</a>
+                        {% endif %}
+                        <a class="dropdown-item" href="/offer/searchList">Ver las ofertas publicadas</a>
+                    </div>
+                </li>
+            {% endif %}
+            {% if role == "standard" %}
+                <li class="nav-item ">
+                    <a class="nav-link" href="/conversation/list">
+                        Conversaciones
+                        <span class="sr-only">(current)</span>
+                    </a>
+                </li>
+            {% endif %}
+            {% if role == "admin" %}
+                <li class="nav-item ">
+                    <a class="nav-link" href="/log">
+                        Registro
+                        <span class="sr-only">(current)</span>
+                    </a>
+                </li>
+            {% endif %}
         </ul>
         <ul class="navbar-nav justify-content-end">
-            <li class="nav-item">
-                <a class="nav-link" href="/signup">
-                    <i class='fas fa-user-alt' style='font-size:16px'></i>
-                    <span>Registrarse</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/login">
-                    <i class='fas fa-sign-in-alt' style='font-size:16px'></i>
-                    <span>Login</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/logout">
-                    <i class='fas fa-sign-out-alt' style='font-size:16px'></i>
-                    <span>Desconectar</span>
-                </a>
-            </li>
+            {% if user is not defined %}
+                <li class="nav-item">
+                    <a class="nav-link" href="/signup">
+                        <i class='fas fa-user-alt' style='font-size:16px'></i>
+                        <span>Registrarse</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/login">
+                        <i class='fas fa-sign-in-alt' style='font-size:16px'></i>
+                        <span>Login</span>
+                    </a>
+                </li>
+            {% endif %}
+            {% if user is defined %}
+                <div class="userData nav-item">
+                    <img class="rounded-circle" alt="Profile Image" src="/images/User.png" width="24"/>
+                    <span class="userDataText">
+                            {{ user }}
+                        </span>
+                    {% if role == "standard" %}
+                        <span class="userDataText" style="font-size: 20px">
+                                {{ amount }} €
+                            </span>
+                    {% endif %}
+                </div>
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">
+                        <i class='fas fa-sign-out-alt' style='font-size:16px'></i>
+                        <span>Desconectar</span>
+                    </a>
+                </li>
+            {% endif %}
         </ul>
     </div>
 </nav>
