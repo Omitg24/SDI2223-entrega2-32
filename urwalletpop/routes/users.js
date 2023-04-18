@@ -83,6 +83,13 @@ module.exports = function (app, usersRepository) {
             res.render("error", {errors: errors});
         })
     });
+    app.get('/logout', function (req, res) {
+        req.session.user = null;
+        req.session.role = null;
+        req.session.amount = null;
+        req.session.date = null;
+        res.redirect("/login");
+    })
     function validateSignUp(user, confirmPassword, callback) {
         let errors = [];
         if (user.email.trim().toString().length === 0) {
