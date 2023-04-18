@@ -1,4 +1,7 @@
 module.exports = function (app, usersRepository) {
+    app.get('/home', function (req, res) {
+        res.render("home.twig", { user: req.session.user, role: req.session.role, amount: req.session.amount, date: req.session.date });
+    });
     app.get('/signup', function (req, res) {
         res.render("signup.twig");
     });
@@ -21,7 +24,7 @@ module.exports = function (app, usersRepository) {
             role: "standard",
             amount: 100
         }
-        validate(user, passwordConfirm, function (errors) {
+        validateSignUp(user, passwordConfirm, function (errors) {
             if (errors != null && errors.length > 0) {
                 res.render("error", {errors: errors});
             } else {
@@ -29,6 +32,7 @@ module.exports = function (app, usersRepository) {
                     req.session.user = user.email;
                     req.session.role = user.role;
                     req.session.amount = user.amount;
+                    req.session.date = user.date;
                     res.redirect("/offer/ownedList");
                 }).catch(error => {
                     res.redirect("/signup" +
@@ -38,8 +42,48 @@ module.exports = function (app, usersRepository) {
             }
         });
     });
-
-    function validate(user, confirmPassword, callback) {
+    app.get('/login', function (req, res) {
+        res.render("login.twig");
+    })
+    app.post('/login', function (req, res) {
+        let securePassword = app.get("crypto").createHmac('sha256', app.get('clave'))
+            .update(req.body.password).digest('hex');
+        let filter = {
+            email: req.body.email,
+            password: securePassword
+        }
+        let options = {};
+        usersRepository.findUser(filter, options).then(user => {
+            if (user == null) {
+                req.session.user = null;
+                req.session.role = null;
+                req.session.amount = null;
+                req.session.date = null;
+                let errors = [];
+                errors.push({field: "Email", message: "Email o password incorrecto"});
+                res.render("error", {errors: errors});
+            } else {
+                req.session.user = user.email;
+                req.session.role = user.role;
+                req.session.amount = user.amount;
+                req.session.date = user.date;
+                if (user.role === "admin") {
+                    res.redirect("/users/list");
+                } else {
+                    res.redirect("/offer/ownedList");
+                }
+            }
+        }).catch(error => {
+            req.session.user = null;
+            req.session.role = null;
+            req.session.amount = null;
+            req.session.date = null;
+            let errors = [];
+            errors.push({field: "Email", message: "Se ha producido un error al buscar el usuario"});
+            res.render("error", {errors: errors});
+        })
+    });
+    function validateSignUp(user, confirmPassword, callback) {
         let errors = [];
         if (user.email.trim().toString().length === 0) {
             errors.push({field: "Email", message: "El email no puede ser vacío."});

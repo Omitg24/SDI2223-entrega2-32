@@ -20,4 +20,24 @@
   color: rgb(240, 173, 181);
 }
 
+.indexElement {
+  text-align: center;
+}
+
+.text-body section {
+  border-style: solid;
+  border-width: 1px;
+  border-color: #ff5252;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  background-color: rgba(198, 70, 71, 0.4);
+  padding-top: 10px;
+}
+
+.profileData {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 /* Sticky footer styles-------------------------------------------------- */
