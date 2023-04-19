@@ -51,13 +51,13 @@ Este proyecto forma parte de la entrega 2 de la asignatura de Sistemas Distribui
 
 #### Parte 2A - API de Servicios Web Rest:
 
-- Álvaro Davila Sampedro, UO284548:  
+- Álvaro Davila Sampedro, UO284548:
 
-- Israel Solís Iglesias, UO282162:  
+- Israel Solís Iglesias, UO282162:
 
-- Omar Teixeira González, UO281847:  
+- Omar Teixeira González, UO281847:
 
-- David Leszek Warzynski Abril, UO278968:  
+- David Leszek Warzynski Abril, UO278968:
 
 #### Parte 2B - Cliente Ligero JQuery/Ajax:
 
