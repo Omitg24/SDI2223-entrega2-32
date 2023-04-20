@@ -1,6 +1,17 @@
 {% extends 'layout.twig' %}
 
-{% block body %}
-  <h1>{{title}}</h1>
-  <p>Welcome to {{title}}</p>
+{% block title %} Inicio {% endblock %}
+
+{% block main_container %}
+    <h2 class="indexElement">
+        <img height="128" src="/images/Titulo.png">
+    </h2>
+    <p class="indexElement">
+        Este proyecto, realizado por los alumnos de SDI, se basa en la conocida aplicación de compra-venta
+        "Wallapop", dando la oportunidad de que diversos usuarios interaccionen a través de ofertas y conversaciones,
+        entre otros.
+    </p>
+    <div class="indexElement">
+        <img src="/images/Symbol.png" width="512">
+    </div>
 {% endblock %}

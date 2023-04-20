@@ -29,6 +29,22 @@ module.exports = {
             throw (error);
         }
     },
+    getUsersPg: async function (filter, options, page) {
+        try {
+            const limit = 4;
+            const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
+            const database = client.db("UrWalletPop");
+            const collectionName = 'users';
+            const usersCollection = database.collection(collectionName);
+            const usersCollectionCount = await usersCollection.count();
+            const cursor = usersCollection.find(filter, options).skip((page - 1) * limit).limit(limit)
+            const users = await cursor.toArray();
+            const result = {users: users, total: usersCollectionCount};
+            return result;
+        } catch (error) {
+            throw (error);
+        }
+    },
     insertUser: async function (user) {
         try {
             const client = await this.mongoClient.connect(this.app.get('connectionStrings'));

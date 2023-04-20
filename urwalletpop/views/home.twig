@@ -1,0 +1,34 @@
+{% extends 'layout.twig' %}
+
+{% block title %} Home {% endblock %}
+
+{% block main_container %}
+    <div class="text-body" style="text-align: center">
+        <h2>¡Bienvenido a UrWalletPop!</h2>
+        <h3>En esta sección se encuentran tus datos y ofertas personales, representa un aspecto privado con respecto a
+            otros usuarios.</h3>
+        <section>
+            <div class="profileData">
+                <p>
+                    Usuario autenticado como:
+                    <br>
+                    <strong>{{ user }}</strong>
+                </p>
+            </div>
+            <div class="profileData">
+                <p>
+                    Fecha de nacimiento:
+                    <br>
+                    <strong>{{ date }}</strong>
+                </p>
+            </div>
+            <div class="profileData">
+                <p>
+                    Actualmente tiene un crédito total de:
+                    <br>
+                    <strong>{{ amount }} €</strong>
+                </p>
+            </div>
+        </section>
+    </div>
+{% endblock %}
