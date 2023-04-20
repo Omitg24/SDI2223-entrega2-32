@@ -1,0 +1,69 @@
+{% extends "layout.twig" %}
+{% block title %} Listado de usuarios {% endblock %}
+
+{% block main_container %}
+    <h2>Listado de usuarios</h2>
+    <div class="row">
+        <div class="col"></div>
+        <div id="custom-search-input" class="col-xs-12 col-sm-12 col-md-8 col-lg-5 mx-auto">
+            <form method="get" action="/users/list" class="input-group align-items-center">
+                <input id="search" type="text" class="form-control" placeholder="Nombre del usuario" name="search"/>
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="submit">
+                        <i class="fa fa-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <form action="/users/delete" class="form-horizontal" method="post">
+        <div class="table-responsive overflow-hidden">
+            <table class="table table-hover" id="tableUsers">
+                <thead class="thead-dark">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Apellidos</th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col">Eliminar</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for userToList in usersList %}
+                    <tr>
+                        <th scope="row">{{ loop.index }}</th>
+                        <td>{{ userToList.email }}</td>
+                        <td>{{ userToList.name }}</td>
+                        <td>{{ userToList.lastName }}</td>
+                        <td></td>
+                        <td></td>
+                        {% if userToList.email != user %}
+                            <td scope="row"><input class="cb" name="users"
+                                                   value="{{ userToList.id }}"
+                                                   type="checkbox"></td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <button class="btn btn-dark" id="delete-users" type="submit">Eliminar</button>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <ul class="pagination">
+                {% for page in pages %}
+                    <li class="page-item {% if currentPage == page %} active {% endif %}" id="pi-{{ page }}">
+                        <a class="page-link" href="/users/list/?page={{ page }}">{{ page }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </form>
+
+{% endblock %}
