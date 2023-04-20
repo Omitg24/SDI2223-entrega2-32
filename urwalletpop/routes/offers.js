@@ -1,5 +1,5 @@
 module.exports = function (app, offersRepository) {
-    app.get('/offers/purchasedList', function (req, res) {
+    app.get('/offer/purchasedList', function (req, res) {
         const user=req.session.user;
         let filter = {user :user, purchased:true};
         let options = {sort: { title: 1}};
@@ -19,8 +19,15 @@ module.exports = function (app, offersRepository) {
                     pages.push(i);
                 }
             }
+            let offers= [{
+                price : 100,
+                title: "RTX3090",
+                description: "La mejor tarjeta gráfica",
+                owner: "user99@email.com"
+            }]
             let response = {
-                offers: result.offers,
+                offers : offers,
+                //offers: result.offers,
                 pages: pages,
                 currentPage: page
             }
