@@ -40,7 +40,7 @@ module.exports = function (app, offersRepository, userRepository) {
         app.get('/offer/purchase/:id', function (req, res) {
             let filter = {_id: ObjectId(req.params.id)};
             offersRepository.findOffer(filter,{}).then(offer =>{
-               if(req.session.user !== offer.owner){
+               if(req.session.user !== offer.owner && offer.purchased===false){
                    //Comprobar si el usuario tiene el dinero suficiente
                    if(req.session.amount >= offer.price){
                        offer.purchased=true;
