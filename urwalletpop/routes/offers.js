@@ -1,7 +1,8 @@
-module.exports = function (app, offersRepository) {
+const {ObjectId} = require("mongodb");
+module.exports = function (app, offersRepository, userRepository) {
     app.get('/offer/purchasedList', function (req, res) {
         const user=req.session.user;
-        let filter = {user :user, purchased:true};
+        let filter = {buyer :user, purchased:true};
         let options = {sort: { title: 1}};
         let page = parseInt(req.query.page); // Es String !!!
         if (typeof req.query.page === "undefined" || req.query.page === null || req.query.page === "0") {
@@ -35,6 +36,30 @@ module.exports = function (app, offersRepository) {
         }).catch(error => {
             res.send("Se ha producido un error al listar las ofertas compradas " + error)
         });
-    })
+    }),
+        app.get('/offer/purchase/:id', function (req, res) {
+            let filter = {_id: ObjectId(req.params.id)};
+            offersRepository.findOffer(filter,{}).then(offer =>{
+               if(req.session.user !== offer.owner){
+                   //Comprobar si el usuario tiene el dinero suficiente
+                   if(req.session.amount >= offer.price){
+                       offer.purchased=true;
+                       offer.buyer=req.session.user;
+                       req.session.amount=req.session.amount-offer.price
+                       offersRepository.updateOffer(offer,filter,{}).then(result => {
+                               if (result == null) {
+                                   res.send("Error al comprar la oferta");
+                               } else {
+                                   res.redirect("/offer/searchList");
+                               }
+                       }).catch(error => {
+                           res.send("Se ha producido un error al modificar la oferta " + error)
+                       });
+                   }
+               }else{
+                   res.send("Se ha producido un error al modificar la oferta");
+               }
+            })
+        });
 
 }
