@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>{% block title %} UrWalletPop {% endblock %}</title>
+    <title>UrWalletPop - {% block title %} {% endblock %}</title>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1" name="viewport"/>
     <link href="/images/Symbol.png" rel="shortcut icon" type="image/png"/>
@@ -42,7 +42,7 @@
                         Gestión de usuarios
                     </a>
                     <div aria-labelledby="navbarDropdown" class="dropdown-menu">
-                        <a class="dropdown-item" href="/user/list">
+                        <a class="dropdown-item" href="/users/list">
                             Ver todos los usuarios
                         </a>
                     </div>
@@ -85,13 +85,13 @@
         <ul class="navbar-nav justify-content-end">
             {% if user is not defined %}
                 <li class="nav-item">
-                    <a class="nav-link" href="/signup">
+                    <a class="nav-link" href="/users/signup">
                         <i class='fas fa-user-alt' style='font-size:16px'></i>
                         <span>Registrarse</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/login">
+                    <a class="nav-link" href="/users/login">
                         <i class='fas fa-sign-in-alt' style='font-size:16px'></i>
                         <span>Login</span>
                     </a>
@@ -110,7 +110,7 @@
                     {% endif %}
                 </div>
                 <li class="nav-item">
-                    <a class="nav-link" href="/logout">
+                    <a class="nav-link" href="/users/logout">
                         <i class='fas fa-sign-out-alt' style='font-size:16px'></i>
                         <span>Desconectar</span>
                     </a>
