@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>UrWalletPop Ajax</title>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+    <link href="/images/Symbol.png" rel="shortcut icon" type="image/png"/>
+    <!-- Bootstrap CSS -->
+    <link href="/stylesheets/custom.css" rel="stylesheet">
+    <link href="/stylesheets/bootstrap.css" rel="stylesheet"/>
+    <!-- Font Awesome CSS -->
+    <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css"
+          integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" rel="stylesheet">
+    <!-- JS files: jQuery first, then Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="/javascripts/cookie.js"></script>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="/">
+        <img alt="logo" height="48" src="/images/Logo.png"/>
+    </a>
+    <button aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler"
+            data-target="#my-navbarColor02" data-toggle="collapse" type="button">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="my-navbarColor02">
+        <ul class="navbar-nav mr-auto" id="offer-menu-bar">
+            <li>Ofertas</li>
+        </ul>
+        <ul class="navbar-nav mr-auto" id="conversation-menu-bar">
+            <li>Conversaciones</li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right" id="barra-menu-derecha">
+            <!-- Opciones de menú aqui -->
+
+        </ul>
+    </div>
+</nav>
+<div class="container" id="main-container"> <!--  id para identificar -->
+
+</div>
+
+<script>
+    var user;
+
+    let token;
+    let URLbase = "https://localhost:8081/api";
+    $("#main-container").load("widget-login.html");
+
+    if (Cookies.get('token') != null) {
+        token = Cookies.get('token');
+        usuario = Cookies.get('user');
+        let url = new URL(window.location.href);
+        let w = url.searchParams.get("w");
+        if (w === "login") {
+            $("#main-container").load("widget-login.html");
+        }
+        if (w === "offer") {
+            $("#main-container").load("widget-offer.html");
+        }
+        if (w === "conversation") {
+            $("#main-container").load("widget-conversation.html");
+        }
+    }
+
+    function widgetOfertas() {
+        $("#main-container").load("widget-offer.html");
+    }
+
+    function widgetChats() {
+        $("#main-container").load("widget-conversation.html");
+    }
+
+</script>
+</body>
+</html>
