@@ -1,3 +1,5 @@
+//const {ObjectId} = require("mongodb");
+const {ObjectId} = require("mongodb");
 module.exports = function (app, usersRepository) {
     app.get('/home', function (req, res) {
         res.render("home.twig", {
@@ -225,17 +227,24 @@ module.exports = function (app, usersRepository) {
         res.render("signup.twig");
     });
 
-    app.get('/users/delete/:id', function (req, res) {
-        let filter = {_id: ObjectId(req.params.id)};
-        usersRepository.deleteUser(filter, {}).then(result => {
-            if (result === null || result.deletedCount === 0) {
-                res.send("No se ha podido eliminar el registro");
-            } else {
-                //TODO MOdificar la ruta que devuelve
-                res.redirect("");
-            }
-        }).catch(error => {
-            res.send("Se ha producido un error al intentar eliminar la canción: " + error)
-        });
+    app.post('/users/delete', function (req, res) {
+        let ids = req.body.users;
+        let filter;
+        if(typeof ids == "string"){
+            ids=[ids];
+        }
+        for(let i=0;i<ids.length;i++){
+            filter = {_id: ObjectId(ids[i])};
+            usersRepository.deleteUser(filter, {}).then(result => {
+                if (result === null || result.deletedCount === 0) {
+                    //res.send(req.body.users)
+                    res.send("No se ha podido eliminar el registro");
+                } else {
+                    res.redirect("list.twig");
+                }
+            }).catch(error => {
+                res.send("Se ha producido un error al intentar eliminar la canción: " + error)
+            });
+        }
     })
 }

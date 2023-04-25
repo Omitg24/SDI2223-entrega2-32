@@ -41,6 +41,12 @@ const usersRepository = require("./repositories/usersRepository.js");
 usersRepository.init(app, MongoClient);
 require("./routes/users.js")(app, usersRepository);
 
+const logsRepository = require("./repositories/logsRepository.js");
+logsRepository.init(app, MongoClient);
+require("./routes/logs.js")(app, logsRepository);
+
+const loggerMiddleware = require("./routes/loggerMiddleware.js")(logsRepository);
+
 let indexRouter = require('./routes/index');
 app.use('/', indexRouter);
 
@@ -49,6 +55,8 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'twig');
 
 app.use(logger('dev'));
+app.use(loggerMiddleware);
+
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
