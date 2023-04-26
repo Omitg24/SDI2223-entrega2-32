@@ -42,8 +42,7 @@ usersRepository.init(app, MongoClient);
 require("./routes/users.js")(app, usersRepository);
 const offerRepository = require("./repositories/offerRepository.js");
 offerRepository.init(app, MongoClient);
-require("./routes/offers.js")(app, offerRepository);
-
+require("./routes/offers.js")(app, offerRepository, usersRepository);
 
 let indexRouter = require('./routes/index');
 app.use('/', indexRouter);
