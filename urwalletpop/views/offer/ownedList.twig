@@ -8,11 +8,23 @@
         {% for offer in offers %}
             <div class="card border-dark mb-3" style="max-width: 18rem;min-width: 18rem; ">
                 <div class="card-body">
-                    <h5 class="card-title">{{ offer.price }} EUR</h5>
-                    <h6 class="card-subtitle" id="titleFeatured">{{ offer.title }}</h6>
+                    <img class="card-img-top" height="256" src="/images/Symbol.png" width="256"/>
+                    <h3 class="card-title">{{ offer.price }} EUR</h3>
+                    <h4 class="card-subtitle" id="titleFeatured">{{ offer.title }}</h4>
                     <p class="card-text">{{ offer.description }}</p>
                     <h6 class="card-link" id="date">{{ offer.date }}</h6>
                     <div class="d-flex flex-row">
+                        {% if offer.feature %}
+                            <button class="btn btn-info" type="button">
+                                Destacada
+                            </button>
+                        {% else %}
+                            <a href='/offer/feature/{{ offer._id }}'>
+                                <button class="btn btn-success" type="button">
+                                    Destacar
+                                </button>
+                            </a>
+                        {% endif %}
                         <a href='/offer/delete/{{ offer._id }}'>
                             <button class="btn btn-danger"
                                     type="button">
@@ -20,21 +32,6 @@
                             </button>
                         </a>
                     </div>
-                    {% if offer.feature %}
-                        <div class="d-flex flex-row">
-                                <button class="btn btn-info" type="button">
-                                    Destacada
-                                </button>
-                        </div>
-                    {% else %}
-                        <div class="d-flex flex-row">
-                            <a href='/offer/feature/{{ offer._id }}'>
-                                <button class="btn btn-success" type="button">
-                                    Destacar
-                                </button>
-                            </a>
-                        </div>
-                    {% endif%}
                 </div>
             </div>
         {% endfor %}
