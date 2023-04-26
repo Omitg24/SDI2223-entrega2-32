@@ -29,7 +29,7 @@
     </button>
     <div class="collapse navbar-collapse" id="my-navbarColor02">
         <ul class="navbar-nav mr-auto">
-            {% if user is defined %}
+            {% if user != null %}
                 <li class="nav-item ">
                     <a class="nav-link" href="/home">Home<span class="sr-only">(current)</span></a>
                 </li>
@@ -48,7 +48,7 @@
                     </div>
                 </li>
             {% endif %}
-            {% if user is defined %}
+            {% if user != null %}
                 <li class="nav-item dropdown" id="offer-menu">
                     <a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle"
                        data-toggle="dropdown"
@@ -83,7 +83,7 @@
             {% endif %}
         </ul>
         <ul class="navbar-nav justify-content-end">
-            {% if user is not defined %}
+            {% if user == null %}
                 <li class="nav-item">
                     <a class="nav-link" href="/users/signup">
                         <i class='fas fa-user-alt' style='font-size:16px'></i>
@@ -97,7 +97,7 @@
                     </a>
                 </li>
             {% endif %}
-            {% if user is defined %}
+            {% if user != null %}
                 <div class="userData nav-item">
                     <img class="rounded-circle" alt="Profile Image" src="/images/User.png" width="24"/>
                     <span class="userDataText">

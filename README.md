@@ -52,19 +52,39 @@ Este proyecto forma parte de la entrega 2 de la asignatura de Sistemas Distribui
 #### Parte 2A - API de Servicios Web Rest:
 
 - Álvaro Davila Sampedro, UO284548:
-
+    7. Marcar mensaje como leído (0.50 puntos).
+  
 - Israel Solís Iglesias, UO282162:
+    3. Enviar mensajes a una oferta (0.50 puntos).
+    4. Obtener los mensajes de una conversación (0.25 puntos).
+    5. Obtener el listado de conversaciones (0.25 puntos).
+    6. Eliminar conversaciones (0.50 puntos). 
 
 - Omar Teixeira González, UO281847:
+    1. Identificarse como usuario vía token (0.25 puntos).
 
 - David Leszek Warzynski Abril, UO278968:
-
+    2. Obtener el listado de ofertas disponibles (Sólo las ofertas de los otros usuarios) (0.25 puntos).
+  
 #### Parte 2B - Cliente Ligero JQuery/Ajax:
 
 - Álvaro Davila Sampedro, UO284548:
+    6. Marcar mensajes como leídos de forma automática (0.75 puntos).
+    7. Mostrar el número de mensajes sin leer (0.75 puntos). 
 
 - Israel Solís Iglesias, UO282162:
+    3. Establecer conversación en una oferta (0.25 puntos).
+    4. Ver el listado de conversaciones (0.0.25 puntos).
+    5. Eliminar una conversación (0.50 puntos).
 
 - Omar Teixeira González, UO281847:
+    1. Autenticación del usuario (0.25 puntos).
 
 - David Leszek Warzynski Abril, UO278968:
+    2. Mostrar el listado de ofertas disponibles (0.25 puntos).
+
+### Pruebas Automatizadas:
+Cada miembro del equipo hará las pruebas correspondientes a sus puntos desarrollados.
+
+### Informe de Entrega:
+Omar realizará los esquemas y redactará el informe de entrega.

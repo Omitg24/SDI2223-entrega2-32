@@ -1,7 +1,12 @@
 const {ObjectId} = require("mongodb");
 module.exports = function (app, offerRepository, usersRepository) {
     app.get('/offer/add', function (req, res) {
-        res.render("offer/add.twig");
+        res.render("offer/add.twig", {
+            user: req.session.user,
+            role: req.session.role,
+            amount: req.session.amount,
+            date: req.session.date
+        });
     });
 
     app.post('/offer/add', function (req, res) {
@@ -54,6 +59,10 @@ module.exports = function (app, offerRepository, usersRepository) {
                 errors.push({field: "Ofertas", message: "No se encontraron ofertas"});
                 res.render("error", {
                     errors: errors,
+                    user: req.session.user,
+                    role: req.session.role,
+                    amount: req.session.amount,
+                    date: req.session.date
                 });
             } else {
                 let lastPage = result.total / 5;
@@ -68,6 +77,10 @@ module.exports = function (app, offerRepository, usersRepository) {
                 }
                 let response = {
                     offers: result.offers,
+                    user: req.session.user,
+                    role: req.session.role,
+                    amount: req.session.amount,
+                    date: req.session.date,
                     pages: pages,
                     currentPage: page
                 }
@@ -77,7 +90,11 @@ module.exports = function (app, offerRepository, usersRepository) {
             let errors = [];
             errors.push({field: "Ofertas", message: "Erros al buscar ofertas"});
             res.render("error", {
-                errors: errors
+                errors: errors,
+                user: req.session.user,
+                role: req.session.role,
+                amount: req.session.amount,
+                date: req.session.date
             })
         })
     })
@@ -91,6 +108,10 @@ module.exports = function (app, offerRepository, usersRepository) {
                 errors.push({field: "Ofertas", message: "La oferta no existe o no se encuentra disponible"});
                 res.render("error", {
                     errors: errors,
+                    user: req.session.user,
+                    role: req.session.role,
+                    amount: req.session.amount,
+                    date: req.session.date
                 });
             } else {
                 res.redirect("/offer/ownedList");
@@ -99,7 +120,11 @@ module.exports = function (app, offerRepository, usersRepository) {
             let errors = [];
             errors.push({field: "Ofertas", message: "Error al borrar oferta"});
             res.render("error", {
-                errors: errors
+                errors: errors,
+                user: req.session.user,
+                role: req.session.role,
+                amount: req.session.amount,
+                date: req.session.date
             })
         })
     })
@@ -125,6 +150,10 @@ module.exports = function (app, offerRepository, usersRepository) {
                 errors.push({field: "Ofertas", message: "No se encontraron ofertas"});
                 res.render("error", {
                     errors: errors,
+                    user: req.session.user,
+                    role: req.session.role,
+                    amount: req.session.amount,
+                    date: req.session.date
                 });
             } else {
                 let lastPage = result.total / 5;
@@ -139,17 +168,25 @@ module.exports = function (app, offerRepository, usersRepository) {
                 }
                 let response = {
                     offers: result.offers,
+                    user: req.session.user,
+                    role: req.session.role,
+                    amount: req.session.amount,
+                    date: req.session.date,
                     pages: pages,
                     currentPage: page,
                     search: search
                 }
-                res.render("offer/offer.twig", response);
+                res.render("offer/searchList.twig", response);
             }
         }).catch(error => {
             let errors = [];
             errors.push({field: "Ofertas", message: "Error al buscar ofertas"});
             res.render("error", {
-                errors: errors
+                errors: errors,
+                user: req.session.user,
+                role: req.session.role,
+                amount: req.session.amount,
+                date: req.session.date
             })
         })
     })

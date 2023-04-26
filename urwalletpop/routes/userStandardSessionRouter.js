@@ -1,9 +1,9 @@
 const express = require('express');
 const userSessionRouter = express.Router();
 userSessionRouter.use(function (req, res, next) {
-    console.log("userAdminSessionRouter");
+    console.log("userStandardSessionRouter");
 
-    if (req.session.role === 'admin') {
+    if (req.session.role === 'standard') {
         next();
     } else {
         let errors = [];
