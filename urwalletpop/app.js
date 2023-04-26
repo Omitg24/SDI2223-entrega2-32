@@ -40,6 +40,10 @@ app.use('/users/delete', userAdminSessionRouter);
 const usersRepository = require("./repositories/usersRepository.js");
 usersRepository.init(app, MongoClient);
 require("./routes/users.js")(app, usersRepository);
+const offerRepository = require("./repositories/offerRepository.js");
+offerRepository.init(app, MongoClient);
+require("./routes/offers.js")(app, offerRepository);
+
 
 const offersRepository = require("./repositories/offersRepository.js");
 offersRepository.init(app, MongoClient);
