@@ -26,6 +26,21 @@
                 <h6 class="card-subtitle" id="titleFeatured">{{ offer.title }}</h6>
                 <p class="card-text">{{ offer.description }}</p>
                 <h6 class="card-link" id="date">{{ offer.date }}</h6>
+                {% if offer.purchase %}
+                    <div class="d-flex flex-row">
+                        <button class="btn btn-info" type="button">
+                            Vendida
+                        </button>
+                    </div>
+                {% else %}
+                    <div class="d-flex flex-row">
+                        <a href='/offer/purchase/{{ offer._id }}'>
+                            <button class="btn btn-success" type="button">
+                                Comprar
+                            </button>
+                        </a>
+                    </div>
+                {% endif%}
             </div>
         </div>
     {% endfor %}
