@@ -47,6 +47,7 @@ app.set('connectionStrings', url);
 
 const userSessionRouter = require('./routes/userSessionRouter');
 app.use('/home', userSessionRouter);
+app.use('/user/*', userSessionRouter);
 app.use('/offer/*', userSessionRouter);
 app.use('/conversation/*', userSessionRouter);
 app.use('/log', userSessionRouter);
@@ -68,6 +69,10 @@ const usersRepository = require("./repositories/usersRepository.js");
 usersRepository.init(app, MongoClient);
 require("./routes/users.js")(app, usersRepository);
 require("./routes/api/usersAPI.js")(app, usersRepository);
+const offerRepository = require("./repositories/offerRepository.js");
+offerRepository.init(app, MongoClient);
+require("./routes/offers.js")(app, offerRepository);
+
 
 let indexRouter = require('./routes/index');
 app.use('/', indexRouter);
