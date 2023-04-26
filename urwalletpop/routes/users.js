@@ -34,7 +34,7 @@ module.exports = function (app, usersRepository) {
             role: "standard",
             amount: 100
         }
-        validateSignUp(user, passwordConfirm, function (errors) {
+        validateSignUp(user, passwordConfirm).then(errors => {
             if (errors != null && errors.length > 0) {
                 res.render("signup.twig", {errors: errors});
             } else {
@@ -170,7 +170,7 @@ module.exports = function (app, usersRepository) {
         });
     });
 
-    function validateSignUp(user, confirmPassword, callback) {
+    async function validateSignUp(user, confirmPassword) {
         let errors = [];
         if (user.email.trim().toString().length === 0) {
             errors.push({type: "Email", message: "El email no puede ser vacío."});
@@ -220,12 +220,11 @@ module.exports = function (app, usersRepository) {
                 });
             }
             if (errors.length <= 0) {
-                callback(null);
-            } else {
-                callback(errors);
+                return null;
             }
         }).catch(error => {
             errors.push({type: "Email", message: "Se ha producido un error al buscar el usuario." + error});
         });
+        return errors;
     }
 }
