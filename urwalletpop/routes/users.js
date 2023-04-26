@@ -48,7 +48,12 @@ module.exports = function (app, usersRepository) {
         });
     });
     app.get('/users/login', function (req, res) {
-        res.render("login.twig");
+        res.render("login.twig", {
+            user: req.session.user,
+            role: req.session.role,
+            amount: req.session.amount,
+            date: req.session.date
+        });
     })
     app.post('/users/login', function (req, res) {
         let securePassword = app.get("crypto").createHmac('sha256', app.get('clave'))
