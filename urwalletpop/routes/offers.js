@@ -1,5 +1,5 @@
 const {ObjectId} = require("mongodb");
-module.exports = function (app, offerRepository) {
+module.exports = function (app, offerRepository, usersRepository) {
     app.get('/offer/add', function (req, res) {
         res.render("offer/add.twig", {
             user: req.session.user,
@@ -10,16 +10,33 @@ module.exports = function (app, offerRepository) {
     });
 
     app.post('/offer/add', function (req, res) {
+        let feature=false;
+        if(req.body.feature === "on"){
+            feature=true;
+        }
         let offer = {
             author: req.session.user,
             title: req.body.title,
             description: req.body.description,
             date: new Date(Date.now()).toUTCString(),
             price: req.body.price,
-            purchase: false
+            purchase: false,
+            buyer: null,
+            feature: feature,
         }
         validateOffer(offer, res).then(result => {
             if (result) {
+                if(offer.feature){
+                    usersRepository.findUser({email: req.session.user}, {}).then(user => {
+                        if(user.amount >=20){
+                            user.amount -=20;
+                            usersRepository.updateUser(user, {email: user.email}, {}).then();
+                        }else {
+                            res.redirect("/offer/add?message=No dispone del dinero suficiente. &messageType=alert-danger");
+                        }
+                    }
+                    )
+                }
                 offerRepository.insertOffer(offer).then(result => {
                     res.redirect("/offer/ownedlist");
                 }).catch(error => {
@@ -202,5 +219,91 @@ module.exports = function (app, offerRepository) {
         return true;
     }
 
-
+    app.get('/offer/purchasedList', function (req, res) {
+        let filter = {buyer: req.session.user};
+        let options = {};
+        let page = parseInt(req.query.page);
+        if (typeof req.query.page === "undefined" || req.query.page === null || req.query.page === "0") {
+            page = 1;
+        }
+        offerRepository.getOffersPage(filter, options, page).then(result => {
+            let lastPage = result.total / 4;
+            if (result.total % 4 > 0) { // Sobran decimales
+                lastPage = lastPage + 1;
+            }
+            let pages = []; // paginas mostrar
+            for (let i = page - 2; i <= page + 2; i++) {
+                if (i > 0 && i <= lastPage) {
+                    pages.push(i);
+                }
+            }
+            let response = {
+                offers: result.offers,
+                pages: pages,
+                currentPage: page
+            }
+            res.render("offer/purchasedList.twig", response);
+        }).catch(error => {
+            res.send("Se ha producido un error al listar las ofertas compradas " + error)
+        });
+    }),
+        app.get('/offer/purchase/:id', function (req, res) {
+            let filter = {_id: ObjectId(req.params.id)};
+            offerRepository.findOffer(filter, {}).then(offer => {
+                if (req.session.user !== offer.author && offer.purchase === false) {
+                    //Comprobar si el usuario tiene el dinero suficiente
+                    if (req.session.amount >= offer.price) {
+                        offer.purchase = true;
+                        offer.buyer = req.session.user;
+                        req.session.amount = req.session.amount - offer.price
+                        offerRepository.updateOffer(offer, filter, {}).then(result => {
+                            if (result == null) {
+                                res.send("Error al comprar la oferta");
+                            } else {
+                                usersRepository.findUser({email: req.session.user}, {}).then(user => {
+                                        user.amount = req.session.amount;
+                                        usersRepository.updateUser(user, {email: user.email}, {}).then();
+                                    }
+                                )
+                                res.redirect("/offer/searchList");
+                            }
+                        }).catch(error => {
+                            res.send("Se ha producido un error al modificar la oferta " + error)
+                        });
+                    }
+                } else {
+                    res.send("Se ha producido un error al modificar la oferta");
+                }
+            })
+        });
+    app.get('/offer/feature/:id', function (req, res) {
+        let filter = {_id: ObjectId(req.params.id)};
+        offerRepository.findOffer(filter, {}).then(offer => {
+            if (req.session.user === offer.author && offer.feature === false) {
+                //Comprobar si el usuario tiene el dinero suficiente
+                if (req.session.amount >= 20) {
+                    offer.feature = true;
+                    req.session.amount = req.session.amount - 20
+                    offerRepository.updateOffer(offer, filter, {}).then(result => {
+                        if (result == null) {
+                            res.send("Error al destacar la oferta");
+                        } else {
+                            usersRepository.findUser({email: req.session.user}, {}).then(user => {
+                                    user.amount = req.session.amount;
+                                    usersRepository.updateUser(user, {email: user.email}, {}).then();
+                                }
+                            )
+                            res.redirect("/offer/ownedList");
+                        }
+                    }).catch(error => {
+                        res.send("Se ha producido un error al destacar la oferta " + error)
+                    });
+                }else{
+                    res.redirect("/offer/ownedList");
+                }
+            } else {
+                res.send("Se ha producido un error al modificar la oferta");
+            }
+        })
+    });
 }

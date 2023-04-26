@@ -20,6 +20,21 @@
                             </button>
                         </a>
                     </div>
+                    {% if offer.feature %}
+                        <div class="d-flex flex-row">
+                                <button class="btn btn-info" type="button">
+                                    Destacada
+                                </button>
+                        </div>
+                    {% else %}
+                        <div class="d-flex flex-row">
+                            <a href='/offer/feature/{{ offer._id }}'>
+                                <button class="btn btn-success" type="button">
+                                    Destacar
+                                </button>
+                            </a>
+                        </div>
+                    {% endif%}
                 </div>
             </div>
         {% endfor %}
