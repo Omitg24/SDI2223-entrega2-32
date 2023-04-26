@@ -69,6 +69,7 @@ const usersRepository = require("./repositories/usersRepository.js");
 usersRepository.init(app, MongoClient);
 require("./routes/users.js")(app, usersRepository);
 require("./routes/api/usersAPI.js")(app, usersRepository);
+
 const offerRepository = require("./repositories/offerRepository.js");
 offerRepository.init(app, MongoClient);
 require("./routes/offers.js")(app, offerRepository, usersRepository);
