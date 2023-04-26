@@ -13,28 +13,16 @@ class Sdi2223Entrega2TestApplicationTests {
     static String PathFirefox = "C:\\Program Files\\Mozilla Firefox\\firefox.exe";
     //static String Geckodriver = "C:\\Path\\geckodriver-v0.30.0-win64.exe";
     static String Geckodriver = "C:\\Dev\\tools\\selenium\\geckodriver-v0.30.0-win64.exe";
-    //static String PathFirefox = "/Applications/Firefox.app/Contents/MacOS/firefox-bin";
+    static String URL = "http://localhost:8081";    //static String PathFirefox = "/Applications/Firefox.app/Contents/MacOS/firefox-bin";
 //static String Geckodriver = "/Users/USUARIO/selenium/geckodriver-v0.30.0-macos";
 //Común a Windows y a MACOSX
     static WebDriver driver = getDriver(PathFirefox, Geckodriver);
-    static String URL = "http://localhost:8081";
 
     public static WebDriver getDriver(String PathFirefox, String Geckodriver) {
         System.setProperty("webdriver.firefox.bin", PathFirefox);
         System.setProperty("webdriver.gecko.driver", Geckodriver);
         driver = new FirefoxDriver();
         return driver;
-    }
-
-    @BeforeEach
-    public void setUp() {
-        driver.navigate().to(URL);
-    }
-
-    //Después de cada prueba se borran las cookies del navegador
-    @AfterEach
-    public void tearDown() {
-        driver.manage().deleteAllCookies();
     }
 
     //Antes de la primera prueba
@@ -47,6 +35,17 @@ class Sdi2223Entrega2TestApplicationTests {
     static public void end() {
 //Cerramos el navegador al finalizar las pruebas
         driver.quit();
+    }
+
+    @BeforeEach
+    public void setUp() {
+        driver.navigate().to(URL);
+    }
+
+    //Después de cada prueba se borran las cookies del navegador
+    @AfterEach
+    public void tearDown() {
+        driver.manage().deleteAllCookies();
     }
 
     @Test
@@ -109,7 +108,6 @@ class Sdi2223Entrega2TestApplicationTests {
         Assertions.assertTrue(false, "PR10 sin hacer");
     }
 
-
     /* Ejemplos de pruebas de llamada a una API-REST */
     /* ---- Probamos a obtener lista de canciones sin token ---- */
     @Test
@@ -136,4 +134,6 @@ class Sdi2223Entrega2TestApplicationTests {
         //4. Comprobamos que el servicio ha tenido exito
         Assertions.assertEquals(200, response.getStatusCode());
     }
+
+
 }

@@ -1,2 +1,5 @@
 # IntelliJ Files
 .idea
+
+# Node Files
+/urwalletpop/node_modules
