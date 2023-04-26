@@ -48,12 +48,7 @@ module.exports = function (app, usersRepository) {
         });
     });
     app.get('/users/login', function (req, res) {
-        res.render("login.twig", {
-            user: req.session.user,
-            role: req.session.role,
-            amount: req.session.amount,
-            date: req.session.date
-        });
+        res.render("login.twig");
     })
     app.post('/users/login', function (req, res) {
         let securePassword = app.get("crypto").createHmac('sha256', app.get('clave'))
@@ -113,10 +108,11 @@ module.exports = function (app, usersRepository) {
         res.redirect("/users/login");
     });
     app.get('/users/list', function (req, res) {
+        let search = req.query.search || '';
         let filter = {};
         let options = {sort: {name: 1}};
-        if (req.query.search != null && typeof (req.query.search) != "undefined" && req.query.search != "") {
-            filter = {"email": {$regex: ".*" + req.query.search + ".*"}};
+        if (search !== '') {
+            filter = {"email": {$regex: new RegExp(search, 'i')}};
         }
         let page = parseInt(req.query.page);
         if (typeof req.query.page === "undefined" || req.query.page === null || req.query.page === "0") {
@@ -151,7 +147,8 @@ module.exports = function (app, usersRepository) {
                     amount: req.session.amount,
                     date: req.session.date,
                     pages: pages,
-                    currentPage: page
+                    currentPage: page,
+                    search: search
                 }
                 res.render("user/list.twig", response);
             }

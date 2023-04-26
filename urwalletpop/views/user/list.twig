@@ -7,7 +7,7 @@
         <div class="col"></div>
         <div id="custom-search-input" class="col-xs-12 col-sm-12 col-md-8 col-lg-5 mx-auto">
             <form method="get" action="/users/list" class="input-group align-items-center">
-                <input id="search" type="text" class="form-control" placeholder="Nombre del usuario" name="search"/>
+                <input id="search" type="text" class="form-control" placeholder="Nombre del usuario" name="search" value="{{ search }}"/>
                 <div class="input-group-append">
                     <button class="btn btn-outline-secondary" type="submit">
                         <i class="fa fa-search"></i>
@@ -59,13 +59,12 @@
             <ul class="pagination">
                 {% for page in pages %}
                     <li class="page-item {% if currentPage == page %} active {% endif %}" id="pi-{{ page }}">
-                        <a class="page-link" href="/users/list/?page={{ page }}">{{ page }}</a>
+                        <a class="page-link" href="/users/list/?page={{ page }}{% if search %}&search={{ search }}{% endif %}">{{ page }}</a>
                     </li>
                 {% endfor %}
             </ul>
         </div>
         <script>
-            <!--Script para bloquear el boton en caso de no tener selección -->
             $("input[name='users']").on('change',
                 function() {
                     $("#delete-users").prop('disabled',

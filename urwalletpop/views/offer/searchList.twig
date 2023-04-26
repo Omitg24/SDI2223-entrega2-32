@@ -7,7 +7,7 @@
 <div class="row">
     <div class="col"></div>
     <div id="custom-search-input" class="col-xs-12 col-sm-12 col-md-8 col-lg-5 mx-auto">
-        <form method="get" action="/offer/offers" class="input-group align-items-center">
+        <form method="get" action="/offer/searchList" class="input-group align-items-center">
             <input id="search" type="text" class="form-control" placeholder="Titulo oferta" name="search"
             value="{{ search }}"/>
             <div class="input-group-append">
@@ -34,7 +34,7 @@
     <ul class="pagination">
         {% for page in pages %}
             <li class="page-item {% if currentPage == page %} active {% endif %}" id="pi-{{ page }}">
-                <a class="page-link" href="/offer/offers/?page={{ page }}{% if search %}&search={{ search }}{% endif %}">{{ page }}</a>
+                <a class="page-link" href="/offer/searchList/?page={{ page }}{% if search %}&search={{ search }}{% endif %}">{{ page }}</a>
             </li>
         {% endfor %}
     </ul>
