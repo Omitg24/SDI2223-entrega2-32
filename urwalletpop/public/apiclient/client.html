@@ -27,14 +27,24 @@
     </button>
     <div class="collapse navbar-collapse" id="my-navbarColor02">
         <ul class="navbar-nav mr-auto" id="offer-menu-bar">
-            <li>Ofertas</li>
+            <li class="nav-item ">
+                <a class="nav-link" onclick=widgetOffers()>
+                    Ofertas
+                </a>
+            </li>
+            <li class="nav-item ">
+                <a class="nav-link" onclick=widgetConversations()>
+                    Conversaciones
+                </a>
+            </li>
         </ul>
-        <ul class="navbar-nav mr-auto" id="conversation-menu-bar">
-            <li>Conversaciones</li>
-        </ul>
-        <ul class="nav navbar-nav navbar-right" id="barra-menu-derecha">
-            <!-- Opciones de menú aqui -->
-
+        <ul class="navbar-nav justify-content-end">
+            <li class="nav-item">
+                <a class="nav-link" onclick=widgetLogin()>
+                    <i class='fas fa-sign-in-alt' style='font-size:16px'></i>
+                    <span>Login</span>
+                </a>
+            </li>
         </ul>
     </div>
 </nav>
@@ -63,6 +73,10 @@
         if (w === "conversation") {
             $("#main-container").load("widget-conversation.html");
         }
+    }
+
+    function widgetLogin() {
+        $("#main-container").load("widget-login.html");
     }
 
     function widgetOffers() {
