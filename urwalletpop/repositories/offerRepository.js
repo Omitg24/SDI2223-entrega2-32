@@ -32,6 +32,17 @@ module.exports = {
         } catch (error) {
             throw (error);
         }
+    }, getOffers: async function (filter, options) {
+        try {
+            const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
+            const database = client.db("UrWalletPop");
+            const collectionName = 'offers';
+            const offersCollection = database.collection(collectionName);
+            const offers = await offersCollection.find(filter, options).toArray();
+            return offers;
+        } catch (error) {
+            throw (error);
+        }
     },
     deleteOffer: async function (filter, options) {
         try {
@@ -57,7 +68,7 @@ module.exports = {
             throw (error);
         }
     },
-    updateOffer: async function(newOffer, filter, options) {
+    updateOffer: async function (newOffer, filter, options) {
         try {
             const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
             const database = client.db("UrWalletPop");
