@@ -10,10 +10,12 @@
             <div class="card-deck">
                 <div class="card border-dark mb-3" style="max-width: 18rem; min-width: 18rem;">
                     <div class="card-body">
-                        <h5 class="card-title">{{ offer.price }} €</h5>
-                        <h6 class="card-subtitle">{{ offer.title }} </h6>
-                        <p class="card-text">{{ offer.description}}</p>
+                        <img class="card-img-top" height="256" src="/images/Symbol.png" width="256"/>
+                        <h3 class="card-title">{{ offer.price }} EUR</h3>
+                        <h4 class="card-subtitle" id="titleFeatured">{{ offer.title }}</h4>
+                        <p class="card-text">{{ offer.description }}</p>
                         <p class="card-text">{{ offer.author}}</p>
+                        <h6 class="card-link" id="date">{{ offer.date }}</h6>
                     </div>
                 </div>
             </div>
@@ -21,7 +23,7 @@
         <!-- Fin del Bloque canción -->
     </div>
     <!-- Paginación mostrar la actual y 2 anteriores y dos siguientes -->
-    <div class="row text-center">
+    <div class="row justify-content-center">
         <ul class="pagination">
             {% for page in pages %}
                 <li class="page-item" id="pi-{{ page }}">

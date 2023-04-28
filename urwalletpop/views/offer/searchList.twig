@@ -7,7 +7,7 @@
 <div class="row">
     <div class="col"></div>
     <div id="custom-search-input" class="col-xs-12 col-sm-12 col-md-8 col-lg-5 mx-auto">
-        <form method="get" action="/offer/offers" class="input-group align-items-center">
+        <form method="get" action="/offer/searchList" class="input-group align-items-center">
             <input id="search" type="text" class="form-control" placeholder="Titulo oferta" name="search"
             value="{{ search }}"/>
             <div class="input-group-append">
@@ -22,8 +22,9 @@
     {% for offer in offers %}
         <div class="card border-dark mb-3" style="max-width: 18rem;min-width: 18rem; ">
             <div class="card-body">
-                <h5 class="card-title">{{ offer.price }} EUR</h5>
-                <h6 class="card-subtitle" id="titleFeatured">{{ offer.title }}</h6>
+                <img class="card-img-top" height="256" src="/images/Symbol.png" width="256"/>
+                <h3 class="card-title">{{ offer.price }} EUR</h3>
+                <h4 class="card-subtitle" id="titleFeatured">{{ offer.title }}</h4>
                 <p class="card-text">{{ offer.description }}</p>
                 <h6 class="card-link" id="date">{{ offer.date }}</h6>
                 {% if offer.purchase %}
@@ -49,7 +50,7 @@
     <ul class="pagination">
         {% for page in pages %}
             <li class="page-item {% if currentPage == page %} active {% endif %}" id="pi-{{ page }}">
-                <a class="page-link" href="/offer/offers/?page={{ page }}{% if search %}&search={{ search }}{% endif %}">{{ page }}</a>
+                <a class="page-link" href="/offer/searchList/?page={{ page }}{% if search %}&search={{ search }}{% endif %}">{{ page }}</a>
             </li>
         {% endfor %}
     </ul>

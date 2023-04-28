@@ -1,13 +1,13 @@
 const express = require('express');
 const userSessionRouter = express.Router();
 userSessionRouter.use(function (req, res, next) {
-    console.log("userAdminSessionRouter");
+    console.log("userStandardSessionRouter");
 
-    if (req.session.role === 'admin') {
+    if (req.session.role === 'standard') {
         next();
     } else {
         let errors = [];
-        errors.push({field: "Error de permisos", message: "No tienes permisos de administrador para acceder a esta página"});
+        errors.push({field: "Error de permisos", message: "No tienes permisos de usuario estándar para acceder a esta página"});
         console.log("va a: " + req.originalUrl);
         res.render("error", {
             errors: errors,
