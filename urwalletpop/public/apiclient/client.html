@@ -56,12 +56,13 @@
     var user;
 
     let token;
-    let URLbase = "https://localhost:8081/api";
+    let URLbase = "http://localhost:8081/api";
     $("#main-container").load("widget-login.html");
 
     if (Cookies.get('token') != null) {
         token = Cookies.get('token');
         usuario = Cookies.get('user');
+        $("#main-container").load("widget-offer.html");
         let url = new URL(window.location.href);
         let w = url.searchParams.get("w");
         if (w === "login") {
@@ -73,6 +74,8 @@
         if (w === "conversation") {
             $("#main-container").load("widget-conversation.html");
         }
+    } else {
+        $("#main-container").load("widget-login.html");
     }
 
     function widgetLogin() {
