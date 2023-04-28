@@ -40,4 +40,8 @@
     align-items: center;
 }
 
+.errors {
+    margin-top: 20px;
+}
+
 /* Sticky footer styles-------------------------------------------------- */
