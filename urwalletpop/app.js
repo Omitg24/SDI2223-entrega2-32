@@ -65,18 +65,19 @@ app.use('/offer/ownedList', userStandardSessionRouter);
 app.use('/offer/purchasedList', userStandardSessionRouter);
 app.use('/conversation/list', userStandardSessionRouter);
 
+
+const offerRepository = require("./repositories/offerRepository.js");
+const usersRepository = require("./repositories/usersRepository.js");
+usersRepository.init(app, MongoClient);
+offerRepository.init(app, MongoClient);
+
+require("./routes/users.js")(app, usersRepository, offerRepository);
+require("./routes/offers.js")(app, offerRepository, usersRepository);
+require("./routes/api/usersAPI.js")(app,usersRepository,offerRepository);
+
 const userTokenRouter = require('./routes/userTokenRouter');
 app.use("/api/offers/", userTokenRouter);
 
-const usersRepository = require("./repositories/usersRepository.js");
-usersRepository.init(app, MongoClient);
-
-const offerRepository = require("./repositories/offerRepository.js");
-offerRepository.init(app, MongoClient);
-
-require("./routes/users.js")(app, usersRepository);
-require("./routes/api/usersAPI.js")(app, usersRepository, offerRepository);
-require("./routes/offers.js")(app, offerRepository, usersRepository);
 
 let indexRouter = require('./routes/index');
 app.use('/', indexRouter);

@@ -1,12 +1,32 @@
-module.exports = function (app, usersRepository) {
+module.exports = function (app, usersRepository,offerRepository) {
     app.get('/home', function (req, res) {
-        res.render("home.twig", {
-            user: req.session.user,
-            role: req.session.role,
-            amount: req.session.amount,
-            date: req.session.date
+        let filter = {feature: true};
+        let page = parseInt(req.query.page);
+        if (typeof req.query.page === "undefined" || req.query.page === null || req.query.page === "0") {
+            page = 1;
+        }
+        offerRepository.getOffersPage(filter, {}, page).then(result => {
+            let lastPage = result.total / 4;
+            if (result.total % 4 > 0) { // Sobran decimales
+                lastPage = lastPage + 1;
+            }
+            let pages = []; // paginas mostrar
+            for (let i = page - 2; i <= page + 2; i++) {
+                if (i > 0 && i <= lastPage) {
+                    pages.push(i);
+                }
+            }
+            res.render("home.twig", {
+                offers: result.offers,
+                user: req.session.user,
+                role: req.session.role,
+                amount: req.session.amount,
+                date: req.session.date,
+                pages: pages,
+                currentPage: page
+            });
         });
-    });
+    }),
     app.get('/users/signup', function (req, res) {
         res.render("signup.twig", {
             user: req.session.user,
