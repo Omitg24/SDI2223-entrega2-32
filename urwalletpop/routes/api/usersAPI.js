@@ -1,5 +1,17 @@
 const {ObjectId} = require("mongodb");
-module.exports = function (app, usersRepository) {
+module.exports = function (app, usersRepository, offerRepository) {
+    app.get("/api/offers", function (req, res) {
+        let filter = {author: {$ne: res.user}};
+        let options = {};
+        offerRepository.getOffers(filter, options).then(offers => {
+            res.status(200);
+            res.json({offers: offers});
+        }).catch(error => {
+            res.status(500);
+            res.json({error: "Error al obtener las ofertas."});
+        })
+    });
+
     app.post("/api/users/login", function (req, res) {
         try {
             let securePassword = app.get("crypto").createHmac('sha256', app.get('clave'))
@@ -9,8 +21,8 @@ module.exports = function (app, usersRepository) {
                 password: securePassword
             }
             let user = {
-                email : req.body.email,
-                password:req.body.password
+                email: req.body.email,
+                password: req.body.password
             }
             let options = {};
             validateUsersData(user).then(errors => {
@@ -57,15 +69,17 @@ module.exports = function (app, usersRepository) {
     async function validateUsersData(user) {
         let errors = new Array();
         if (user.email === null || typeof user.email === 'undefined' ||
-            user.email === ""){
+            user.email === "") {
             errors.push("El campo email no puede estar vacío");
         }
         if (user.password === null || typeof user.password === 'undefined' ||
-            user.password === ""){
+            user.password === "") {
             errors.push("El campo contraseña no puede estar vacío");
         }
         if (errors.length <= 0)
             return null;
         return errors;
     }
+
+
 }
