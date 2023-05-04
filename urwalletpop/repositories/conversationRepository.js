@@ -5,26 +5,26 @@ module.exports = {
         this.mongoClient = mongoClient;
         this.app = app;
     },
-    findUser: async function (filter, options) {
+    findConversation: async function (filter, options) {
         try {
             const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
             const database = client.db("UrWalletPop");
-            const collectionName = 'users';
-            const usersCollection = database.collection(collectionName);
-            const user = await usersCollection.findOne(filter, options);
-            return user;
+            const collectionName = 'conversations';
+            const conversationsCollection = database.collection(collectionName);
+            const conversation = await conversationsCollection.findOne(filter, options);
+            return conversation;
         } catch (error) {
             throw (error);
         }
     },
-    getUsers: async function (filter, options) {
+    getConversations: async function (filter, options) {
         try {
             const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
             const database = client.db("UrWalletPop");
-            const collectionName = 'users';
-            const usersCollection = database.collection(collectionName);
-            const users = await usersCollection.find(filter, options).toArray();
-            return users;
+            const collectionName = 'conversations';
+            const conversationsCollection = database.collection(collectionName);
+            const conversations = await conversationsCollection.find(filter, options).toArray();
+            return conversations;
         } catch (error) {
             throw (error);
         }
@@ -45,37 +45,37 @@ module.exports = {
             throw (error);
         }
     },
-    insertUser: async function (user) {
+    insertConversation: async function (conversation) {
         try {
             const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
             const database = client.db("UrWalletPop");
-            const collectionName = 'users';
-            const usersCollection = database.collection(collectionName);
-            const result = await usersCollection.insertOne(user);
+            const collectionName = 'conversations';
+            const conversationsCollection = database.collection(collectionName);
+            const result = await conversationsCollection.insertOne(conversation);
             return result.insertedId;
         } catch (error) {
             throw (error);
         }
     },
-    updateUser: async function(newUser, filter, options) {
+    updateConversation: async function(newConversation, filter, options) {
         try {
             const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
             const database = client.db("UrWalletPop");
-            const collectionName = 'users';
-            const usersCollection = database.collection(collectionName);
-            const result = await usersCollection.updateOne(filter, {$set: newUser}, options);
+            const collectionName = 'conversations';
+            const conversationsCollection = database.collection(collectionName);
+            const result = await conversationsCollection.updateOne(filter, {$set: newConversation}, options);
             return result;
         } catch (error) {
             throw (error);
         }
     },
-    deleteUser: async function (filter, options) {
+    deleteConversation: async function (filter, options) {
         try {
             const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
             const database = client.db("UrWalletPop");
-            const collectionName = 'users';
-            const usersCollection = database.collection(collectionName);
-            const result = await usersCollection.deleteOne(filter, options);
+            const collectionName = 'conversations';
+            const conversationsCollection = database.collection(collectionName);
+            const result = await conversationsCollection.deleteOne(filter, options);
             return result;
         } catch (error) {
             throw (error);

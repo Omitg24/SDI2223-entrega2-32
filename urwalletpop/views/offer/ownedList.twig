@@ -1,0 +1,48 @@
+{% extends "layout.twig" %}
+
+{% block title %} Ofertas Propias {% endblock %}
+
+{% block main_container %}
+    <h3>Listado Ofertas Propias</h3>
+    <div class="card-deck">
+        {% for offer in offers %}
+            <div class="card border-dark mb-3" style="max-width: 18rem;min-width: 18rem; ">
+                <div class="card-body">
+                    <img class="card-img-top" height="256" src="/images/Symbol.png" width="256"/>
+                    <h3 class="card-title">{{ offer.price }} EUR</h3>
+                    <h4 class="card-subtitle" id="titleFeatured">{{ offer.title }}</h4>
+                    <p class="card-text">{{ offer.description }}</p>
+                    <h6 class="card-link" id="date">{{ offer.date }}</h6>
+                    <div class="d-flex flex-row">
+                        {% if offer.feature %}
+                            <button class="btn btn-info" type="button">
+                                Destacada
+                            </button>
+                        {% else %}
+                            <a href='/offer/feature/{{ offer._id }}'>
+                                <button class="btn btn-success" type="button">
+                                    Destacar
+                                </button>
+                            </a>
+                        {% endif %}
+                        <a href='/offer/delete/{{ offer._id }}'>
+                            <button class="btn btn-danger"
+                                    type="button">
+                                Eliminar
+                            </button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <div class="row justify-content-center">
+        <ul class="pagination">
+            {% for page in pages %}
+                <li class="page-item {% if currentPage == page %} active {% endif %}" id="pi-{{ page }}">
+                    <a class="page-link" href="/offer/ownedList/?page={{ page }}">{{ page }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}

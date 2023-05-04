@@ -1,0 +1,56 @@
+<div id="widget-offers">
+    <input type="text" class="form-control" placeholder="Filtrar por titulo" id="filter-by-title"/>
+    <button class="btn btn-dark" onclick="loadOffers()">Actualizar</button>
+    <div class="card-deck" id="offers-list">
+
+    </div>
+</div>
+<script>
+    window.history.pushState("", "", "/apiclient/client.html?w=offer");
+    var offers;
+
+    function loadOffers() {
+        $.ajax({
+            url: URLbase + "/offers",
+            type: "GET",
+            data: {},
+            dataType: "json",
+            headers: {"token": token},
+            success: function success(response) {
+                offers = response.offers;
+                updateOffersList(offers);
+            },
+            error: function (error) {
+                $("#main-container").load("widget-login.html");
+            }
+        });
+    }
+
+    function updateOffersList(offers) {
+        $("#offers-list").empty();
+        for (var i = 0; i < offers.length; i++) {
+            $("#offers-list").append(
+                "<div className='card border-dark mb-3' style='max-width: 18rem;min-width: 18rem; '>" +
+                "<div className='card-body'>" +
+                "<img className='card-img-top' height='180' src='/images/Symbol.png' width='180'/>" +
+                "<h3 className='card-title'>" + offers[i].price + " EUR</h3>" +
+                "<h4 className='card-subtitle' id='titleFeatured'>" + offers[i].title + "</h4>" +
+                "<p className='card-text'>" + offers[i].description + "</p>" +
+                "<h6 className='card-link' id='date'>" + offers[i].date + "</h6>" +
+                "<h6 className='card-link' id='author'>" + offers[i].author + "</h6>" +
+                "<a onclick=loadConversation('" + offers[i]._id +"','"+"saaaaa"+ "')"
+                +"<button class=\"btn btn-dark\">Abrir</button>" +"</a>"+
+                "</div>" +
+                "</div>"
+            )
+        }
+    }
+
+    function loadConversation(interestedId,offerId){
+        interestedId=interestedId;
+        offerId=offerId;
+        $("#main-container").load("widget-conversation.html");
+    }
+
+    loadOffers();
+</script>

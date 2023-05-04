@@ -7,7 +7,7 @@
         <div class="col"></div>
         <div id="custom-search-input" class="col-xs-12 col-sm-12 col-md-8 col-lg-5 mx-auto">
             <form method="get" action="/users/list" class="input-group align-items-center">
-                <input id="search" type="text" class="form-control" placeholder="Nombre del usuario" name="search"/>
+                <input id="search" type="text" class="form-control" placeholder="Nombre del usuario" name="search" value="{{ search }}"/>
                 <div class="input-group-append">
                     <button class="btn btn-outline-secondary" type="submit">
                         <i class="fa fa-search"></i>
@@ -51,7 +51,7 @@
 
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
-                    <button class="btn btn-dark" id="delete-users" type="submit">Eliminar</button>
+                    <button class="btn btn-dark" id="delete-users" type="submit" disabled>Eliminar</button>
                 </div>
             </div>
         </div>
@@ -59,11 +59,17 @@
             <ul class="pagination">
                 {% for page in pages %}
                     <li class="page-item {% if currentPage == page %} active {% endif %}" id="pi-{{ page }}">
-                        <a class="page-link" href="/users/list/?page={{ page }}">{{ page }}</a>
+                        <a class="page-link" href="/users/list/?page={{ page }}{% if search %}&search={{ search }}{% endif %}">{{ page }}</a>
                     </li>
                 {% endfor %}
             </ul>
         </div>
+        <script>
+            $("input[name='users']").on('change',
+                function() {
+                    $("#delete-users").prop('disabled',
+                        !$("input[name='users']:checked").length);
+                })
+        </script>
     </form>
-
 {% endblock %}

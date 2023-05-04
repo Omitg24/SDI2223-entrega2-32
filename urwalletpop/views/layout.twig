@@ -29,7 +29,7 @@
     </button>
     <div class="collapse navbar-collapse" id="my-navbarColor02">
         <ul class="navbar-nav mr-auto">
-            {% if user is defined %}
+            {% if user != null %}
                 <li class="nav-item ">
                     <a class="nav-link" href="/home">Home<span class="sr-only">(current)</span></a>
                 </li>
@@ -48,7 +48,7 @@
                     </div>
                 </li>
             {% endif %}
-            {% if user is defined %}
+            {% if user != null %}
                 <li class="nav-item dropdown" id="offer-menu">
                     <a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle"
                        data-toggle="dropdown"
@@ -83,7 +83,7 @@
             {% endif %}
         </ul>
         <ul class="navbar-nav justify-content-end">
-            {% if user is not defined %}
+            {% if user == null %}
                 <li class="nav-item">
                     <a class="nav-link" href="/users/signup">
                         <i class='fas fa-user-alt' style='font-size:16px'></i>
@@ -97,7 +97,7 @@
                     </a>
                 </li>
             {% endif %}
-            {% if user is defined %}
+            {% if user != null %}
                 <div class="userData nav-item">
                     <img class="rounded-circle" alt="Profile Image" src="/images/User.png" width="24"/>
                     <span class="userDataText">
@@ -134,6 +134,30 @@
                     .append("<div class='alert " + messageType + "'>" + message + " </div>");
             }
         </script>
+        {% block errors_container %}
+            {% if errors != null %}
+                <div class="alert alert-danger table-responsive errors">
+                    <table class="table table-hover table-borderless">
+                        <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Tipo</th>
+                            <th scope="col">Mensaje</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for error in errors %}
+                            <tr>
+                                <th scope="row">{{ loop.index }}</th>
+                                <td>{{ error.type }}</td>
+                                <td>{{ error.message }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        {% endblock %}
         <!-- Contenido -->
         {% block main_container %}
             <!-- Posible contenido por defecto -->

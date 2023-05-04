@@ -1,0 +1,82 @@
+<div class="container" id="widget-conversationList">
+    <h2>Titulo oferta</h2>
+    <p>th:text="#{msg.conversation.list.info}"</p>
+    <button class="btn btn-dark" id="updateButton" type="button">Update</button>
+    <script>
+        $("#updateButton").click(function () {
+            $("#tableConversations").load('/conversation/list/update');
+        });
+    </script>
+    <div class="table-responsive">
+        <table class="table table-hover" id="tableConversations">
+            <thead>
+            <tr>
+                <th>Email</th>
+                <th>Título de oferta</th>
+                <th>Abrir</th>
+                <th>Eliminar</th>
+            </tr>
+            </thead>
+            <tbody id="conversations-list">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+    <script>
+        window.history.pushState("", "", "/apiclient/client.html?w=conversationList");
+        let conversations;
+        var interestedId;
+        var offerId;
+
+        function loadConversations() {
+            $.ajax({
+                url: URLbase + "/conversation/list",
+                type: "GET",
+                data: {},
+                dataType: "json",
+                headers: {"token": token},
+                success: function success(response) {
+                    conversations = response.conversations;
+                    user = response.user;
+                    updateConversationList(conversations,user);
+                },
+                error: function (error) {
+                    $("#main-container").load("widget-login.html");
+                }
+            });
+        }
+
+        function updateConversationList(conversations,user) {
+            $("#conversations-list").empty();
+            for (let i = 0; i < conversations.length; i++) {
+                $("#conversations-list").append("<tr>");
+                if(conversations[i].interested._id==user._id){
+                    $("#conversations-list").append(
+                        "<td>"+conversations[i].offer.author.email +"</td>"
+                    )
+                }else{
+                    $("#conversations-list").append(
+                        "<td>"+conversations[i].interested.email +"</td>"
+                    )
+                }
+                $("#conversations-list").append(
+                    "<td>"+conversations[i].offer.title +"</td>"
+                )
+                $("#conversations-list").append(
+                    "<td><a onclick=loadConversation('" + conversations[i].offer._id +"','"+conversations[i].interested._id + "')"
+                    +"<button class=\"btn btn-dark\">Abrir</button>" +"</a></td>" +
+                    "<td><a href='/conversation/delete/'" + conversations[i]._id +">"
+                    +"<button class=\"btn btn-dark\">Eliminar</button>" +"</a></td>"
+                )
+                $("#conversations-list").append("</tr>");
+            }
+        }
+
+        function loadConversation(interestedId,offerId){
+            interestedId=interestedId;
+            offerId=offerId;
+            $("#main-container").load("widget-conversation.html");
+        }
+        loadConversations();
+    </script>

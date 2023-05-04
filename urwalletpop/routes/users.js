@@ -1,17 +1,39 @@
-//const {ObjectId} = require("mongodb");
-const {ObjectId} = require("mongodb");
-const logsRepository = require("../repositories/logsRepository");
-module.exports = function (app, usersRepository,logsRepository) {
+module.exports = function (app, usersRepository,offerRepository,logsRepository) {
     app.get('/home', function (req, res) {
-        res.render("home.twig", {
+        let filter = {feature: true};
+        let page = parseInt(req.query.page);
+        if (typeof req.query.page === "undefined" || req.query.page === null || req.query.page === "0") {
+            page = 1;
+        }
+        offerRepository.getOffersPage(filter, {}, page).then(result => {
+            let lastPage = result.total / 4;
+            if (result.total % 4 > 0) { // Sobran decimales
+                lastPage = lastPage + 1;
+            }
+            let pages = []; // paginas mostrar
+            for (let i = page - 2; i <= page + 2; i++) {
+                if (i > 0 && i <= lastPage) {
+                    pages.push(i);
+                }
+            }
+            res.render("home.twig", {
+                offers: result.offers,
+                user: req.session.user,
+                role: req.session.role,
+                amount: req.session.amount,
+                date: req.session.date,
+                pages: pages,
+                currentPage: page
+            });
+        });
+    }),
+    app.get('/users/signup', function (req, res) {
+        res.render("signup.twig", {
             user: req.session.user,
             role: req.session.role,
             amount: req.session.amount,
             date: req.session.date
         });
-    });
-    app.get('/users/signup', function (req, res) {
-        res.render("signup.twig");
     });
     app.post('/users/signup', function (req, res) {
         let securePassword = app.get("crypto").createHmac('sha256', app.get('clave'))
@@ -32,9 +54,9 @@ module.exports = function (app, usersRepository,logsRepository) {
             role: "standard",
             amount: 100
         }
-        validateSignUp(user, passwordConfirm, function (errors) {
+        validateSignUp(user, passwordConfirm).then(errors => {
             if (errors != null && errors.length > 0) {
-                res.render("error", {errors: errors});
+                res.render("signup.twig", {errors: errors});
             } else {
                 usersRepository.insertUser(user).then(userId => {
                     req.session.user = user.email;
@@ -69,9 +91,8 @@ module.exports = function (app, usersRepository,logsRepository) {
                 req.session.amount = null;
                 req.session.date = null;
                 let errors = [];
-                errors.push({field: "Email", message: "Email o password incorrecto"});
-                res.statusCode = 404;
-                res.render("error", {
+                errors.push({type: "Email", message: "Email o password incorrecto"});
+                res.render("login", {
                     errors: errors,
                     user: req.session.user,
                     role: req.session.role,
@@ -97,8 +118,8 @@ module.exports = function (app, usersRepository,logsRepository) {
             req.session.amount = null;
             req.session.date = null;
             let errors = [];
-            errors.push({field: "Email", message: "Se ha producido un error al buscar el usuario"});
-            res.render("error", {
+            errors.push({type: "Email", message: "Se ha producido un error al buscar el usuario"});
+            res.render("login.twig", {
                 errors: errors,
                 user: req.session.user,
                 role: req.session.role,
@@ -115,10 +136,11 @@ module.exports = function (app, usersRepository,logsRepository) {
         res.redirect("/users/login");
     });
     app.get('/users/list', function (req, res) {
+        let search = req.query.search || '';
         let filter = {};
         let options = {sort: {name: 1}};
-        if (req.query.search != null && typeof (req.query.search) != "undefined" && req.query.search != "") {
-            filter = {"email": {$regex: ".*" + req.query.search + ".*"}};
+        if (search !== '') {
+            filter = {"email": {$regex: new RegExp(search, 'i')}};
         }
         let page = parseInt(req.query.page);
         if (typeof req.query.page === "undefined" || req.query.page === null || req.query.page === "0") {
@@ -127,8 +149,8 @@ module.exports = function (app, usersRepository,logsRepository) {
         usersRepository.getUsersPg(filter, options, page).then(result => {
             if (result === null) {
                 let errors = [];
-                errors.push({field: "Email", message: "No hay usuarios registrados."});
-                res.render("/error", {
+                errors.push({type: "Email", message: "No hay usuarios registrados."});
+                res.render("user/list.twig", {
                     errors: errors,
                     user: req.session.user,
                     role: req.session.role,
@@ -153,14 +175,15 @@ module.exports = function (app, usersRepository,logsRepository) {
                     amount: req.session.amount,
                     date: req.session.date,
                     pages: pages,
-                    currentPage: page
+                    currentPage: page,
+                    search: search
                 }
                 res.render("user/list.twig", response);
             }
         }).catch(error => {
             let errors = [];
-            errors.push({field: "Base de datos", message: "Se ha producido un error al buscar los usuarios."});
-            res.render("error", {
+            errors.push({type: "Base de datos", message: "Se ha producido un error al buscar los usuarios."});
+            res.render("user/list.twig", {
                 errors: errors,
                 user: req.session.user,
                 role: req.session.role,
@@ -170,57 +193,44 @@ module.exports = function (app, usersRepository,logsRepository) {
         });
     });
 
-
-    function insertLog(req,type,email){
-        let log = {
-            date:Date.now(),
-            action:req.method,
-            url:email,
-            type:type,
-        }
-        logsRepository.insertLog(log).catch(error => {
-            console.log("No se ha podido registrar la peticion " + req.method)
-        });
-    }
-
-    function validateSignUp(user, confirmPassword, callback) {
+    async function validateSignUp(user, confirmPassword) {
         let errors = [];
         if (user.email.trim().toString().length === 0) {
-            errors.push({field: "Email", message: "El email no puede ser vacío."});
+            errors.push({type: "Email", message: "El email no puede ser vacío."});
         }
         if (user.name.trim().toString().length === 0) {
-            errors.push({field: "Nombre", message: "El nombre no puede ser vacío."});
+            errors.push({type: "Nombre", message: "El nombre no puede ser vacío."});
         }
         if (user.lastName.trim().toString().length === 0) {
-            errors.push({field: "Apellido", message: "El apellido no puede ser vacío."});
+            errors.push({type: "Apellido", message: "El apellido no puede ser vacío."});
         }
         if (user.password.trim().toString().length === 0) {
-            errors.push({field: "Contraseña", message: "La contraseña no puede ser vacía."});
+            errors.push({type: "Contraseña", message: "La contraseña no puede ser vacía."});
         }
         if (confirmPassword === undefined || confirmPassword.trim().toString().length === 0) {
             errors.push({
-                field: "Confirmar contraseña",
+                type: "Confirmar contraseña",
                 message: "La confirmación de contraseña no puede ser vacía."
             });
         }
         if (user.password !== confirmPassword) {
-            errors.push({field: "Contraseñas", message: "Las contraseñas no coinciden."});
+            errors.push({type: "Contraseñas", message: "Las contraseñas no coinciden."});
         }
         if (user.password.length < 4 && user.password.length > 24) {
             errors.push({
-                field: "Contraseña",
+                type: "Contraseña",
                 message: "La contraseña debe de tener un mínimo de 4 caracteres y un máximo de 24."
             });
         }
         if (!user.email.includes("@")) {
-            errors.push({field: "Contraseña", message: "El email debe seguir el siguiente formato: \"x@y\"."});
+            errors.push({type: "Contraseña", message: "El email debe seguir el siguiente formato: \"x@y\"."});
         }
         let dateString = user.date;
         let dateParts = dateString.split("/");
         let dateObject = new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]);
         if (new Date(dateObject).getTime() >= new Date().getTime()) {
             errors.push({
-                field: "Fecha de nacimiento",
+                type: "Fecha de nacimiento",
                 message: "La fecha de nacimiento no puede ser la fecha actual."
             });
         }
@@ -228,22 +238,18 @@ module.exports = function (app, usersRepository,logsRepository) {
         usersRepository.findUser(filter, {}).then(user => {
             if (user !== null) {
                 errors.push({
-                    field: "Email",
+                    type: "Email",
                     message: "Este email ya pertenece a otro usuario, " + user.email + "."
                 });
             }
             if (errors.length <= 0) {
-                callback(null);
-            } else {
-                callback(errors);
+                return null;
             }
         }).catch(error => {
-            errors.push({field: "Email", message: "Se ha producido un error al buscar el usuario." + error});
+            errors.push({type: "Email", message: "Se ha producido un error al buscar el usuario." + error});
         });
+        return errors;
     }
-    app.get('/signup', function (req, res) {
-        res.render("signup.twig");
-    });
 
     app.post('/users/delete', function (req, res) {
         let ids = req.body.users;
@@ -264,5 +270,17 @@ module.exports = function (app, usersRepository,logsRepository) {
                 res.send("Se ha producido un error al intentar eliminar la canción: " + error)
             });
         }
-    })
+    });
+
+    function insertLog(req,type,email){
+        let log = {
+            date:Date.now(),
+            action:req.method,
+            url:email,
+            type:type,
+        }
+        logsRepository.insertLog(log).catch(error => {
+            console.log("No se ha podido registrar la peticion " + req.method)
+        });
+    }
 }

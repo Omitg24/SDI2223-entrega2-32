@@ -5,6 +5,22 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 var app = express();
+
+let rest = require('request');
+app.set('rest', rest);
+
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Credentials", "true");
+    res.header("Access-Control-Allow-Methods", "POST, GET, DELETE, UPDATE, PUT");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type,Accept, token");
+    // Debemos especificar todas las headers que se aceptan. Content-Type , token
+    next();
+});
+
+let jwt = require('jsonwebtoken');
+app.set('jwt', jwt);
+
 let expressSession = require('express-session');
 app.use(expressSession({
     secret: 'abcdefg',
@@ -13,7 +29,11 @@ app.use(expressSession({
 }));
 
 let crypto = require('crypto');
-
+let fileUpload = require('express-fileupload');
+app.use(fileUpload({
+    limits: { fileSize: 50 * 1024 * 1024 },
+    createParentPath: true
+}));
 app.set('uploadPath', __dirname);
 app.set('clave', 'abcdefg');
 app.set('crypto', crypto);
@@ -38,6 +58,7 @@ app.use('/home', userSessionRouter);
 app.use('/user/*', userSessionRouter);
 app.use('/offer/*', userSessionRouter);
 app.use('/conversation/*', userSessionRouter);
+app.use('/users/searchList', userSessionRouter);
 app.use('/users/logout', userSessionRouter);
 
 const userAdminSessionRouter = require('./routes/userAdminSessionRouter');
@@ -46,10 +67,28 @@ app.use('/log/list', userAdminSessionRouter);
 app.use('/log/delete', userAdminSessionRouter);
 app.use('/users/delete', userAdminSessionRouter);
 
+const userStandardSessionRouter = require('./routes/userStandardSessionRouter');
+app.use('/offer/add', userStandardSessionRouter);
+app.use('/offer/ownedList', userStandardSessionRouter);
+app.use('/offer/purchasedList', userStandardSessionRouter);
+app.use('/conversation/list', userStandardSessionRouter);
+
+
+const offerRepository = require("./repositories/offerRepository.js");
 const usersRepository = require("./repositories/usersRepository.js");
+const conversationRepository = require("./repositories/conversationRepository.js");
 usersRepository.init(app, MongoClient);
-require("./routes/users.js")(app, usersRepository,logsRepository);
+offerRepository.init(app, MongoClient);
+conversationRepository.init(app, MongoClient);
+
 require("./routes/logs.js")(app, logsRepository);
+require("./routes/users.js")(app, usersRepository, offerRepository,logsRepository);
+require("./routes/offers.js")(app, offerRepository, usersRepository);
+require("./routes/api/usersAPI.js")(app,usersRepository,offerRepository);
+
+const userTokenRouter = require('./routes/userTokenRouter');
+app.use("/api/offers/", userTokenRouter);
+
 
 let indexRouter = require('./routes/index');
 app.use('/', indexRouter);
@@ -74,7 +113,7 @@ app.use(function (err, req, res, next) {
     res.locals.message = err.message;
     res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-    errors = [{field: "Error general", message: err.message}];
+    errors = [{field: "Error no controlado", message: err.message}];
     // render the error page
     res.status(err.status || 500);
     res.render('error', {
