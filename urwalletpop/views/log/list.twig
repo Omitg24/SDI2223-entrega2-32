@@ -4,12 +4,23 @@
 {% block main_container %}
     <h2>Registro</h2>
     <div class="row">
-        <div class="col-sm-offset-2 col-sm-10">
+        <div class="col">
             <a href="/log/delete">
-            <button class="btn btn-dark" id="delete-logs" type="submit">Eliminar</button>
+                <button class="btn btn-dark" id="delete-logs" type="submit">Eliminar</button>
             </a>
         </div>
+        <div id="custom-search-input" class="col">
+            <form method="get" action="/log/list" class="input-group align-items-center">
+                <input id="search" type="text" class="form-control" placeholder="Tipo del log" name="search"/>
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="submit">
+                        <i class="fa fa-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
+
 
         <div class="table-responsive overflow-hidden">
             <table class="table table-hover" id="tableUsers">

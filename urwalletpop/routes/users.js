@@ -170,6 +170,7 @@ module.exports = function (app, usersRepository,logsRepository) {
         });
     });
 
+
     function insertLog(req,type,email){
         let log = {
             date:Date.now(),

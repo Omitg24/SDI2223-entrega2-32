@@ -6,21 +6,24 @@ var loggerRouter = function (logsRepository) {
     let router = express.Router();
 
     router.use(function (req, res, next) {
-        let type = "PET";
         let url = req.url;
-        if(url.includes("signup")){
-            type="ALTA";
-        }
+        if(!url.includes("login")){
+            let type = "PET";
+            if(url.includes("signup")){
+                type="ALTA";
+            }
 
-        let log = {
-            date:Date.now(),
-            action:req.method,
-            url:req.url,
-            type:type,
+
+            let log = {
+                date:Date.now(),
+                action:req.method,
+                url:req.originalUrl,
+                type:type,
+            }
+            logsRepository.insertLog(log).catch(error => {
+                console.log("No se ha podido registrar la peticion " + req.method)
+            });
         }
-        logsRepository.insertLog(log).catch(error => {
-            console.log("No se ha podido registrar la peticion " + req.method)
-        });
         next();
     });
 

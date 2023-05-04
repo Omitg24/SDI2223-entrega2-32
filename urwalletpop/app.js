@@ -27,7 +27,6 @@ app.set('connectionStrings', url);
 
 const logsRepository = require("./repositories/logsRepository.js");
 logsRepository.init(app, MongoClient);
-require("./routes/logs.js")(app, logsRepository);
 
 const loggerMiddleware = require("./routes/loggerMiddleware");
 
@@ -39,16 +38,18 @@ app.use('/home', userSessionRouter);
 app.use('/user/*', userSessionRouter);
 app.use('/offer/*', userSessionRouter);
 app.use('/conversation/*', userSessionRouter);
-app.use('/log', userSessionRouter);
 app.use('/users/logout', userSessionRouter);
 
 const userAdminSessionRouter = require('./routes/userAdminSessionRouter');
 app.use('/users/list', userAdminSessionRouter);
+app.use('/log/list', userAdminSessionRouter);
+app.use('/log/delete', userAdminSessionRouter);
 app.use('/users/delete', userAdminSessionRouter);
 
 const usersRepository = require("./repositories/usersRepository.js");
 usersRepository.init(app, MongoClient);
 require("./routes/users.js")(app, usersRepository,logsRepository);
+require("./routes/logs.js")(app, logsRepository);
 
 let indexRouter = require('./routes/index');
 app.use('/', indexRouter);
