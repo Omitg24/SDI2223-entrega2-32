@@ -25,6 +25,15 @@ const {MongoClient} = require("mongodb");
 const url = 'mongodb://localhost:27017';
 app.set('connectionStrings', url);
 
+const logsRepository = require("./repositories/logsRepository.js");
+logsRepository.init(app, MongoClient);
+require("./routes/logs.js")(app, logsRepository);
+
+const loggerMiddleware = require("./routes/loggerMiddleware");
+
+app.use(logger('dev'));
+app.use(loggerMiddleware(logsRepository));
+
 const userSessionRouter = require('./routes/userSessionRouter');
 app.use('/home', userSessionRouter);
 app.use('/user/*', userSessionRouter);
@@ -39,13 +48,7 @@ app.use('/users/delete', userAdminSessionRouter);
 
 const usersRepository = require("./repositories/usersRepository.js");
 usersRepository.init(app, MongoClient);
-require("./routes/users.js")(app, usersRepository);
-
-const logsRepository = require("./repositories/logsRepository.js");
-logsRepository.init(app, MongoClient);
-require("./routes/logs.js")(app, logsRepository);
-
-const loggerMiddleware = require("./routes/loggerMiddleware.js")(logsRepository);
+require("./routes/users.js")(app, usersRepository,logsRepository);
 
 let indexRouter = require('./routes/index');
 app.use('/', indexRouter);
@@ -53,9 +56,6 @@ app.use('/', indexRouter);
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'twig');
-
-app.use(logger('dev'));
-app.use(loggerMiddleware);
 
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));

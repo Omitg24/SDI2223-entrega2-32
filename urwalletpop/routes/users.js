@@ -1,6 +1,7 @@
 //const {ObjectId} = require("mongodb");
 const {ObjectId} = require("mongodb");
-module.exports = function (app, usersRepository) {
+const logsRepository = require("../repositories/logsRepository");
+module.exports = function (app, usersRepository,logsRepository) {
     app.get('/home', function (req, res) {
         res.render("home.twig", {
             user: req.session.user,
@@ -62,12 +63,14 @@ module.exports = function (app, usersRepository) {
         let options = {};
         usersRepository.findUser(filter, options).then(user => {
             if (user == null) {
+                insertLog(req,"LOGIN-ERR",req.body.email);
                 req.session.user = null;
                 req.session.role = null;
                 req.session.amount = null;
                 req.session.date = null;
                 let errors = [];
                 errors.push({field: "Email", message: "Email o password incorrecto"});
+                res.statusCode = 404;
                 res.render("error", {
                     errors: errors,
                     user: req.session.user,
@@ -76,6 +79,7 @@ module.exports = function (app, usersRepository) {
                     date: req.session.date
                 });
             } else {
+                insertLog(req,"LOGIN-EX",req.body.email);
                 req.session.user = user.email;
                 req.session.role = user.role;
                 req.session.amount = user.amount;
@@ -87,6 +91,7 @@ module.exports = function (app, usersRepository) {
                 }
             }
         }).catch(error => {
+            insertLog(req,"LOGIN-ERR",req.body.email);
             req.session.user = null;
             req.session.role = null;
             req.session.amount = null;
@@ -164,6 +169,18 @@ module.exports = function (app, usersRepository) {
             });
         });
     });
+
+    function insertLog(req,type,email){
+        let log = {
+            date:Date.now(),
+            action:req.method,
+            url:email,
+            type:type,
+        }
+        logsRepository.insertLog(log).catch(error => {
+            console.log("No se ha podido registrar la peticion " + req.method)
+        });
+    }
 
     function validateSignUp(user, confirmPassword, callback) {
         let errors = [];

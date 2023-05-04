@@ -5,7 +5,7 @@ module.exports = function (app, logsRepository) {
      * y devuelve una vista que se encargara de mostrarlos
      */
     app.get('/log/list', function (req, res) {
-        let options={sort:{date:1}};
+        let options={sort:{date:-1}};
         let filter={};
 
         //Si la peticion recibe un texto de busqueda actualizamos el filtro
