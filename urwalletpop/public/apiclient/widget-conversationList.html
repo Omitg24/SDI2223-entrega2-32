@@ -26,7 +26,7 @@
     <script>
         window.history.pushState("", "", "/apiclient/client.html?w=conversationList");
         let conversations;
-        var interestedId;
+        var interestedEmail;
         var offerId;
 
         function loadConversations() {
@@ -73,8 +73,8 @@
             }
         }
 
-        function loadConversation(interestedId,offerId){
-            interestedId=interestedId;
+        function loadConversation(interestedEmail,offerId){
+            interestedEmail=interestedEmail;
             offerId=offerId;
             $("#main-container").load("widget-conversation.html");
         }

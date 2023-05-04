@@ -56,8 +56,9 @@
     let conversations;
 
     function loadConversation() {
+        console.log(offerId+"eeeee")
         $.ajax({
-            url: URLbase + "/conversation/"+offerId+"/"+interestedId,
+            url: URLbase + "/conversation/"+offerId+"/"+interestedEmail,
             type: "GET",
             data: {},
             dataType: "json",
@@ -75,8 +76,9 @@
 
     function updateConversation(conversation,user) {
         $("#messages-list").empty();
+        if(conversation!=null){
         for (let i = 0; i < conversation.messages.length; i++) {
-            if(conversation!=null){
+
                 $("#messages-list").append("<div>");
                 if(conversation.messages[i].owner.email == user.email){
                     $("messages-list").append("<div class=\"d-flex justify-content-between\">" +

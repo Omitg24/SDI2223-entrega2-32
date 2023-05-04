@@ -1,8 +1,8 @@
 const {ObjectId} = require("mongodb");
 module.exports = function (app, usersRepository, offerRepository,conversationRepository) {
 
-    app.get("/api/conversation/:offerId/:interestedId", function (req, res) {
-        let filter = {$and: [{interested: {_id:ObjectId(req.params.interestedId)}}
+    app.get("/api/conversation/:offerId/:interestedEmail", function (req, res) {
+        let filter = {$and: [{interested: {email:req.params.interestedEmail}}
                                         , {offer: {_id:ObjectId(req.params.offerId)}}]};
         let options = {};
         conversationRepository.findConversation(filter, options).then(conversation => {
@@ -31,7 +31,7 @@ module.exports = function (app, usersRepository, offerRepository,conversationRep
         return "redirect:/conversation/list";
     });
 
-    app.post("/api/conversation/:offerId/:interestedId", function (req, res) {
+    app.post("/api/conversation/:offerId/:interestedEmail", function (req, res) {
         //Validamos que el mensaje no este vacio
         //sendMessageValidator.validate(message, result);
         //if (result.hasErrors()) {
@@ -45,7 +45,7 @@ module.exports = function (app, usersRepository, offerRepository,conversationRep
             text: req.body.message
         }
         //Obtenemos o creamos la conversación en función de si existe o no
-        let conversationFilter = {$and: [{interested: {_id:ObjectId(req.params.interestedId)}}
+        let conversationFilter = {$and: [{interested: {email:req.params.interestedEmail}}
                 , {offer: {_id:ObjectId(req.params.offerId)}}]};
 
         let offerFilter = {_id:ObjectId(req.params.offerId)};
@@ -88,9 +88,8 @@ module.exports = function (app, usersRepository, offerRepository,conversationRep
         let filter = {author: {$ne: res.user}};
         let options = {};
         offerRepository.getOffers(filter, options).then(offers => {
-            console.log(res.user);
             res.status(200);
-            res.json({ offers: offers});
+            res.json({ offers: offers,interested: res.user});
         }).catch(error => {
             res.status(500);
             res.json({error: "Error al obtener las ofertas."});

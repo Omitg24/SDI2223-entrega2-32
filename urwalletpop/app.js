@@ -81,13 +81,13 @@ usersRepository.init(app, MongoClient);
 offerRepository.init(app, MongoClient);
 conversationRepository.init(app, MongoClient);
 
+const userTokenRouter = require('./routes/userTokenRouter');
+app.use("/api/offers/", userTokenRouter);
+
 require("./routes/logs.js")(app, logsRepository);
 require("./routes/users.js")(app, usersRepository, offerRepository,logsRepository);
 require("./routes/offers.js")(app, offerRepository, usersRepository);
-require("./routes/api/usersAPI.js")(app,usersRepository,offerRepository);
-
-const userTokenRouter = require('./routes/userTokenRouter');
-app.use("/api/offers/", userTokenRouter);
+require("./routes/api/usersAPI.js")(app,usersRepository,offerRepository,conversationRepository);
 
 
 let indexRouter = require('./routes/index');
