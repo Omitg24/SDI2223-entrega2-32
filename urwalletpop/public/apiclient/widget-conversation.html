@@ -22,7 +22,7 @@
                                 <form class="form-horizontal"
                                       method="post">
                                     <input aria-describedby="button-addon2" aria-label="Recipient's username"
-                                           class="form-control" id="text"
+                                           class="form-control" id="text-message"
                                            name="message"
                                            placeholder="Type message" type="text"/>
                                     <button class="btn bg-dark text-white" id="button-addon2"
@@ -47,13 +47,17 @@
 <script>
     window.history.pushState("", "", "/apiclient/client.html?w=conversation");
 
+    window.setInterval(function(){
+        loadConversation();
+    }, 1000);
+
     $("#offer-title").empty();
     $("#offer-title").text(offerTitle);
 
     document.querySelector('.form-horizontal').addEventListener('submit', event => {
         event.preventDefault();
 
-        const messageInput = document.querySelector('#text').value;
+        const messageInput = document.querySelector('#text-message').value;
         const headers = new Headers();
         headers.append('Content-Type', 'application/json');
         headers.append('token',token);
@@ -64,7 +68,7 @@
             body: JSON.stringify({ message: messageInput })
         })
             .then(response => response.json())
-            .then(data => console.log(data))
+            .then(data => {loadConversation();})
             .catch(error => console.error(error));
     });
 
@@ -120,5 +124,4 @@
             }
         }
     }
-    loadConversation();
 </script>
