@@ -65,7 +65,7 @@
                 $("#conversations-list").append(
                     "<td><a onclick=\"loadConversation('" + conversations[i].offer._id +"','"+conversations[i].interested +"','"+conversations[i].offer.title+"')\""
                     +"<button class=\"btn btn-dark\">Abrir</button>" +"</a></td>" +
-                    "<td><a href='/conversation/delete/'" + conversations[i]._id +">"
+                    "<td><a onclick=\"deleteConversation('"+conversations[i]._id+"')\""+">"
                     +"<button class=\"btn btn-dark\">Eliminar</button>" +"</a></td>"
                 )
                 $("#conversations-list").append("</tr>");
@@ -77,6 +77,23 @@
             offerId=offerIdVal;
             offerTitle=offerTitleVal;
             $("#main-container").load("widget-conversation.html");
+        }
+
+        function deleteConversation(conversationId){
+            console.log(token+"tokentoken");
+            $.ajax({
+                url: URLbase + "/conversation/delete/"+conversationId,
+                type: "POST",
+                data: {},
+                dataType: "json",
+                headers: {"token": token},
+                success: function success(response) {
+                    loadConversations();
+                },
+                error: function (error) {
+                    $("#main-container").load("widget-login.html");
+                }
+            });
         }
         loadConversations();
     </script>

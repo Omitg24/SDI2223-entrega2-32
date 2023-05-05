@@ -29,15 +29,23 @@ module.exports = function (app, usersRepository, offerRepository,conversationRep
             res.status(200);
             res.json({conversations: conversations,user:res.user});
         }).catch(error => {
-            console.log("ppppppppppppppppppp");
             res.status(500);
             res.json({error: "Error al obtener las conversaciones."});
         })
     });
 
-    app.get("/api/conversation/delete/:id", function (req, res) {
-        conversationService.deleteConversation(id);
-        return "redirect:/conversation/list";
+    app.post("/api/conversation/delete/:id", function (req, res) {
+        let filter = {
+            _id:ObjectId(req.params.id)
+        };
+        let options = {};
+        conversationRepository.deleteConversation(filter,options).then(result=>{
+            res.status(200);
+            res.json({result: result});
+        }).catch(error=>{
+            res.status(500);
+            res.json({error: "Error al eliminar las conversaciones."});
+        })
     });
 
     app.post("/api/conversation/:offerId/:interestedEmail", function (req, res) {
