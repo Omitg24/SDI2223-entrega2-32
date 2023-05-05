@@ -71,7 +71,6 @@ const userStandardSessionRouter = require('./routes/userStandardSessionRouter');
 app.use('/offer/add', userStandardSessionRouter);
 app.use('/offer/ownedList', userStandardSessionRouter);
 app.use('/offer/purchasedList', userStandardSessionRouter);
-app.use('/conversation/list', userStandardSessionRouter);
 
 
 const offerRepository = require("./repositories/offerRepository.js");
@@ -83,6 +82,7 @@ conversationRepository.init(app, MongoClient);
 
 const userTokenRouter = require('./routes/userTokenRouter');
 app.use("/api/offers/", userTokenRouter);
+app.use("/api/conversation/*", userTokenRouter);
 
 require("./routes/logs.js")(app, logsRepository);
 require("./routes/users.js")(app, usersRepository, offerRepository,logsRepository);

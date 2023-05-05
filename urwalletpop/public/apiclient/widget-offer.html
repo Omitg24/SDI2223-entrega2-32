@@ -9,6 +9,7 @@
     window.history.pushState("", "", "/apiclient/client.html?w=offer");
     var offers;
     var interested;
+    var offerTitle;
 
     function loadOffers() {
         $.ajax({
@@ -40,7 +41,7 @@
                 "<p className='card-text'>" + offers[i].description + "</p>" +
                 "<h6 className='card-link' id='date'>" + offers[i].date + "</h6>" +
                 "<h6 className='card-link' id='author'>" + offers[i].author + "</h6>" +
-                "<a onclick=\"loadConversation('"+offers[i]._id+"','" + interested + "')\"" + "<button class=\"btn btn-dark\">Establecer conversación</button> </a>"+
+                "<a onclick=\"loadConversation('"+offers[i]._id+"','" + interested + "','" + offers[i].title+"')\"" + "<button class=\"btn btn-dark\">Establecer conversación</button> </a>"+
                 "</div>" +
                 "</div>"
             )
@@ -49,9 +50,10 @@
 
 
 
-    async function loadConversation(offerIdVal,interested){
+    async function loadConversation(offerIdVal,interested,offerTitleVal){
         interestedEmail=interested;
         offerId=offerIdVal;
+        offerTitle=offerTitleVal;
         $("#main-container").load("widget-conversation.html");
     }
 

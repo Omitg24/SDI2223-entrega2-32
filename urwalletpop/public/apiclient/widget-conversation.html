@@ -1,5 +1,5 @@
 <div class="container" id="widget-conversation">
-    <h2 class="text-center" >th:text="#{msg.conversation.header}"</h2>
+    <h2 class="text-center" >Mensajes</h2>
     <section>
         <div class="container py-5">
 
@@ -9,7 +9,7 @@
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center p-3"
                              style="border-top: 4px solid #ffa900;">
-                            <h5 class="mb-0" >th:text="${offer.title}"</h5>
+                            <h5 class="mb-0" id="offer-title"></h5>
                         </div>
 
                         <div class="card-body" style="position: relative; height: 400px; overflow-y: scroll;">
@@ -17,31 +17,24 @@
                                 </div>
                             </div>
 
-                        <!--
                         <div class="card-footer text-muted d-flex justify-content-start align-items-center p-3">
                             <div class="input-group mb-0">
                                 <form class="form-horizontal"
-                                      method="post"
-                                      th:action="@{/conversation/{offerId}/{interestedUserId}(offerId=${offer.id}, interestedUserId=${interestedUser.id})}"
-                                      th:object="${message}">
+                                      method="post">
                                     <input aria-describedby="button-addon2" aria-label="Recipient's username"
                                            class="form-control" id="text"
-                                           name="text"
+                                           name="message"
                                            placeholder="Type message" type="text"/>
-                                    <span
-                                            class="text-danger" th:errors="*{text}"
-                                            th:if="${#fields.hasErrors('text')}"></span>
                                     <button class="btn bg-dark text-white" id="button-addon2"
                                             style="padding-top: .55rem;"
-                                            th:text="#{msg.conversation.send}" type="submit">
-                                        Button
+                                            type="submit">
+                                        Enviar mensaje
                                     </button>
 
                                 </form>
 
                             </div>
                         </div>
-                        -->
                     </div>
 
                 </div>
@@ -53,10 +46,29 @@
 
 <script>
     window.history.pushState("", "", "/apiclient/client.html?w=conversation");
-    let conversations;
+
+    $("#offer-title").empty();
+    $("#offer-title").text(offerTitle);
+
+    document.querySelector('.form-horizontal').addEventListener('submit', event => {
+        event.preventDefault();
+
+        const messageInput = document.querySelector('#text').value;
+        const headers = new Headers();
+        headers.append('Content-Type', 'application/json');
+        headers.append('token',token);
+
+        fetch(`/api/conversation/${offerId}/${interestedEmail}`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ message: messageInput })
+        })
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .catch(error => console.error(error));
+    });
 
     function loadConversation() {
-        console.log(offerId+"eeeee")
         $.ajax({
             url: URLbase + "/conversation/"+offerId+"/"+interestedEmail,
             type: "GET",
@@ -64,7 +76,7 @@
             dataType: "json",
             headers: {"token": token},
             success: function success(response) {
-                conversation = response.conversation;
+                let conversation = response.conversation;
                 user = response.user;
                 updateConversation(conversation,user);
             },
@@ -80,9 +92,9 @@
         for (let i = 0; i < conversation.messages.length; i++) {
 
                 $("#messages-list").append("<div>");
-                if(conversation.messages[i].owner.email == user.email){
-                    $("messages-list").append("<div class=\"d-flex justify-content-between\">" +
-                        "                                            <p class=\"small mb-1 text-muted\">"+ conversation.messages[i].owner.name+"</p>" +
+                if(conversation.messages[i].owner == user){
+                    $("#messages-list").append("<div class=\"d-flex justify-content-between\">" +
+                        "                                            <p class=\"small mb-1 text-muted\">"+ conversation.messages[i].owner+"</p>" +
                         "                                            <p class=\"small mb-1 text-muted\">"+conversation.messages[i].date+"</p>" +
                         "                                        </div>" +
                         "                                        <div class=\"d-flex flex-row justify-content-end mb-4 pt-1\">" +
@@ -92,8 +104,8 @@
                         "                                            </div>" +
                         "                                        </div>");
                 }else{
-                    $("messages-list").append("<div class=\"d-flex justify-content-between\">" +
-                        "                                            <p class=\"small mb-1 text-muted\">"+ conversation.messages[i].owner.name+"</p>" +
+                    $("#messages-list").append("<div class=\"d-flex justify-content-between\">" +
+                        "                                            <p class=\"small mb-1 text-muted\">"+ conversation.messages[i].owner+"</p>" +
                         "                                            <p class=\"small mb-1 text-muted\">"+conversation.messages[i].date+"</p>" +
                         "                                        </div>" +
                         "                                        <div class=\"d-flex flex-row justify-content-start\">" +

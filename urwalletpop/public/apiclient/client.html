@@ -61,7 +61,7 @@
 
     if (Cookies.get('token') != null) {
         token = Cookies.get('token');
-        usuario = Cookies.get('user');
+        user = Cookies.get('user');
         $("#main-container").load("widget-offer.html");
         let url = new URL(window.location.href);
         let w = url.searchParams.get("w");
@@ -71,8 +71,11 @@
         if (w === "offer") {
             $("#main-container").load("widget-offer.html");
         }
-        if (w === "conversation") {
+        if (w === "conversationList") {
             $("#main-container").load("widget-conversationList.html");
+        }
+        if (w === "conversation") {
+            $("#main-container").load("widget-conversation.html");
         }
     } else {
         $("#main-container").load("widget-login.html");

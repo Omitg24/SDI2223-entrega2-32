@@ -2,12 +2,15 @@ const {ObjectId} = require("mongodb");
 module.exports = function (app, usersRepository, offerRepository,conversationRepository) {
 
     app.get("/api/conversation/:offerId/:interestedEmail", function (req, res) {
-        let filter = {$and: [{interested: {email:req.params.interestedEmail}}
-                                        , {offer: {_id:ObjectId(req.params.offerId)}}]};
+        //Obtenemos o creamos la conversación en función de si existe o no
+        let conversationFilter = {
+            interested: req.params.interestedEmail,
+            'offer._id': ObjectId(req.params.offerId)
+        };
         let options = {};
-        conversationRepository.findConversation(filter, options).then(conversation => {
+        conversationRepository.findConversation(conversationFilter, options).then(conversation => {
             res.status(200);
-            res.json({conversation: conversation});
+            res.json({conversation: conversation,user:res.user});
         }).catch(error => {
             res.status(500);
             res.json({error: "Error al obtener la conversacion"});
@@ -15,12 +18,18 @@ module.exports = function (app, usersRepository, offerRepository,conversationRep
     });
 
     app.get("/api/conversation/list", function (req, res) {
-        let filter = {$or: [{interested: res.user}, {offer: {author:res.user}}]};
+        let filter = {
+            $or: [
+                { interested: res.user },
+                { 'offer.author': res.user }
+            ]
+        };
         let options = {};
         conversationRepository.getConversations(filter, options).then(conversations => {
             res.status(200);
-            res.json({conversations: conversations});
+            res.json({conversations: conversations,user:res.user});
         }).catch(error => {
+            console.log("ppppppppppppppppppp");
             res.status(500);
             res.json({error: "Error al obtener las conversaciones."});
         })
@@ -44,18 +53,22 @@ module.exports = function (app, usersRepository, offerRepository,conversationRep
             owner: res.user,
             text: req.body.message
         }
-        //Obtenemos o creamos la conversación en función de si existe o no
-        let conversationFilter = {$and: [{interested: {email:req.params.interestedEmail}}
-                , {offer: {_id:ObjectId(req.params.offerId)}}]};
-
         let offerFilter = {_id:ObjectId(req.params.offerId)};
+        //Obtenemos o creamos la conversación en función de si existe o no
+        let conversationFilter = {
+            interested: req.params.interestedEmail,
+            'offer._id': ObjectId(req.params.offerId)
+        };
+
         let options = {};
+        let user = res.user;
         conversationRepository.findConversation(conversationFilter, options).then(conversation => {
             let conver;
-            if(conversation){
+            console.log(conversation+"tratratra");
+            if(conversation!=null){
                 conver = conversation;
                 conver.messages.push(message);
-                conversationRepository.updateConversation(conver,{_id:ObjectId(conver._id)},options).then(res=>{
+                conversationRepository.updateConversation(conver,{_id:ObjectId(conver._id)},options).then(result=>{
                     res.status(200);
                     res.json({message: "Conversación actualizada"});
                 }).catch(error=>{
@@ -64,11 +77,12 @@ module.exports = function (app, usersRepository, offerRepository,conversationRep
                 });
             }else{
                 offerRepository.findOffer(offerFilter,options).then(offer=>{
-                    conver={offer:offer,interested:res.user,messages:[message]}
-                    conversationRepository.insertConversation(conver).then(res=>{
+                    conver={offer:offer,interested:user,messages:[message]}
+                    conversationRepository.insertConversation(conver).then(result=>{
                         res.status(200);
                         res.json({message: "Conversación insertada"});
                     }).catch(error=>{
+                        console.log(error)
                         res.status(500);
                         res.json({error: "Error al insertar la conversacion"});
                     })
@@ -79,6 +93,7 @@ module.exports = function (app, usersRepository, offerRepository,conversationRep
                 conver={}
             }
         }).catch(error => {
+            console.log("b3");
             res.status(500);
             res.json({error: "Error al obtener la conversacion"});
         })

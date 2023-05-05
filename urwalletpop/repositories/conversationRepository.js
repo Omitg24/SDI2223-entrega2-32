@@ -7,19 +7,15 @@ module.exports = {
     },
     findConversation: async function (filter, options) {
         try {
-            console.log("a1");
             const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
-            console.log("a2");
             const database = client.db("UrWalletPop");
-            console.log("a3");
             const collectionName = 'conversations';
             const conversationsCollection = database.collection(collectionName);
-            console.log("a4");
             let conversation=null;
-            console.log("aasdassa");
             try{
                 conversation = await conversationsCollection.findOne(filter, options);
-            }catch(error){}
+            }catch(error){
+            }
             return conversation;
         } catch (error) {
             throw (error);

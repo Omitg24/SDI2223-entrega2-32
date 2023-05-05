@@ -25,7 +25,6 @@
 
     <script>
         window.history.pushState("", "", "/apiclient/client.html?w=conversationList");
-        let conversations;
         var interestedEmail;
         var offerId;
 
@@ -37,7 +36,7 @@
                 dataType: "json",
                 headers: {"token": token},
                 success: function success(response) {
-                    conversations = response.conversations;
+                    let conversations = response.conversations;
                     user = response.user;
                     updateConversationList(conversations,user);
                 },
@@ -51,20 +50,20 @@
             $("#conversations-list").empty();
             for (let i = 0; i < conversations.length; i++) {
                 $("#conversations-list").append("<tr>");
-                if(conversations[i].interested._id==user._id){
+                if(conversations[i].interested!=user){
                     $("#conversations-list").append(
-                        "<td>"+conversations[i].offer.author.email +"</td>"
+                        "<td>"+conversations[i].interested +"</td>"
                     )
                 }else{
                     $("#conversations-list").append(
-                        "<td>"+conversations[i].interested.email +"</td>"
+                        "<td>"+conversations[i].offer.author +"</td>"
                     )
                 }
                 $("#conversations-list").append(
                     "<td>"+conversations[i].offer.title +"</td>"
                 )
                 $("#conversations-list").append(
-                    "<td><a onclick=loadConversation('" + conversations[i].offer._id +"','"+conversations[i].interested._id + "')"
+                    "<td><a onclick=\"loadConversation('" + conversations[i].offer._id +"','"+conversations[i].interested +"','"+conversations[i].offer.title+"')\""
                     +"<button class=\"btn btn-dark\">Abrir</button>" +"</a></td>" +
                     "<td><a href='/conversation/delete/'" + conversations[i]._id +">"
                     +"<button class=\"btn btn-dark\">Eliminar</button>" +"</a></td>"
@@ -73,9 +72,10 @@
             }
         }
 
-        function loadConversation(interestedEmail,offerId){
-            interestedEmail=interestedEmail;
-            offerId=offerId;
+        function loadConversation(offerIdVal,interestedEmailVal,offerTitleVal){
+            interestedEmail=interestedEmailVal;
+            offerId=offerIdVal;
+            offerTitle=offerTitleVal;
             $("#main-container").load("widget-conversation.html");
         }
         loadConversations();
