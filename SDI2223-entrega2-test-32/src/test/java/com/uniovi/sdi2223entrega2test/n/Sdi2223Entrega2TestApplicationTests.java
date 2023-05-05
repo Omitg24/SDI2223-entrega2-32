@@ -40,6 +40,8 @@ class Sdi2223Entrega2TestApplicationTests {
     @BeforeEach
     public void setUp() {
         driver.navigate().to(URL);
+        MongoDB m = new MongoDB();
+        m.resetMongo();
     }
 
     //Después de cada prueba se borran las cookies del navegador
