@@ -27,15 +27,16 @@ Este proyecto forma parte de la entrega 2 de la asignatura de Sistemas Distribui
   - 13: Seguridad y auditoria de la aplicación. (1 punto)
 
 - Álvaro Davila Sampedro, UO284548:
-  - 10: Comprar una oferta. (0.25 puntos)
+  -  10: Comprar una oferta. (0.25 puntos)
   -  11: Ver el listado de ofertas compradas. (0.25 puntos)
   -  12: Marcar una oferta como destacada (0.5 puntos)
 
 - Israel Solís Iglesias, UO282162:
+  - Se encargará de llevar a cabo el log o registro de las peticiones producidas por los usuarios. 
   -  5: Borrado múltiple de usuarios. (0.5 puntos)
 
 - Omar Teixeira González, UO281847:
-  Se encargará de la presentación general del proyecto, mediante los diseños y CSSs.
+  -  Se encargará de la presentación general del proyecto, mediante los diseños y CSSs.
   -  1: Registrarse como usuario. (0.25 puntos)
   -  2: Iniciar sesión. (0.25 puntos)
   -  3: Fin de sesión. (0.25 puntos)
