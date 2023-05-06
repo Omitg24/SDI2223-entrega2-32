@@ -450,6 +450,37 @@ class Sdi2223Entrega2TestApplicationTests {
         PO_PrivateView.logout(driver);
     }
 
+    @Test
+    @Order(38)
+    public void PR38() {
+        final String RestAssuredURL = "http://localhost:8081/api/v1.0/users/login";
+        //2. Preparamos el parámetro en formato JSON
+        RequestSpecification request = RestAssured.given();
+        JSONObject requestParams = new JSONObject();
+        requestParams.put("email", "user01@email.com");
+        requestParams.put("password", "user01");
+        request.header("Content-Type", "application/json");
+        request.body(requestParams.toJSONString());
+        //3. Hacemos la petición
+        Response response = request.post(RestAssuredURL);
+        //4. Comprobamos que el servicio ha tenido exito
+        Assertions.assertEquals(200, response.getStatusCode());
+    }
+
+
+    /**
+     * PR47. Marcar como leído un mensaje de ID conocido. Esta prueba consistirá en comprobar que
+     * el mensaje marcado de ID conocido queda marcado correctamente a true como leído. Por lo
+     * tanto, se tendrá primero que invocar al servicio de identificación (S1), solicitar el servicio de
+     * marcado (S7), comprobando que el mensaje marcado ha quedado marcado a true como leído (S4)
+     * Realizado por: Álvaro
+     */
+    @Test
+    @Order(47)
+    public void PR47() {
+
+    }
+
     /**
      * PR57.  Identificarse en la aplicación y enviar un mensaje a una oferta, validar que el mensaje
      * enviado aparece en el chat. Identificarse después con el usuario propietario de la oferta y validar
@@ -540,24 +571,6 @@ class Sdi2223Entrega2TestApplicationTests {
         PO_View.checkElementBy(driver, "text", "3");
     }
 
-
-
-    @Test
-    @Order(38)
-    public void PR38() {
-        final String RestAssuredURL = "http://localhost:8081/api/v1.0/users/login";
-        //2. Preparamos el parámetro en formato JSON
-        RequestSpecification request = RestAssured.given();
-        JSONObject requestParams = new JSONObject();
-        requestParams.put("email", "user01@email.com");
-        requestParams.put("password", "user01");
-        request.header("Content-Type", "application/json");
-        request.body(requestParams.toJSONString());
-        //3. Hacemos la petición
-        Response response = request.post(RestAssuredURL);
-        //4. Comprobamos que el servicio ha tenido exito
-        Assertions.assertEquals(200, response.getStatusCode());
-    }
 
 
 }

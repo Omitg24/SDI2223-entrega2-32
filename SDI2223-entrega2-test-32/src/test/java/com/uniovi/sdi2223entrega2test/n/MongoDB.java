@@ -7,6 +7,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import org.bson.types.ObjectId;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -56,6 +57,7 @@ public class MongoDB {
 		deleteData();
 		insertUsers();
 		insertOffers();
+		insertMessages();
 	}
 
 	private void deleteData() {
@@ -74,6 +76,8 @@ public class MongoDB {
 		}
 		return hexString.toString();
 	}
+
+
 
 	private void insertUsers() {
 		MongoCollection<Document> usuarios = getMongodb().getCollection("users");
@@ -135,6 +139,18 @@ public class MongoDB {
 			}
 
 		}
+	}
+
+	private void insertMessages(){
+		MongoCollection<Document> offers = getMongodb().getCollection("messages");
+		Document offer1 = new Document()
+				.append("owner", "user07@email.com")
+				.append("interested", "user05@emial.com")
+				.append("date","11/11/2002")
+				.append("offer", new ObjectId("645692d93a07e85fc87fefa6"))
+				.append("text","Hola")
+				.append("read",false);
+		offers.insertOne(offer1);
 	}
 
 }
