@@ -1,4 +1,4 @@
-module.exports = function (app, usersRepository,offerRepository) {
+module.exports = function (app, usersRepository,offerRepository,logsRepository) {
     app.get('/home', function (req, res) {
         let filter = {feature: true};
         let page = parseInt(req.query.page);
@@ -85,6 +85,7 @@ module.exports = function (app, usersRepository,offerRepository) {
         let options = {};
         usersRepository.findUser(filter, options).then(user => {
             if (user == null) {
+                insertLog(req,"LOGIN-ERR",req.body.email);
                 req.session.user = null;
                 req.session.role = null;
                 req.session.amount = null;
@@ -99,6 +100,7 @@ module.exports = function (app, usersRepository,offerRepository) {
                     date: req.session.date
                 });
             } else {
+                insertLog(req,"LOGIN-EX",req.body.email);
                 req.session.user = user.email;
                 req.session.role = user.role;
                 req.session.amount = user.amount;
@@ -110,6 +112,7 @@ module.exports = function (app, usersRepository,offerRepository) {
                 }
             }
         }).catch(error => {
+            insertLog(req,"LOGIN-ERR",req.body.email);
             req.session.user = null;
             req.session.role = null;
             req.session.amount = null;
@@ -246,5 +249,38 @@ module.exports = function (app, usersRepository,offerRepository) {
             errors.push({type: "Email", message: "Se ha producido un error al buscar el usuario." + error});
         });
         return errors;
+    }
+
+    app.post('/users/delete', function (req, res) {
+        let ids = req.body.users;
+        let filter;
+        if(typeof ids == "string"){
+            ids=[ids];
+        }
+        for(let i=0;i<ids.length;i++){
+            filter = {_id: ObjectId(ids[i])};
+            usersRepository.deleteUser(filter, {}).then(result => {
+                if (result === null || result.deletedCount === 0) {
+                    //res.send(req.body.users)
+                    res.send("No se ha podido eliminar el registro");
+                } else {
+                    res.redirect("list.twig");
+                }
+            }).catch(error => {
+                res.send("Se ha producido un error al intentar eliminar la canción: " + error)
+            });
+        }
+    });
+
+    function insertLog(req,type,email){
+        let log = {
+            date:Date.now(),
+            action:req.method,
+            url:email,
+            type:type,
+        }
+        logsRepository.insertLog(log).catch(error => {
+            console.log("No se ha podido registrar la peticion " + req.method)
+        });
     }
 }

@@ -8,6 +8,8 @@
 <script>
     window.history.pushState("", "", "/apiclient/client.html?w=offer");
     var offers;
+    var interested;
+    var offerTitle;
 
     function loadOffers() {
         $.ajax({
@@ -17,8 +19,9 @@
             dataType: "json",
             headers: {"token": token},
             success: function success(response) {
+                interested = response.interested;
                 offers = response.offers;
-                updateOffersList(offers);
+                updateOffersList(offers,interested);
             },
             error: function (error) {
                 $("#main-container").load("widget-login.html");
@@ -26,7 +29,7 @@
         });
     }
 
-    function updateOffersList(offers) {
+    function updateOffersList(offers,interested) {
         $("#offers-list").empty();
         for (var i = 0; i < offers.length; i++) {
             $("#offers-list").append(
@@ -38,10 +41,21 @@
                 "<p className='card-text'>" + offers[i].description + "</p>" +
                 "<h6 className='card-link' id='date'>" + offers[i].date + "</h6>" +
                 "<h6 className='card-link' id='author'>" + offers[i].author + "</h6>" +
+                "<a onclick=\"loadConversation('"+offers[i]._id+"','" + interested + "','" + offers[i].title+"')\"" + "<button class=\"btn btn-dark\">Establecer conversación</button> </a>"+
                 "</div>" +
                 "</div>"
             )
         }
     }
+
+
+
+    async function loadConversation(offerIdVal,interested,offerTitleVal){
+        interestedEmail=interested;
+        offerId=offerIdVal;
+        offerTitle=offerTitleVal;
+        $("#main-container").load("widget-conversation.html");
+    }
+
     loadOffers();
 </script>

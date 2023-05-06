@@ -45,38 +45,49 @@ const {MongoClient} = require("mongodb");
 const url = 'mongodb://localhost:27017';
 app.set('connectionStrings', url);
 
+const logsRepository = require("./repositories/logsRepository.js");
+logsRepository.init(app, MongoClient);
+
+const loggerMiddleware = require("./routes/loggerMiddleware");
+
+app.use(logger('dev'));
+app.use(loggerMiddleware(logsRepository));
+
 const userSessionRouter = require('./routes/userSessionRouter');
 app.use('/home', userSessionRouter);
 app.use('/user/*', userSessionRouter);
 app.use('/offer/*', userSessionRouter);
 app.use('/conversation/*', userSessionRouter);
-app.use('/log', userSessionRouter);
 app.use('/users/searchList', userSessionRouter);
 app.use('/users/logout', userSessionRouter);
 
 const userAdminSessionRouter = require('./routes/userAdminSessionRouter');
 app.use('/users/list', userAdminSessionRouter);
+app.use('/log/list', userAdminSessionRouter);
+app.use('/log/delete', userAdminSessionRouter);
 app.use('/users/delete', userAdminSessionRouter);
-app.use('/log', userAdminSessionRouter);
 
 const userStandardSessionRouter = require('./routes/userStandardSessionRouter');
 app.use('/offer/add', userStandardSessionRouter);
 app.use('/offer/ownedList', userStandardSessionRouter);
 app.use('/offer/purchasedList', userStandardSessionRouter);
-app.use('/conversation/list', userStandardSessionRouter);
 
 
 const offerRepository = require("./repositories/offerRepository.js");
 const usersRepository = require("./repositories/usersRepository.js");
+const conversationRepository = require("./repositories/conversationRepository.js");
 usersRepository.init(app, MongoClient);
 offerRepository.init(app, MongoClient);
+conversationRepository.init(app, MongoClient);
 
 const userTokenRouter = require('./routes/userTokenRouter');
 app.use("/api/offers/", userTokenRouter);
+app.use("/api/conversation/*", userTokenRouter);
 
-require("./routes/users.js")(app, usersRepository, offerRepository);
+require("./routes/logs.js")(app, logsRepository);
+require("./routes/users.js")(app, usersRepository, offerRepository,logsRepository);
 require("./routes/offers.js")(app, offerRepository, usersRepository);
-require("./routes/api/usersAPI.js")(app,usersRepository,offerRepository);
+require("./routes/api/usersAPI.js")(app,usersRepository,offerRepository,conversationRepository);
 
 
 let indexRouter = require('./routes/index');
@@ -86,7 +97,6 @@ app.use('/', indexRouter);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'twig');
 
-app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
