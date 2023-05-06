@@ -70,7 +70,7 @@
                 )
                 $("#conversations-list").append(
                     "<td><a onclick=\"loadConversationFromList('" + conversations[i].offer._id +"','"+conversations[i].interested +"','"+conversations[i].offer.title+"')\""
-                    +"<button class=\"btn btn-dark\">Abrir</button>" +"</a></td>" +
+                    +"<button id='openConversation' class=\"btn btn-dark\">Abrir</button>" +"</a></td>" +
                     "<td><a onclick=\"deleteConversation('"+conversations[i]._id+"')\""+">"
                     +"<button class=\"btn btn-dark\">Eliminar</button>" +"</a></td>"
                 )

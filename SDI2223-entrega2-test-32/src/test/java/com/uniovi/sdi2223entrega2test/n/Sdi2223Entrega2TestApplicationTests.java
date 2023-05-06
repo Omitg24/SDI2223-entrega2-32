@@ -450,6 +450,98 @@ class Sdi2223Entrega2TestApplicationTests {
         PO_PrivateView.logout(driver);
     }
 
+    /**
+     * PR57.  Identificarse en la aplicación y enviar un mensaje a una oferta, validar que el mensaje
+     * enviado aparece en el chat. Identificarse después con el usuario propietario de la oferta y validar
+     * que tiene un mensaje sin leer, entrar en el chat y comprobar que el mensaje pasa a tener el estado
+     * leído.
+     * Realizada por: Álvaro
+     */
+    @Test
+    @Order(57)
+    public void PR57() {
+        driver.navigate().to("http://localhost:8081/apiclient/client.html?w=login");
+        //Iniciamos sesión como usuario estandar
+        PO_PrivateView.loginAPI(driver, "user01@email.com", "user01");
+
+
+        PO_PrivateView.checkViewAndClick(driver, "free", "//*[@id=\"createConversation\"]", 0);
+
+        List<WebElement> elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"text-message\"]");
+        elements.get(0).click();
+        elements.get(0).sendKeys("Hola");
+        elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"button-addon2\"]");
+        elements.get(0).click();
+
+        PO_View.checkElementBy(driver, "text", "Hola");
+
+
+        driver.navigate().to("http://localhost:8081/apiclient/client.html?w=login");
+        //Iniciamos sesión como usuario estandar
+        PO_PrivateView.loginAPI(driver, "user02@email.com", "user02");
+
+        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(text(), 'Conversaciones')]", 0);
+
+        PO_View.checkElementBy(driver, "text", "1");
+
+        PO_PrivateView.checkViewAndClick(driver, "free", "//*[@id=\"openConversation\"]",0);
+        PO_View.checkElementBy(driver, "text", "Hola");
+
+        //FALTA POR ENCONTRAR EL ICONO DE LEÍDO
+    }
+
+    /**
+     * PR58.  Identificarse en la aplicación y enviar tres mensajes a una oferta, validar que los mensajes
+     * enviados aparecen en el chat. Identificarse después con el usuario propietario de la oferta y validar
+     * que el número de mensajes sin leer aparece en su oferta.
+     * Realizada por: Álvaro
+     */
+    @Test
+    @Order(58)
+    public void PR58() {
+        driver.navigate().to("http://localhost:8081/apiclient/client.html?w=login");
+        //Iniciamos sesión como usuario estandar
+        PO_PrivateView.loginAPI(driver, "user01@email.com", "user01");
+
+
+        PO_PrivateView.checkViewAndClick(driver, "free", "//*[@id=\"createConversation\"]", 0);
+
+        List<WebElement> elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"text-message\"]");
+        elements.get(0).click();
+        elements.get(0).sendKeys("Hola");
+        elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"button-addon2\"]");
+        elements.get(0).click();
+
+        PO_View.checkElementBy(driver, "text", "Hola");
+
+        elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"text-message\"]");
+        elements.get(0).click();
+        elements.get(0).sendKeys("que");
+        elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"button-addon2\"]");
+        elements.get(0).click();
+
+        PO_View.checkElementBy(driver, "text", "que");
+
+        elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"text-message\"]");
+        elements.get(0).click();
+        elements.get(0).sendKeys("tal");
+        elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"button-addon2\"]");
+        elements.get(0).click();
+
+        PO_View.checkElementBy(driver, "text", "tal");
+
+
+        driver.navigate().to("http://localhost:8081/apiclient/client.html?w=login");
+        //Iniciamos sesión como usuario estandar
+        PO_PrivateView.loginAPI(driver, "user02@email.com", "user02");
+
+        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(text(), 'Conversaciones')]", 0);
+
+        PO_View.checkElementBy(driver, "text", "3");
+    }
+
+
+
     @Test
     @Order(38)
     public void PR38() {

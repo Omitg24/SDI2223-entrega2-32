@@ -143,13 +143,13 @@
         for (let i = 0; i < messages.length; i++) {
 
                 $("#messages-list").append("<div>");
+                let icon;
+                if(messages[i].read){
+                    icon="<img src='/images/read.png' width='25' height='25'/>";
+                 }else{
+                    icon="<img src='/images/notRead.png' width='25' height='25'/>";
+                }
                 if(messages[i].owner == user){
-                    let icon;
-                    if(messages[i].read){
-                        icon="<img src='/images/read.png' width='25' height='25'/>";
-                    }else{
-                        icon="<img src='/images/notRead.png' width='25' height='25'/>";
-                    }
                     $("#messages-list").append("<div class=\"d-flex justify-content-between\">" +
                         "                                            <p class=\"small mb-1 text-muted\">"+ messages[i].owner+"</p>" +
                         "                                            <p class=\"small mb-1 text-muted\">"+ messages[i].date+"</p>" +
@@ -169,7 +169,7 @@
                         "                                            <div>" +
                         "                                                <p class=\"small p-2 ms-3 mb-3 rounded-3\"" +
                         "                                                   style=\"background-color: #f5f6f7;\"" +
-                        "                                                   >"+ messages[i].text+"</p>" +
+                        "                                                   >"+ messages[i].text+" "+icon+"</p>" +
                         "                                            </div>\n" +
                         "                                        </div>");
                 }
