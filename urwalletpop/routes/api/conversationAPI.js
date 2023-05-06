@@ -46,6 +46,12 @@ module.exports = function (app, offerRepository, conversationRepository,messageR
         };
         let options = {};
         conversationRepository.findConversation(conversationFilter, options).then(conversation => {
+
+            if(conversation!=null && !(conversation.offer.author == res.user || req.params.interestedEmail ==res.user)){
+                res.status(403);
+                res.json({error: "No puedes obtener la conversación"});
+                return;
+            }
             let messageFilter = {
                 offer: ObjectId(req.params.offerId)
             }
@@ -82,19 +88,24 @@ module.exports = function (app, offerRepository, conversationRepository,messageR
         };
         let options = {};
         conversationRepository.findConversation(conversationFilter,options).then(conversation=>{
-            let messageFilter={offer:conversation.offer._id,interested:conversation.interested}
-            messageRepository.deleteMessages(messageFilter,options).then(result=>{
-                conversationRepository.deleteConversation(conversationFilter,options).then(result=>{
-                    res.status(200);
-                    res.json({result: result});
+            if(conversation.offer.author == res.user || conversation.interested == res.user){
+                let messageFilter={offer:conversation.offer._id,interested:conversation.interested}
+                messageRepository.deleteMessages(messageFilter,options).then(result=>{
+                    conversationRepository.deleteConversation(conversationFilter,options).then(result=>{
+                        res.status(200);
+                        res.json({result: result});
+                    }).catch(error=>{
+                        res.status(500);
+                        res.json({error: "Error al eliminar las conversaciones."});
+                    })
                 }).catch(error=>{
                     res.status(500);
-                    res.json({error: "Error al eliminar las conversaciones."});
+                    res.json({error: "Error al eliminar los mensajes."});
                 })
-            }).catch(error=>{
-                res.status(500);
-                res.json({error: "Error al eliminar los mensajes."});
-            })
+            }else{
+                res.status(403);
+                res.json({error: "No puedes eliminar la conversación"});
+            }
         }).catch(error=>{
             console.log(error);
             res.status(500);
@@ -128,31 +139,31 @@ module.exports = function (app, offerRepository, conversationRepository,messageR
             conversationRepository.findConversation(conversationFilter, options).then(conversation => {
                 if(conversation === null){
                     let conver;
-                    offerRepository.findOffer(offerFilter,options).then(offer=>{
-                        conver={offer:offer,interested:user}
-                        conversationRepository.insertConversation(conver).then(result=>{
-                            res.status(200);
-                            res.json({message: "Conversación insertada"});
+                    if(user == req.params.interestedEmail){
+                        offerRepository.findOffer(offerFilter,options).then(offer=>{
+                            conver={offer:offer,interested:user}
+                            conversationRepository.insertConversation(conver).then(result=>{
+                                res.status(200);
+                                res.json({message: "Conversación insertada"});
+                            }).catch(error=>{
+                                res.status(500);
+                                res.json({error: "Error al insertar la conversacion"});
+                            })
                         }).catch(error=>{
-                            console.log(error)
                             res.status(500);
-                            res.json({error: "Error al insertar la conversacion"});
+                            res.json({error: "Error al obtener la oferta"});
                         })
-                    }).catch(error=>{
-                        res.status(500);
-                        res.json({error: "Error al obtener la oferta"});
-                    })
-                    conver={}
+                        conver={}
+                    }else{
+                        res.status(403);
+                        res.json({error: "No puedes iniciar una conversación en tu propia oferta"});
+                    }
+
                 }
             }).catch(error => {
-                console.log("b3");
                 res.status(500);
                 res.json({error: "Error al obtener la conversacion"});
             })
         })
-
-
     });
-
-
 }
