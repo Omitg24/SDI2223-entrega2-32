@@ -77,17 +77,31 @@ module.exports = function (app, offerRepository, conversationRepository,messageR
     });
 
     app.post("/api/conversation/delete/:id", function (req, res) {
-        let filter = {
+        let conversationFilter = {
             _id:ObjectId(req.params.id)
         };
         let options = {};
-        conversationRepository.deleteConversation(filter,options).then(result=>{
-            res.status(200);
-            res.json({result: result});
+        conversationRepository.findConversation(conversationFilter,options).then(conversation=>{
+            let messageFilter={offer:conversation.offer._id,interested:conversation.interested}
+            messageRepository.deleteMessages(messageFilter,options).then(result=>{
+                conversationRepository.deleteConversation(conversationFilter,options).then(result=>{
+                    res.status(200);
+                    res.json({result: result});
+                }).catch(error=>{
+                    res.status(500);
+                    res.json({error: "Error al eliminar las conversaciones."});
+                })
+            }).catch(error=>{
+                res.status(500);
+                res.json({error: "Error al eliminar los mensajes."});
+            })
         }).catch(error=>{
+            console.log(error);
             res.status(500);
-            res.json({error: "Error al eliminar las conversaciones."});
+            res.json({error: "Error al obtener la conversacion."});
         })
+
+
     });
 
     app.post("/api/conversation/:offerId/:interestedEmail", function (req, res) {

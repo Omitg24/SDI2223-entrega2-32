@@ -91,6 +91,7 @@
                     loadConversations();
                 },
                 error: function (error) {
+                    console.log(error);
                     $("#main-container").load("widget-login.html");
                 }
             });
