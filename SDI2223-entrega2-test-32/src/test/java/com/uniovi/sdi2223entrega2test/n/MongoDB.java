@@ -137,4 +137,16 @@ public class MongoDB {
         }
     }
 
+    public long getTotalOffersCount() {
+        return getMongodb().getCollection("offers").count();
+    }
+
+    public long getUsersOffersCount(String author) {
+        return getMongodb().getCollection("offers").count(new Document("author", author));
+    }
+
+    public long getOffersByTitleCount(String title) {
+        return getMongodb().getCollection("offers").count(new Document("title", new Document("$regex", title).append("$options", "i")));
+    }
+
 }
