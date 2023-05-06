@@ -14,19 +14,22 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
-import java.io.Console;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class Sdi2223Entrega2TestApplicationTests {
     static String PathFirefox = "C:\\Program Files\\Mozilla Firefox\\firefox.exe";
     //static String Geckodriver = "C:\\Path\\geckodriver-v0.30.0-win64.exe";
-    static String Geckodriver = "C:\\Users\\Usuario\\Desktop\\SDI\\geckodriver-v0.30.0-win64.exe";
+    static String Geckodriver = "geckodriver-v0.30.0-win64.exe";
     static String URL = "http://localhost:8081";    //static String PathFirefox = "/Applications/Firefox.app/Contents/MacOS/firefox-bin";
     //static String Geckodriver = "/Users/USUARIO/selenium/geckodriver-v0.30.0-macos";
     //Común a Windows y a MACOSX
     static WebDriver driver = getDriver(PathFirefox, Geckodriver);
     private MongoDB m;
+
+
 
     public static WebDriver getDriver(String PathFirefox, String Geckodriver) {
         System.setProperty("webdriver.firefox.bin", PathFirefox);
@@ -50,7 +53,13 @@ class Sdi2223Entrega2TestApplicationTests {
     @BeforeEach
     public void setUp() {
         driver.navigate().to(URL);
-        m = new MongoDB();
+        try {
+            m = new MongoDB();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        } catch (InvalidKeyException e) {
+            throw new RuntimeException(e);
+        }
         m.resetMongo();
     }
 
@@ -131,6 +140,59 @@ class Sdi2223Entrega2TestApplicationTests {
     }
 
     /**
+     * PR16.Ir al formulario de alta de oferta, rellenarla con datos válidos y pulsar el botón Submit.
+     */
+    @Test
+    @Order(16)
+    public void PR16(){
+        // Iniciamos sesión como usuario estandar
+        PO_PrivateView.login(driver, "user01@email.com", "user01");
+
+        //Pinchamos en la opción de menú de ofertas: //li[contains(@id, 'offers-menu')]/a
+        PO_PrivateView.checkViewAndClick(driver, "free", "//li[contains(@class, 'nav-item dropdown')]/a", 0);
+        //Esperamos a que aparezca la opción de añadir oferta: //a[contains(@href, 'offer/add')]
+        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@href, 'offer/add')]", 0);
+
+        // Rellenamos el formulario de alta de oferta con datos validos
+        PO_PrivateView.fillFormAddOffer(driver, "PruebaTitulo", "PruebaDescripcion", "0.21");
+
+        // Comprobamos que la oferta recien añadida sale en la lista de ofertas propias
+        // del usuario
+        PO_PrivateView.checkElement(driver, "PruebaTitulo");
+        PO_PrivateView.checkElement(driver, "PruebaDescripcion");
+        PO_PrivateView.checkElement(driver, "0.21 EUR");
+
+        // Hacemos logout
+        PO_PrivateView.logout(driver);
+    }
+
+    /**
+     * PR17. Ir al formulario de alta de oferta, rellenarla con datos inválidos (campo título vacío y precio
+     *  en negativo) y pulsar el botón Submit
+     */
+    @Test
+    @Order(17)
+    public void PR17(){
+        // Iniciamos sesión como usuario estandar
+        PO_PrivateView.login(driver, "user01@email.com", "user01");
+
+        //Pinchamos en la opción de menú de ofertas: //li[contains(@id, 'offers-menu')]/a
+        PO_PrivateView.checkViewAndClick(driver, "free", "//li[contains(@class, 'nav-item dropdown')]/a", 0);
+        //Esperamos a que aparezca la opción de añadir oferta: //a[contains(@href, 'offer/add')]
+        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@href, 'offer/add')]", 0);
+
+        // Rellenamos el formulario de alta de oferta con datos inválidos(titulo vacío y precio en negativo)
+        PO_PrivateView.fillFormAddOffer(driver, "", "PruebaDescripcion", "-0.21");
+
+        // Comprobamos que se muestran los dos menasjes de error
+        PO_PrivateView.checkElement(driver, "Titulo de la oferta no puede estar vacío o tener menos de 3 caracteres");
+        PO_PrivateView.checkElement(driver, "Precio de la oferta no puede ser negativo");
+
+        // Hacemos logout
+        PO_PrivateView.logout(driver);
+    }
+
+    /**
      * PR26. Sobre una búsqueda determinada (a elección del desarrollador),
      * comprar una oferta que deja un saldo positivo en el contador del comprador.
      * Comprobar que el contador se actualiza correctamente en la vista del comprador.
@@ -140,7 +202,7 @@ class Sdi2223Entrega2TestApplicationTests {
     @Order(26)
     public void PR26() {
         //Iniciamos sesión como usuario estandar
-        PO_PrivateView.login(driver, "prueba1@prueba1.com", "prueba1");
+        PO_PrivateView.login(driver, "user01@email.com", "user01");
         //Pinchamos en la opción de menú de ofertas: //li[contains(@id, 'offers-menu')]/a
         PO_PrivateView.checkViewAndClick(driver, "free", "//li[contains(@class, 'nav-item dropdown')]/a", 0);
         //Esperamos a que aparezca la opción de mostrar oferta: //a[contains(@href, 'offer/searchList')]
@@ -169,7 +231,7 @@ class Sdi2223Entrega2TestApplicationTests {
     @Order(27)
     public void PR27() {
         //Iniciamos sesión como usuario estandar
-        PO_PrivateView.login(driver, "prueba1@prueba1.com", "prueba1");
+        PO_PrivateView.login(driver, "user01@email.com", "user01");
         //Pinchamos en la opción de menú de ofertas: //li[contains(@id, 'offers-menu')]/a
         PO_PrivateView.checkViewAndClick(driver, "free", "//li[contains(@class, 'nav-item dropdown')]/a", 0);
         //Esperamos a que aparezca la opción de mostrar oferta: //a[contains(@href, 'offer/searchList')]
@@ -198,7 +260,7 @@ class Sdi2223Entrega2TestApplicationTests {
     @Order(28)
     public void PR28() {
         //Iniciamos sesión como usuario estandar
-        PO_PrivateView.login(driver, "prueba1@prueba1.com", "prueba1");
+        PO_PrivateView.login(driver, "user01@email.com", "user01");
         //Pinchamos en la opción de menú de ofertas: //li[contains(@id, 'offers-menu')]/a
         PO_PrivateView.checkViewAndClick(driver, "free", "//li[contains(@class, 'nav-item dropdown')]/a", 0);
         //Esperamos a que aparezca la opción de mostrar oferta: //a[contains(@href, 'offer/searchList')]
@@ -224,7 +286,7 @@ class Sdi2223Entrega2TestApplicationTests {
     @Order(29)
     public void PR29() {
         //Iniciamos sesión como usuario estandar
-        PO_PrivateView.login(driver, "prueba1@prueba1.com", "prueba1");
+        PO_PrivateView.login(driver, "user01@email.com", "user01");
         //Pinchamos en la opción de menú de ofertas: //li[contains(@id, 'offers-menu')]/a
         PO_PrivateView.checkViewAndClick(driver, "free", "//li[contains(@class, 'nav-item dropdown')]/a", 0);
         //Esperamos a que aparezca la opción de mostrar oferta: //a[contains(@href, 'offer/searchList')]
@@ -256,7 +318,7 @@ class Sdi2223Entrega2TestApplicationTests {
     @Order(30)
     public void PR30() {
         //Iniciamos sesión como usuario estandar
-        PO_PrivateView.login(driver, "prueba1@prueba1.com", "prueba1");
+        PO_PrivateView.login(driver, "user01@email.com", "user01");
 
         List<WebElement> elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"amount\"]");
         double result = Double.parseDouble(elements.get(0).getText().split(" ")[0]);
@@ -303,7 +365,7 @@ class Sdi2223Entrega2TestApplicationTests {
     @Order(31)
     public void PR31() {
         //Iniciamos sesión como usuario estandar
-        PO_PrivateView.login(driver, "prueba1@prueba1.com", "prueba1");
+        PO_PrivateView.login(driver, "user01@email.com", "user01");
 
         List<WebElement> elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"amount\"]");
         double result = Double.parseDouble(elements.get(0).getText().split(" ")[0]);
@@ -353,7 +415,7 @@ class Sdi2223Entrega2TestApplicationTests {
     @Order(32)
     public void PR32() {
         //Iniciamos sesión como usuario estandar
-        PO_PrivateView.login(driver, "prueba3@prueba3.com", "prueba1");
+        PO_PrivateView.login(driver, "user03@email.com", "user03");
 
         //Pinchamos en la opción de menú de ofertas: //li[contains(@id, 'offers-menu')]/a
         PO_PrivateView.checkViewAndClick(driver, "free", "//li[contains(@class, 'nav-item dropdown')]/a", 0);
@@ -388,8 +450,8 @@ class Sdi2223Entrega2TestApplicationTests {
         //2. Preparamos el parámetro en formato JSON
         RequestSpecification request = RestAssured.given();
         JSONObject requestParams = new JSONObject();
-        requestParams.put("email", "prueba1@prueba1.com");
-        requestParams.put("password", "prueba1");
+        requestParams.put("email", "user01@email.com");
+        requestParams.put("password", "user01");
         request.header("Content-Type", "application/json");
         request.body(requestParams.toJSONString());
         //3. Hacemos la petición
