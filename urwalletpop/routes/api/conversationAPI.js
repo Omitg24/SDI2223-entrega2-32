@@ -93,8 +93,9 @@ module.exports = function (app, offerRepository, conversationRepository,messageR
     app.post("/api/conversation/:offerId/:interestedEmail", function (req, res) {
 
         let message = {
-            owner: interestedEmail,
-            offers : ObjectId(req.params.offerId),
+            owner: res.user,
+            interested:req.params.interestedEmail,
+            offer : ObjectId(req.params.offerId),
             date: new Date(),
             text: req.body.message,
             read: false

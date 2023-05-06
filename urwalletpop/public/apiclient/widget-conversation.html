@@ -45,10 +45,15 @@
 </div>
 
 <script>
-    window.history.pushState("", "", "/apiclient/client.html?w=conversation");
+    var conversationUrl = "/apiclient/client.html?w=conversation"
+    window.history.pushState("", "", conversationUrl);
 
-    window.setInterval(function(){
-        loadConversation();
+    var intervalId =window.setInterval(function(){
+        if (window.location.href == ("http://localhost:8081/apiclient/client.html?w=conversation")) {
+            loadConversation();
+        } else {
+            clearInterval(intervalId);
+        }
     }, 1000);
 
     $("#offer-title").empty();
@@ -86,6 +91,7 @@
                 updateConversation(conversation, messages,user);
             },
             error: function (error) {
+                clearInterval(intervalId);
                 $("#main-container").load("widget-login.html");
             }
         });
