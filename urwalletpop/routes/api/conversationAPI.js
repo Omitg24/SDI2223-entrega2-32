@@ -4,12 +4,13 @@ const{messageValidatorInsert} = require('./sendMessageValidate');
 module.exports = function (app, offerRepository, conversationRepository,messageRepository) {
 
     app.put("/api/messages/:id", function (req, res) {
+
         let messageId = ObjectId(req.params.id);
         let filter = {_id: messageId};
         //Si la _id NO no existe, no crea un nuevo documento.
         messageRepository.findMessage(filter, {}).then(message => {
             if (message.read === false) {
-                if(message.interested=== res.user){
+                if(message.owner !== res.user){
                     message.read=true;
                     messageRepository.updateMessage(message, filter, {}).then(result => {
                         if (result === null) {
@@ -76,8 +77,29 @@ module.exports = function (app, offerRepository, conversationRepository,messageR
         };
         let options = {};
         conversationRepository.getConversations(filter, options).then(conversations => {
-            res.status(200);
-            res.json({conversations: conversations,user:res.user});
+            for (let i = 0; i < conversations.length; i++) {
+                let owner;
+                if (res.user === conversations[i].interested) {
+                    owner = conversations[i].offer.author;
+                } else {
+                    owner = conversations[i].interested;
+                }
+                let filter = {
+                    offer: conversations[i].offer._id,
+                    interested: conversations[i].interested,
+                    owner: owner,
+                    read: false
+                }
+                conversations[i].numberMessages = 0;
+                messageRepository.findMessages(filter, {}).then(messages => {
+                    conversations[i].numberMessages = messages.length;
+                    if(i === conversations.length -1){
+                        res.status(200);
+                        res.json({conversations: conversations, user: res.user});
+                    }
+                })
+
+            }
         }).catch(error => {
             res.status(500);
             res.json({error: "Error al obtener las conversaciones."});

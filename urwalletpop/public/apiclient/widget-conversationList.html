@@ -7,6 +7,7 @@
             <tr>
                 <th>Email</th>
                 <th>Título de oferta</th>
+                <th>Mensajes</th>
                 <th>Abrir</th>
                 <th>Eliminar</th>
             </tr>
@@ -21,6 +22,14 @@
         window.history.pushState("", "", "/apiclient/client.html?w=conversationList");
         var interestedEmail;
         var offerId;
+
+        var intervalId =window.setInterval(function(){
+            if (window.location.href == ("http://localhost:8081/apiclient/client.html?w=conversationList")) {
+                loadConversations();
+            } else {
+                clearInterval(intervalId);
+            }
+        }, 1000);
 
         function loadConversations() {
             $.ajax({
@@ -55,6 +64,9 @@
                 }
                 $("#conversations-list").append(
                     "<td>"+conversations[i].offer.title +"</td>"
+                )
+                $("#conversations-list").append(
+                    "<td>"+conversations[i].numberMessages +"</td>"
                 )
                 $("#conversations-list").append(
                     "<td><a onclick=\"loadConversationFromList('" + conversations[i].offer._id +"','"+conversations[i].interested +"','"+conversations[i].offer.title+"')\""

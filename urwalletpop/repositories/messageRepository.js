@@ -29,6 +29,18 @@ module.exports = {
             throw (error);
         }
     },
+    findMessage: async function (filter, options) {
+        try {
+            const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
+            const database = client.db("UrWalletPop");
+            const collectionName = 'messages';
+            const messagesCollection = database.collection(collectionName);
+            const message = await messagesCollection.findOne(filter, options);
+            return message;
+        } catch (error) {
+            throw (error);
+        }
+    },
     updateMessage: async function (newMessage, filter, options) {
         try {
             const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
