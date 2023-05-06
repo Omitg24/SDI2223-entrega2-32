@@ -14,17 +14,19 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
+import java.io.Console;
 import java.util.List;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class Sdi2223Entrega2TestApplicationTests {
     static String PathFirefox = "C:\\Program Files\\Mozilla Firefox\\firefox.exe";
     //static String Geckodriver = "C:\\Path\\geckodriver-v0.30.0-win64.exe";
-    static String Geckodriver = "C:\\Dev\\tools\\selenium\\geckodriver-v0.30.0-win64.exe";
+    static String Geckodriver = "C:\\Users\\Usuario\\Desktop\\SDI\\geckodriver-v0.30.0-win64.exe";
     static String URL = "http://localhost:8081";    //static String PathFirefox = "/Applications/Firefox.app/Contents/MacOS/firefox-bin";
     //static String Geckodriver = "/Users/USUARIO/selenium/geckodriver-v0.30.0-macos";
     //Común a Windows y a MACOSX
     static WebDriver driver = getDriver(PathFirefox, Geckodriver);
+    private MongoDB m;
 
     public static WebDriver getDriver(String PathFirefox, String Geckodriver) {
         System.setProperty("webdriver.firefox.bin", PathFirefox);
@@ -48,7 +50,7 @@ class Sdi2223Entrega2TestApplicationTests {
     @BeforeEach
     public void setUp() {
         driver.navigate().to(URL);
-        MongoDB m = new MongoDB();
+        m = new MongoDB();
         m.resetMongo();
     }
 
@@ -138,7 +140,7 @@ class Sdi2223Entrega2TestApplicationTests {
     @Order(26)
     public void PR26() {
         //Iniciamos sesión como usuario estandar
-        PO_PrivateView.login(driver, "user13@email.com", "user13");
+        PO_PrivateView.login(driver, "prueba1@prueba1.com", "prueba1");
         //Pinchamos en la opción de menú de ofertas: //li[contains(@id, 'offers-menu')]/a
         PO_PrivateView.checkViewAndClick(driver, "free", "//li[contains(@class, 'nav-item dropdown')]/a", 0);
         //Esperamos a que aparezca la opción de mostrar oferta: //a[contains(@href, 'offer/searchList')]
@@ -149,9 +151,9 @@ class Sdi2223Entrega2TestApplicationTests {
         List<WebElement> elements = PO_View.checkElementBy(driver, "free", "//button[contains(text(), 'Comprar')]");
         elements.get(0).click();
         //Lo comparamos con el precio restado
-        elements = PO_View.checkElementBy(driver, "free", "//span[contains(@class, 'badge badge-secondary')]");
-        double result = Double.parseDouble(elements.get(0).getText());
-        Assertions.assertEquals(result, 30.31);
+        elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"amount\"]");
+        double result = Double.parseDouble(elements.get(0).getText().split(" ")[0]);
+        Assertions.assertEquals(result, 95.0);
 
         //Cierro sesion
         PO_PrivateView.logout(driver);
@@ -167,19 +169,19 @@ class Sdi2223Entrega2TestApplicationTests {
     @Order(27)
     public void PR27() {
         //Iniciamos sesión como usuario estandar
-        PO_PrivateView.login(driver, "user11@email.com", "user11");
+        PO_PrivateView.login(driver, "prueba1@prueba1.com", "prueba1");
         //Pinchamos en la opción de menú de ofertas: //li[contains(@id, 'offers-menu')]/a
         PO_PrivateView.checkViewAndClick(driver, "free", "//li[contains(@class, 'nav-item dropdown')]/a", 0);
         //Esperamos a que aparezca la opción de mostrar oferta: //a[contains(@href, 'offer/searchList')]
         PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@href, 'offer/searchList')]", 0);
         //Hacemos una busqueda
-        PO_PrivateView.makeSearch(driver, "130");
+        PO_PrivateView.makeSearch(driver, "118");
         //Compramos la oferta
         List<WebElement> elements = PO_View.checkElementBy(driver, "free", "//button[contains(text(), 'Comprar')]");
         elements.get(0).click();
         //Lo comparamos con el precio restado
-        elements = PO_View.checkElementBy(driver, "free", "//span[contains(@class, 'badge badge-secondary')]");
-        double result = Double.parseDouble(elements.get(0).getText());
+        elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"amount\"]");
+        double result = Double.parseDouble(elements.get(0).getText().split(" ")[0]);
         Assertions.assertEquals(result, 0.00);
 
         //Cierro sesion
@@ -196,22 +198,19 @@ class Sdi2223Entrega2TestApplicationTests {
     @Order(28)
     public void PR28() {
         //Iniciamos sesión como usuario estandar
-        PO_PrivateView.login(driver, "user13@email.com", "user13");
+        PO_PrivateView.login(driver, "prueba1@prueba1.com", "prueba1");
         //Pinchamos en la opción de menú de ofertas: //li[contains(@id, 'offers-menu')]/a
         PO_PrivateView.checkViewAndClick(driver, "free", "//li[contains(@class, 'nav-item dropdown')]/a", 0);
         //Esperamos a que aparezca la opción de mostrar oferta: //a[contains(@href, 'offer/searchList')]
         PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@href, 'offer/searchList')]", 0);
         //Hacemos una busqueda
-        PO_PrivateView.makeSearch(driver, "25");
+        PO_PrivateView.makeSearch(driver, "119");
         //Compramos la oferta
         List<WebElement> elements = PO_View.checkElementBy(driver, "free", "//button[contains(text(), 'Comprar')]");
         elements.get(0).click();
         //Se muestra el mensaje de error
-        List<WebElement> result = PO_View.checkElementByKey(driver, "error.amount",
-                PO_Properties.getSPANISH());
-        String checkText = PO_HomeView.getP().getString("error.amount",
-                PO_Properties.getSPANISH());
-        Assertions.assertEquals(checkText, result.get(0).getText());
+        elements = PO_View.checkElementBy(driver, "free", "//td[contains(text(), 'El saldo es insuficiente')]");
+        Assertions.assertEquals("El saldo es insuficiente", elements.get(0).getText());
         //Cierro sesion
         PO_PrivateView.logout(driver);
     }
@@ -225,19 +224,19 @@ class Sdi2223Entrega2TestApplicationTests {
     @Order(29)
     public void PR29() {
         //Iniciamos sesión como usuario estandar
-        PO_PrivateView.login(driver, "user12@email.com", "user12");
+        PO_PrivateView.login(driver, "prueba1@prueba1.com", "prueba1");
         //Pinchamos en la opción de menú de ofertas: //li[contains(@id, 'offers-menu')]/a
         PO_PrivateView.checkViewAndClick(driver, "free", "//li[contains(@class, 'nav-item dropdown')]/a", 0);
         //Esperamos a que aparezca la opción de mostrar oferta: //a[contains(@href, 'offer/searchList')]
         PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@href, 'offer/searchList')]", 0);
         //Hacemos una busqueda
-        PO_PrivateView.makeSearch(driver, "20");
+        PO_PrivateView.makeSearch(driver, "117");
         //Compramos la oferta
         List<WebElement> elements = PO_View.checkElementBy(driver, "free", "//button[contains(text(), 'Comprar')]");
         elements.get(0).click();
         //Vamos a la pestaña de ofertas compradas
         PO_PrivateView.checkViewAndClick(driver, "free", "//li[contains(@class, 'nav-item dropdown')]/a", 0);
-        //Esperamos a que aparezca la opción de ofertas compradas: //a[contains(@href, 'offer/searchList')]
+        //Esperamos a que aparezca la opción de ofertas compradas:
         PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@href, 'offer/purchasedList')]", 0);
         List<WebElement> offerList = driver.findElements(By.xpath("//div[contains(@class, 'card border-dark mb-3')]"));
         // Comprobamos que se encuentren todas las ofertas

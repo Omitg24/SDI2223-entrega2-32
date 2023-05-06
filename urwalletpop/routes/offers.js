@@ -241,57 +241,106 @@ module.exports = function (app, offerRepository, usersRepository) {
     });
 
     app.get('/offer/purchase/:id', function (req, res) {
-        let filter = {_id: ObjectId(req.params.id)};
-        offerRepository.findOffer(filter, {}).then(offer => {
-            if (req.session.user !== offer.author && offer.purchase === false) {
-                //Comprobar si el usuario tiene el dinero suficiente
-                if (req.session.amount >= offer.price) {
-                    offer.purchase = true;
-                    offer.buyer = req.session.user;
-                    req.session.amount = req.session.amount - offer.price
-                    offerRepository.updateOffer(offer, filter, {}).then(result => {
-                        if (result == null) {
+        let search = req.query.search || '';
+        let filter = {author: {$ne: req.session.user}};
+        if (search !== '') {
+            filter = {
+                $and: [
+                    {author: {$ne: req.session.user}},
+                    {title: {$regex: new RegExp(search, 'i')}}
+                ]
+            };
+        }
+        let options = {};
+        let page = parseInt(req.query.page);
+        if (typeof req.query.page === "undefined" || req.query.page === null || req.query.page === "0") {
+            page = 1;
+        }
+        offerRepository.getOffersPage(filter, options, page).then(result => {
+            let lastPage = result.total / 4;
+            if (result.total % 4 > 0) { // Sobran decimales
+                lastPage = lastPage + 1;
+            }
+            let pages = []; // paginas mostrar
+            for (let i = page - 2; i <= page + 2; i++) {
+                if (i > 0 && i <= lastPage) {
+                    pages.push(i);
+                }
+            }
+            filter = {_id: ObjectId(req.params.id)};
+            offerRepository.findOffer(filter, {}).then(offer => {
+                if (req.session.user !== offer.author && offer.purchase === false) {
+                    //Comprobar si el usuario tiene el dinero suficiente
+                    if (req.session.amount >= offer.price) {
+                        offer.purchase = true;
+                        offer.buyer = req.session.user;
+                        req.session.amount = req.session.amount - offer.price
+                        offerRepository.updateOffer(offer, filter, {}).then(result => {
+                            if (result == null) {
+                                let errors = [];
+                                errors.push({type: "Comprar oferta", message: "Se ha producido un error al comprar la oferta"});
+                                res.render("offer/searchList.twig", {
+                                    offers : result.offers,
+                                    pages : pages,
+                                    currentPage : page,
+                                    errors: errors,
+                                    user: req.session.user,
+                                    role: req.session.role,
+                                    amount: req.session.amount,
+                                    date: req.session.date
+                                });
+                            } else {
+                                usersRepository.findUser({email: req.session.user}, {}).then(user => {
+                                        user.amount = req.session.amount;
+                                        usersRepository.updateUser(user, {email: user.email}, {}).then();
+                                    }
+                                )
+                                res.redirect("/offer/searchList");
+                            }
+                        }).catch(error => {
                             let errors = [];
                             errors.push({type: "Comprar oferta", message: "Se ha producido un error al comprar la oferta"});
                             res.render("offer/searchList.twig", {
+                                offers : result.offers,
+                                pages : pages,
+                                currentPage : page,
                                 errors: errors,
                                 user: req.session.user,
                                 role: req.session.role,
                                 amount: req.session.amount,
                                 date: req.session.date
                             });
-                        } else {
-                            usersRepository.findUser({email: req.session.user}, {}).then(user => {
-                                    user.amount = req.session.amount;
-                                    usersRepository.updateUser(user, {email: user.email}, {}).then();
-                                }
-                            )
-                            res.redirect("/offer/searchList");
-                        }
-                    }).catch(error => {
+                        });
+                    }else{
                         let errors = [];
-                        errors.push({type: "Comprar oferta", message: "Se ha producido un error al comprar la oferta"});
+                        errors.push({type: "Comprar oferta", message: "El saldo es insuficiente"});
                         res.render("offer/searchList.twig", {
+                            offers : result.offers,
+                            pages : pages,
+                            currentPage : page,
                             errors: errors,
                             user: req.session.user,
                             role: req.session.role,
                             amount: req.session.amount,
                             date: req.session.date
                         });
+                    }
+                } else {
+                    let errors = [];
+                    errors.push({type: "Modificar oferta", message: "Se ha producido un error al modificar la oferta"});
+                    res.render("offer/searchList.twig", {
+                        offers : result.offers,
+                        pages : pages,
+                        currentPage : page,
+                        errors: errors,
+                        user: req.session.user,
+                        role: req.session.role,
+                        amount: req.session.amount,
+                        date: req.session.date
                     });
                 }
-            } else {
-                let errors = [];
-                errors.push({type: "Modificar oferta", message: "Se ha producido un error al modificar la oferta"});
-                res.render("offer/searchList.twig", {
-                    errors: errors,
-                    user: req.session.user,
-                    role: req.session.role,
-                    amount: req.session.amount,
-                    date: req.session.date
-                });
-            }
-        })
+            })
+        });
     });
 
     app.get('/offer/feature/:id', function (req, res) {

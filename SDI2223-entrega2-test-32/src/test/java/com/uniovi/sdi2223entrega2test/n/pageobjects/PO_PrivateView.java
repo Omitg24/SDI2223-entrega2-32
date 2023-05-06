@@ -30,8 +30,8 @@ public class PO_PrivateView extends PO_NavView {
      * @param driver driver
      */
     static public void logout(WebDriver driver) {
-        String loginText = PO_HomeView.getP().getString("msg.signup", PO_Properties.getSPANISH());
-        PO_PrivateView.clickOption(driver, "logout", "text", loginText);
+        List<WebElement> elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"logout\"]");
+        elements.get(0).click();
     }
 
     /**
@@ -65,10 +65,10 @@ public class PO_PrivateView extends PO_NavView {
      * @param searchText texto a buscar
      */
     static public void makeSearch(WebDriver driver, String searchText) {
-        List<WebElement> elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"searchTextForm\"]/div/div/input");
+        List<WebElement> elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"search\"]");
         elements.get(0).click();
         elements.get(0).sendKeys(searchText);
-        elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"searchTextForm\"]/div/button");
+        elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"searchButton\"]");
         elements.get(0).click();
     }
 
