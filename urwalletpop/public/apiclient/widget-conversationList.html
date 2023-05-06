@@ -1,12 +1,6 @@
 <div class="container" id="widget-conversationList">
-    <h2>Titulo oferta</h2>
-    <p>th:text="#{msg.conversation.list.info}"</p>
-    <button class="btn btn-dark" id="updateButton" type="button">Update</button>
-    <script>
-        $("#updateButton").click(function () {
-            $("#tableConversations").load('/conversation/list/update');
-        });
-    </script>
+    <h2>Conversaciones</h2>
+    <button class="btn btn-dark" onclick="loadConversations()" id="updateButton" type="button">Actualizar</button>
     <div class="table-responsive">
         <table class="table table-hover" id="tableConversations">
             <thead>
@@ -63,7 +57,7 @@
                     "<td>"+conversations[i].offer.title +"</td>"
                 )
                 $("#conversations-list").append(
-                    "<td><a onclick=\"loadConversation('" + conversations[i].offer._id +"','"+conversations[i].interested +"','"+conversations[i].offer.title+"')\""
+                    "<td><a onclick=\"loadConversationFromList('" + conversations[i].offer._id +"','"+conversations[i].interested +"','"+conversations[i].offer.title+"')\""
                     +"<button class=\"btn btn-dark\">Abrir</button>" +"</a></td>" +
                     "<td><a onclick=\"deleteConversation('"+conversations[i]._id+"')\""+">"
                     +"<button class=\"btn btn-dark\">Eliminar</button>" +"</a></td>"
@@ -72,15 +66,15 @@
             }
         }
 
-        function loadConversation(offerIdVal,interestedEmailVal,offerTitleVal){
+        function loadConversationFromList(offerIdVal,interestedEmailVal,offerTitleVal){
             interestedEmail=interestedEmailVal;
             offerId=offerIdVal;
             offerTitle=offerTitleVal;
+            console.log("asdadsas")
             $("#main-container").load("widget-conversation.html");
         }
 
         function deleteConversation(conversationId){
-            console.log(token+"tokentoken");
             $.ajax({
                 url: URLbase + "/conversation/delete/"+conversationId,
                 type: "POST",
@@ -91,6 +85,7 @@
                     loadConversations();
                 },
                 error: function (error) {
+                    console.log(error);
                     $("#main-container").load("widget-login.html");
                 }
             });
