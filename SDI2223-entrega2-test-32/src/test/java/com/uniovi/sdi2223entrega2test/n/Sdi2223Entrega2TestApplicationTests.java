@@ -246,6 +246,141 @@ class Sdi2223Entrega2TestApplicationTests {
     }
 
 
+    /**
+     * PR30. Al crear una oferta, marcar dicha oferta como destacada y a continuación comprobar: i)
+     * que aparece en el listado de ofertas destacadas para los usuarios y que el saldo del usuario se
+     * actualiza adecuadamente en la vista del ofertante
+     * Realizada por: Álvaro
+     */
+    @Test
+    @Order(30)
+    public void PR30() {
+        //Iniciamos sesión como usuario estandar
+        PO_PrivateView.login(driver, "prueba1@prueba1.com", "prueba1");
+
+        List<WebElement> elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"amount\"]");
+        double result = Double.parseDouble(elements.get(0).getText().split(" ")[0]);
+        Assertions.assertEquals(result, 100.0);
+
+        //Pinchamos en la opción de menú de ofertas: //li[contains(@id, 'offers-menu')]/a
+        PO_PrivateView.checkViewAndClick(driver, "free", "//li[contains(@class, 'nav-item dropdown')]/a", 0);
+        //Esperamos a que aparezca la opción de añadir oferta: //a[contains(@href, 'offer/add')]
+        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@href, 'offer/add')]", 0);
+
+        // Rellenamos el formulario de alta de oferta con datos validos
+        PO_PrivateView.fillFormAddOfferFeatured(driver, "Prueba37", "PruebaDescripcion37", "0.37");
+
+        // Comprobamos que la oferta recien añadida sale en la lista de ofertas propias
+        // del usuario
+        PO_PrivateView.checkElement(driver, "Prueba37");
+        PO_PrivateView.checkElement(driver, "PruebaDescripcion37");
+        PO_PrivateView.checkElement(driver, "0.37 EUR");
+
+        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@href, 'home')]", 0);
+
+        // Comprobamos que la oferta recien añadida sale en la lista de ofertas destacadas
+        // del usuario
+        PO_PrivateView.checkElement(driver, "Prueba37");
+        PO_PrivateView.checkElement(driver, "PruebaDescripcion37");
+        PO_PrivateView.checkElement(driver, "0.37 EUR");
+
+        //Lo comparamos con el precio restado
+        elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"amount\"]");
+        result = Double.parseDouble(elements.get(0).getText().split(" ")[0]);
+        Assertions.assertEquals(result, 80.00);
+
+        //Cierro sesion
+        PO_PrivateView.logout(driver);
+    }
+
+    /**
+     * PR31. Sobre el listado de ofertas de un usuario con más de 20 euros de saldo, pinchar en el enlace
+     * Destacada y a continuación comprobar: i) que aparece en el listado de ofertas destacadas para los
+     * usuarios y que el saldo del usuario se actualiza adecuadamente en la vista del ofertante
+     * Realizada por: Álvaro
+     */
+    @Test
+    @Order(31)
+    public void PR31() {
+        //Iniciamos sesión como usuario estandar
+        PO_PrivateView.login(driver, "prueba1@prueba1.com", "prueba1");
+
+        List<WebElement> elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"amount\"]");
+        double result = Double.parseDouble(elements.get(0).getText().split(" ")[0]);
+        Assertions.assertEquals(result, 100.0);
+
+        //Pinchamos en la opción de menú de ofertas: //li[contains(@id, 'offers-menu')]/a
+        PO_PrivateView.checkViewAndClick(driver, "free", "//li[contains(@class, 'nav-item dropdown')]/a", 0);
+        //Esperamos a que aparezca la opción de añadir oferta: //a[contains(@href, 'offer/add')]
+        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@href, 'offer/add')]", 0);
+
+        // Rellenamos el formulario de alta de oferta con datos validos
+        PO_PrivateView.fillFormAddOffer(driver, "Prueba37", "PruebaDescripcion37", "0.37");
+
+        // Comprobamos que la oferta recien añadida sale en la lista de ofertas propias
+        // del usuario
+        PO_PrivateView.checkElement(driver, "Prueba37");
+        PO_PrivateView.checkElement(driver, "PruebaDescripcion37");
+        PO_PrivateView.checkElement(driver, "0.37 EUR");
+
+        //Pulsamos el botón de destacar
+        elements = PO_View.checkElementBy(driver, "free", "//button[contains(text(), 'Destacar')]");
+        elements.get(0).click();
+
+        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@href, 'home')]", 0);
+
+        // Comprobamos que la oferta recien añadida sale en la lista de ofertas destacadas
+        // del usuario
+        PO_PrivateView.checkElement(driver, "Prueba37");
+        PO_PrivateView.checkElement(driver, "PruebaDescripcion37");
+        PO_PrivateView.checkElement(driver, "0.37 EUR");
+
+        //Lo comparamos con el precio restado
+        elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"amount\"]");
+        result = Double.parseDouble(elements.get(0).getText().split(" ")[0]);
+        Assertions.assertEquals(result, 80.00);
+
+        //Cierro sesion
+        PO_PrivateView.logout(driver);
+    }
+
+    /**
+     * PR32.  Sobre el listado de ofertas de un usuario con menos de 20 euros de saldo, pinchar en el
+     * enlace Destacada y a continuación comprobar que se muestra el mensaje de saldo no suficiente
+     * Realizada por: Álvaro
+     */
+    @Test
+    @Order(32)
+    public void PR32() {
+        //Iniciamos sesión como usuario estandar
+        PO_PrivateView.login(driver, "prueba3@prueba3.com", "prueba1");
+
+        //Pinchamos en la opción de menú de ofertas: //li[contains(@id, 'offers-menu')]/a
+        PO_PrivateView.checkViewAndClick(driver, "free", "//li[contains(@class, 'nav-item dropdown')]/a", 0);
+        //Esperamos a que aparezca la opción de añadir oferta: //a[contains(@href, 'offer/add')]
+        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@href, 'offer/add')]", 0);
+
+        // Rellenamos el formulario de alta de oferta con datos validos
+        PO_PrivateView.fillFormAddOffer(driver, "Prueba37", "PruebaDescripcion37", "0.37");
+
+        // Comprobamos que la oferta recien añadida sale en la lista de ofertas propias
+        // del usuario
+        PO_PrivateView.checkElement(driver, "Prueba37");
+        PO_PrivateView.checkElement(driver, "PruebaDescripcion37");
+        PO_PrivateView.checkElement(driver, "0.37 EUR");
+
+        //Pulsamos el botón de destacar
+        List<WebElement> elements = PO_View.checkElementBy(driver, "free", "//button[contains(text(), 'Destacar')]");
+        elements.get(0).click();
+
+        //Se muestra el mensaje de error
+        elements = PO_View.checkElementBy(driver, "free", "//td[contains(text(), 'El saldo es insuficiente')]");
+        Assertions.assertEquals("El saldo es insuficiente", elements.get(0).getText());
+
+        //Cierro sesion
+        PO_PrivateView.logout(driver);
+    }
+
     @Test
     @Order(38)
     public void PR38() {

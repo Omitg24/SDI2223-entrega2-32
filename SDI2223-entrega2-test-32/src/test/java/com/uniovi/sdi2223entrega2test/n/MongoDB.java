@@ -57,6 +57,12 @@ public class MongoDB {
 				.append("date","11/11/2002")
 				.append("amount", 100).append("role", "standard");
 		usuarios.insertOne(user1);
+		Document user2 = new Document().append("name", "prueba3").append("lastName", "a")
+				.append("email", "prueba3@prueba3.com")
+				.append("password", "57420b1f0b1e2d07e407a04ff8bbc205a57b3055b34ed94658c04ed38f62daa7")
+				.append("date","11/11/2002")
+				.append("amount", 0).append("role", "standard");
+		usuarios.insertOne(user2);
 	}
 
 	private void insertOffers() {
