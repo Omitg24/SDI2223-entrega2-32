@@ -1,4 +1,6 @@
 const {ObjectId} = require("mongodb");
+const {validationResult} = require('express-validator');
+const{messageValidatorInsert} = require('./sendMessageValidate');
 module.exports = function (app, offerRepository, conversationRepository,messageRepository) {
 
     app.put("/api/messages/:id", function (req, res) {
@@ -115,7 +117,7 @@ module.exports = function (app, offerRepository, conversationRepository,messageR
 
     });
 
-    app.post("/api/conversation/:offerId/:interestedEmail", function (req, res) {
+    app.post("/api/conversation/:offerId/:interestedEmail",messageValidatorInsert, function (req, res) {
 
         let message = {
             owner: res.user,
@@ -136,38 +138,46 @@ module.exports = function (app, offerRepository, conversationRepository,messageR
         let options = {};
         offerRepository.findOffer(offerFilter,options).then(offer=>{
             if(offer.author == user || user ==req.params.interestedEmail) {
-                messageRepository.insertMessage(message).then(result =>{
-                    conversationRepository.findConversation(conversationFilter, options).then(conversation => {
-                        if(conversation === null){
-                            let conver;
-                            if(user == req.params.interestedEmail){
-                                conver={offer:offer,interested:user}
-                                conversationRepository.insertConversation(conver).then(result=>{
-                                    res.status(200);
-                                    res.json({message: "Conversación insertada"});
-                                }).catch(error=>{
-                                    res.status(500);
-                                    res.json({error: "Error al insertar la conversacion"});
-                                })
-                                conver={}
+                const errors = validationResult(req);
+                if(!errors.isEmpty()){
+                    res.status(400);
+                    res.json({errors:errors.array()})
+                }else{
+                    messageRepository.insertMessage(message).then(result =>{
+                        conversationRepository.findConversation(conversationFilter, options).then(conversation => {
+                            if(conversation === null){
+                                let conver;
+                                if(user == req.params.interestedEmail){
+                                    conver={offer:offer,interested:user}
+                                    conversationRepository.insertConversation(conver).then(result=>{
+                                        res.status(200);
+                                        res.json({message: "Conversación insertada"});
+                                    }).catch(error=>{
+                                        res.status(500);
+                                        res.json({errors: "Error al insertar la conversacion"});
+                                    })
+                                    conver={}
+                                }else{
+                                    res.status(403);
+                                    res.json({errors: "No puedes iniciar una conversación en tu propia oferta"});
+                                }
                             }else{
-                                res.status(403);
-                                res.json({error: "No puedes iniciar una conversación en tu propia oferta"});
+                                res.status(200);
+                                res.json({message: "Mensaje enviado"});
                             }
-
-                        }
-                    }).catch(error => {
-                        res.status(500);
-                        res.json({error: "Error al obtener la conversacion"});
+                        }).catch(error => {
+                            res.status(500);
+                            res.json({errors: "Error al obtener la conversacion"});
+                        })
                     })
-                })
+                }
             }else{
                 res.status(403);
-                res.json({error: "No puedes enviar mensajes para esta oferta"});
+                res.json({errors: "No puedes enviar mensajes para esta oferta"});
             }
         }).catch(error=>{
             res.status(500);
-            res.json({error: "Error al obtener la oferta"});
+            res.json({errors: "Error al obtener la oferta"});
         })
 
 

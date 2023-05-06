@@ -30,7 +30,6 @@
                                             type="submit">
                                         Enviar mensaje
                                     </button>
-
                                 </form>
 
                             </div>
@@ -63,18 +62,38 @@
         event.preventDefault();
 
         const messageInput = document.querySelector('#text-message').value;
+
+        $("#text-message").val("");
+
         const headers = new Headers();
         headers.append('Content-Type', 'application/json');
         headers.append('token',token);
 
-        fetch(`/api/conversation/${offerId}/${interestedEmail}`, {
-            method: 'POST',
-            headers,
-            body: JSON.stringify({ message: messageInput })
-        })
-            .then(response => response.json())
-            .then(data => {loadConversation();})
-            .catch(error => console.error(error));
+        $.ajax({
+            url: URLbase + "/conversation/"+offerId+"/"+interestedEmail,
+            type: "POST",
+            data: { message: messageInput },
+            dataType: "json",
+            headers: {"token": token},
+            success: function (response){
+                $("#div-message-errors").remove();
+                loadConversation();
+            },
+            error: function (response) {
+                loadConversation();
+                $("#div-message-errors").remove();
+                let current_errors= (typeof response.responseJSON === "undefined") ? null :response.responseJSON.errors;
+
+                if(current_errors!==null && current_errors.length>0){
+                    $("#button-addon2").after("<div id='div-message-errors' class='alert alert-danger' role='alert'><ul id='ul-errors'></ul></div>");
+                    for(let i=0;i<current_errors.length;i++){
+                        $("#ul-errors").append("<li>" + current_errors[i].msg + "</li>")
+                    }
+                }else{
+                    $("#button-addon2").after("<div id='div-message-errors' class='alert alert-danger'> Se ha producido un error insesperado</div>")
+                }
+            }
+        });
     });
 
     function loadConversation() {
