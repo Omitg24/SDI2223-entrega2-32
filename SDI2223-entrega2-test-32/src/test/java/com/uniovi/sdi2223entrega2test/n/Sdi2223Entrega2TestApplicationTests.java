@@ -334,6 +334,9 @@ class Sdi2223Entrega2TestApplicationTests {
 
         // Comprobamos que la oferta recien añadida sale en la lista de ofertas propias
         // del usuario
+
+        PO_PrivateView.makeSearch(driver, "Prueba37");
+
         PO_PrivateView.checkElement(driver, "Prueba37");
         PO_PrivateView.checkElement(driver, "PruebaDescripcion37");
         PO_PrivateView.checkElement(driver, "0.37 EUR");
@@ -381,6 +384,8 @@ class Sdi2223Entrega2TestApplicationTests {
 
         // Comprobamos que la oferta recien añadida sale en la lista de ofertas propias
         // del usuario
+        PO_PrivateView.makeSearch(driver, "Prueba37");
+
         PO_PrivateView.checkElement(driver, "Prueba37");
         PO_PrivateView.checkElement(driver, "PruebaDescripcion37");
         PO_PrivateView.checkElement(driver, "0.37 EUR");
@@ -427,6 +432,8 @@ class Sdi2223Entrega2TestApplicationTests {
 
         // Comprobamos que la oferta recien añadida sale en la lista de ofertas propias
         // del usuario
+        PO_PrivateView.makeSearch(driver, "Prueba37");
+
         PO_PrivateView.checkElement(driver, "Prueba37");
         PO_PrivateView.checkElement(driver, "PruebaDescripcion37");
         PO_PrivateView.checkElement(driver, "0.37 EUR");
