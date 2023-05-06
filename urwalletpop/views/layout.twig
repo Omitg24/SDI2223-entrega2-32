@@ -104,13 +104,13 @@
                             {{ user }}
                         </span>
                     {% if role == "standard" %}
-                        <span class="userDataText" style="font-size: 20px">
+                        <span id ="amount" class="userDataText" style="font-size: 20px">
                                 {{ amount }} €
                             </span>
                     {% endif %}
                 </div>
                 <li class="nav-item">
-                    <a class="nav-link" href="/users/logout">
+                    <a class="nav-link" href="/users/logout" id="logout">
                         <i class='fas fa-sign-out-alt' style='font-size:16px'></i>
                         <span>Desconectar</span>
                     </a>

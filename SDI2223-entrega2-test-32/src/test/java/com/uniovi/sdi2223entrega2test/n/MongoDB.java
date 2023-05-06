@@ -1,8 +1,6 @@
 package com.uniovi.sdi2223entrega2test.n;
 
-import java.text.ParseException;
-import java.util.Date;
-
+import com.mongodb.client.FindIterable;
 import org.bson.Document;
 
 import com.mongodb.MongoClient;
@@ -10,66 +8,145 @@ import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 public class MongoDB {
-	private MongoClient mongoClient;
-	private MongoDatabase mongodb;
+    private MongoClient mongoClient;
+    private MongoDatabase mongodb;
 
-	public MongoClient getMongoClient() {
-		return mongoClient;
-	}
+    Mac hmacSHA256 = Mac.getInstance("HmacSHA256");
+    SecretKeySpec secretKeySpec;
+    private String secretKey = "abcdefg";
 
-	public void setMongoClient(MongoClient mongoClient) {
-		this.mongoClient = mongoClient;
-	}
+    public MongoDB() throws NoSuchAlgorithmException, InvalidKeyException {
+        secretKeySpec = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+        hmacSHA256.init(secretKeySpec);
+    }
 
-	public void setMongodb(MongoDatabase mongodb) {
-		this.mongodb = mongodb;
-	}
+    public MongoClient getMongoClient() {
+        return mongoClient;
+    }
 
-	public MongoDatabase getMongodb() {
-		return mongodb;
-	}
+    public void setMongoClient(MongoClient mongoClient) {
+        this.mongoClient = mongoClient;
+    }
 
-	public void resetMongo() {
-		try {
-			setMongoClient(new MongoClient(new MongoClientURI(
-					"mongodb://localhost:27017")));
-			setMongodb(getMongoClient().getDatabase("UrWalletPop"));
-		} catch (Exception ex) {
-			System.out.println(ex.toString());
-		}
+    public void setMongodb(MongoDatabase mongodb) {
+        this.mongodb = mongodb;
+    }
 
-		deleteData();
-		insertUsuarios();
-		insertarOfertasYConversaciones();
-	}
+    public MongoDatabase getMongodb() {
+        return mongodb;
+    }
 
-	private void deleteData() {
-		getMongodb().getCollection("offers").drop();
-		getMongodb().getCollection("users").drop();
-		getMongodb().getCollection("conversations").drop();
-		getMongodb().getCollection("messages").drop();
-	}
+    public void resetMongo() {
+        try {
+            setMongoClient(new MongoClient(new MongoClientURI(
+                    "mongodb://localhost:27017")));
+            setMongodb(getMongoClient().getDatabase("UrWalletPop"));
+        } catch (Exception ex) {
+            System.out.println(ex.toString());
+        }
 
-	private void insertUsuarios() {
-		MongoCollection<Document> usuarios = getMongodb().getCollection("users");
-		Document admin = new Document().append("nombre", "admin").append("apellidos", "admin")
-				.append("email", "admin@email.com")
-				.append("password", "ebd5359e500475700c6cc3dd4af89cfd0569aa31724a1bf10ed1e3019dcfdb11")
-				.append("amount", 100).append("rol", "admin");
-		usuarios.insertOne(admin);
+        deleteData();
+        insertUsers();
+        insertOffers();
+    }
 
-		Document user1 = new Document().append("nombre", "user1").append("apellidos", "user")
-				.append("email", "user1@email.com")
-				.append("password", "6fabd6ea6f1518592b7348d84a51ce97b87e67902aa5a9f86beea34cd39a6b4a")
-				.append("amount", 100).append("rol", "user");
-		usuarios.insertOne(user1);
+    private void deleteData() {
+        getMongodb().getCollection("offers").drop();
+        getMongodb().getCollection("users").drop();
+        getMongodb().getCollection("conversations").drop();
+        getMongodb().getCollection("messages").drop();
+    }
 
-		
-	}
+    private String getHash(String password) {
+        byte[] hashBytes = hmacSHA256.doFinal(password.getBytes(StandardCharsets.UTF_8));
+        StringBuilder hexString = new StringBuilder();
+        for (byte b : hashBytes) {
+            String hex = String.format("%02x", b);
+            hexString.append(hex);
+        }
+        return hexString.toString();
+    }
 
-	private void insertarOfertasYConversaciones() {
+    private void insertUsers() {
+        MongoCollection<Document> usuarios = getMongodb().getCollection("users");
 
-	}
+        Document admin = new Document().append("name", "admin").append("lastName", "a")
+                .append("email", "admin@email.com")
+                .append("password", getHash("admin"))
+                .append("date", "11/11/2002")
+                .append("amount", 100).append("role", "admin");
+        usuarios.insertOne(admin);
+        for (int i = 1; i < 16; i++) {
+            String name = "user" + (i < 10 ? "0" : "") + i;
+            usuarios.insertOne(new Document().append("name", name).append("lastName", "a")
+                    .append("email", name + "@email.com")
+                    .append("password", getHash(name))
+                    .append("date", "11/11/2002")
+                    .append("amount", i == 3 ? 0 : 100).append("role", "standard"));
+
+        }
+    }
+
+    private void insertOffers() {
+        MongoCollection<Document> offers = getMongodb().getCollection("offers");
+        Document offer1 = new Document().append("title", "117").append("author", "user02@email.com")
+                .append("description", "aaaaaaaaaaaaaaaaaaaaaaaaaaa")
+                .append("price", 5)
+                .append("date", "11/11/2002")
+                .append("purchase", false)
+                .append("buyer", null)
+                .append("feature", false);
+        offers.insertOne(offer1);
+        Document offer2 = new Document().append("title", "118").append("author", "user02@email.com")
+                .append("description", "aaaaaaaaaaaaaaaaaaaaaaaaaaa")
+                .append("price", 100)
+                .append("date", "11/11/2002")
+                .append("purchase", false)
+                .append("buyer", null)
+                .append("feature", false);
+        offers.insertOne(offer2);
+        Document offer3 = new Document().append("title", "119").append("author", "user02@email.com")
+                .append("description", "aaaaaaaaaaaaaaaaaaaaaaaaaaa")
+                .append("price", 150)
+                .append("date", "11/11/2002")
+                .append("purchase", false)
+                .append("buyer", null)
+                .append("feature", false);
+        offers.insertOne(offer3);
+        for (int i = 1; i < 16; i++) {
+            String name = "user" + (i < 10 ? "0" : "") + i + "@email.com";
+            for (int j = 0; j < 10; j++) {
+                offers.insertOne(new Document().append("title", (j<=4?"Oferta ":"OFERTA ") + i + "" + j)
+                        .append("author", name)
+                        .append("description", "Oferta nueva")
+                        .append("price", 50)
+                        .append("date", "11/11/2002")
+                        .append("purchase", j == 4 ? true : false)
+                        .append("buyer", null)
+                        .append("feature", false));
+            }
+
+        }
+    }
+
+    public long getTotalOffersCount() {
+        return getMongodb().getCollection("offers").count();
+    }
+
+    public long getUsersOffersCount(String author) {
+        return getMongodb().getCollection("offers").count(new Document("author", author));
+    }
+
+    public long getOffersByTitleCount(String title) {
+        return getMongodb().getCollection("offers").count(new Document("title", new Document("$regex", title).append("$options", "i")));
+    }
 
 }

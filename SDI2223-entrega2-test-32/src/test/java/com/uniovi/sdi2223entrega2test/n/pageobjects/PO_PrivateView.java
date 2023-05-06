@@ -30,8 +30,8 @@ public class PO_PrivateView extends PO_NavView {
      * @param driver driver
      */
     static public void logout(WebDriver driver) {
-        String loginText = PO_HomeView.getP().getString("msg.signup", PO_Properties.getSPANISH());
-        PO_PrivateView.clickOption(driver, "logout", "text", loginText);
+        List<WebElement> elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"logout\"]");
+        elements.get(0).click();
     }
 
     /**
@@ -65,12 +65,62 @@ public class PO_PrivateView extends PO_NavView {
      * @param searchText texto a buscar
      */
     static public void makeSearch(WebDriver driver, String searchText) {
-        List<WebElement> elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"searchTextForm\"]/div/div/input");
+        List<WebElement> elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"search\"]");
         elements.get(0).click();
         elements.get(0).sendKeys(searchText);
-        elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"searchTextForm\"]/div/button");
+        elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"searchButton\"]");
         elements.get(0).click();
     }
+
+    /**
+     * Método para rellenar el formulario de añadir ofertas
+     *
+     * @param driver       driver
+     * @param titlep       titulo de la oferta
+     * @param descriptionp descripcion de la oferta
+     * @param pricep       precio de la oferta
+     */
+    static public void fillFormAddOffer(WebDriver driver, String titlep, String descriptionp, String pricep) {
+        // Rellenamos el formulario con los datos recibidos como paramteros.
+        WebElement title = driver.findElement(By.name("title"));
+        title.click();
+        title.clear();
+        title.sendKeys(titlep);
+        WebElement description = driver.findElement(By.name("description"));
+        description.click();
+        description.clear();
+        description.sendKeys(descriptionp);
+        WebElement price = driver.findElement(By.name("price"));
+        price.click();
+        price.clear();
+        price.sendKeys(pricep);
+
+        // Pulsamos el botón para enviar el formulario.
+        By boton = By.className("btn");
+        driver.findElement(boton).click();
+    }
+
+    static public void fillFormAddOfferFeatured(WebDriver driver, String titlep, String descriptionp, String pricep) {
+        // Rellenamos el formulario con los datos recibidos como paramteros.
+        WebElement title = driver.findElement(By.name("title"));
+        title.click();
+        title.clear();
+        title.sendKeys(titlep);
+        WebElement description = driver.findElement(By.name("description"));
+        description.click();
+        description.clear();
+        description.sendKeys(descriptionp);
+        WebElement price = driver.findElement(By.name("price"));
+        price.click();
+        price.clear();
+        price.sendKeys(pricep);
+        WebElement featured = driver.findElement(By.name("feature"));
+        featured.click();
+        // Pulsamos el botón para enviar el formulario.
+        By boton = By.className("btn");
+        driver.findElement(boton).click();
+    }
+
 
 
 }
