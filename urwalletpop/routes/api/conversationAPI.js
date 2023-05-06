@@ -132,38 +132,44 @@ module.exports = function (app, offerRepository, conversationRepository,messageR
             'offer._id': ObjectId(req.params.offerId)
         };
 
+        let user = res.user;
+        let options = {};
+        offerRepository.findOffer(offerFilter,options).then(offer=>{
+            if(offer.author == user || user ==req.params.interestedEmail) {
+                messageRepository.insertMessage(message).then(result =>{
+                    conversationRepository.findConversation(conversationFilter, options).then(conversation => {
+                        if(conversation === null){
+                            let conver;
+                            if(user == req.params.interestedEmail){
+                                conver={offer:offer,interested:user}
+                                conversationRepository.insertConversation(conver).then(result=>{
+                                    res.status(200);
+                                    res.json({message: "Conversación insertada"});
+                                }).catch(error=>{
+                                    res.status(500);
+                                    res.json({error: "Error al insertar la conversacion"});
+                                })
+                                conver={}
+                            }else{
+                                res.status(403);
+                                res.json({error: "No puedes iniciar una conversación en tu propia oferta"});
+                            }
 
-        messageRepository.insertMessage(message).then(result =>{
-            let options = {};
-            let user = res.user;
-            conversationRepository.findConversation(conversationFilter, options).then(conversation => {
-                if(conversation === null){
-                    let conver;
-                    if(user == req.params.interestedEmail){
-                        offerRepository.findOffer(offerFilter,options).then(offer=>{
-                            conver={offer:offer,interested:user}
-                            conversationRepository.insertConversation(conver).then(result=>{
-                                res.status(200);
-                                res.json({message: "Conversación insertada"});
-                            }).catch(error=>{
-                                res.status(500);
-                                res.json({error: "Error al insertar la conversacion"});
-                            })
-                        }).catch(error=>{
-                            res.status(500);
-                            res.json({error: "Error al obtener la oferta"});
-                        })
-                        conver={}
-                    }else{
-                        res.status(403);
-                        res.json({error: "No puedes iniciar una conversación en tu propia oferta"});
-                    }
-
-                }
-            }).catch(error => {
-                res.status(500);
-                res.json({error: "Error al obtener la conversacion"});
-            })
+                        }
+                    }).catch(error => {
+                        res.status(500);
+                        res.json({error: "Error al obtener la conversacion"});
+                    })
+                })
+            }else{
+                res.status(403);
+                res.json({error: "No puedes enviar mensajes para esta oferta"});
+            }
+        }).catch(error=>{
+            res.status(500);
+            res.json({error: "Error al obtener la oferta"});
         })
+
+
     });
 }
