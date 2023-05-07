@@ -1,5 +1,6 @@
 package com.uniovi.sdi2223entrega2test32.pageobjects;
 
+import com.uniovi.sdi2223entrega2test32.util.SeleniumUtils;
 import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -21,6 +22,18 @@ public class PO_PrivateView extends PO_NavView {
         PO_HomeView.clickOption(driver, "login", "class", "btn btn-dark");
         PO_LoginView.fillLoginForm(driver, email, password);
         PO_View.checkElementBy(driver, "text", email);
+    }
+
+    /**
+     * Método para realizar el login de un usuario
+     *
+     * @param driver   driver
+     * @param email      dni del usuario
+     * @param password contraseña del usuario
+     */
+    static public void loginAPI(WebDriver driver, String email, String password) {
+        PO_LoginView.fillLoginForm(driver, email, password);
+        PO_View.checkElementBy(driver, "text", "Actualizar");
     }
 
     /**
@@ -118,17 +131,6 @@ public class PO_PrivateView extends PO_NavView {
         // Pulsamos el botón para enviar el formulario.
         By boton = By.className("btn");
         driver.findElement(boton).click();
-    }
-
-
-    public static void goLastPage(WebDriver driver) {
-        WebElement previousLink;
-        WebElement lastPageLink;
-        do {
-            previousLink= driver.findElement(By.xpath("(//a[contains(@class, 'page-link')])[last()]"));
-            previousLink.click();
-            lastPageLink = driver.findElement(By.xpath("(//a[contains(@class, 'page-link')])[last()]"));
-        }while(previousLink.getText() != lastPageLink.getText());
     }
 
     public static List<String> clickAndGetFirstCellsOfTable(WebDriver driver, int n) {

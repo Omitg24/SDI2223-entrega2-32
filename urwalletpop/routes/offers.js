@@ -1,5 +1,9 @@
 const {ObjectId} = require("mongodb");
 module.exports = function (app, offerRepository, usersRepository) {
+
+    /**
+     * Método que devuelve la vista de la pagina de añadir una oferta
+     */
     app.get('/offer/add', function (req, res) {
         res.render("offer/add.twig", {
             user: req.session.user,
@@ -9,6 +13,10 @@ module.exports = function (app, offerRepository, usersRepository) {
         });
     });
 
+    /**
+     * Método que añade una oferta a la base de datos y redirige a la lista de ofertas
+     * si se añade correctamente o redirige a la pagina de añadir mostrando los errores
+     */
     app.post('/offer/add', function (req, res) {
         let feature = false;
         if (req.body.feature === "on") {
@@ -55,8 +63,20 @@ module.exports = function (app, offerRepository, usersRepository) {
         })
     });
 
+    /**
+     * Metodo que devuelve la vista de la lista de ofertas que tiene el usuario
+     */
     app.get('/offer/ownedList', function (req, res) {
         let filter = {author: req.session.user};
+        let search = req.query.search || '';
+        if (search !== '') {
+            filter = {
+                $and: [
+                    {author:  req.session.user},
+                    {title: {$regex: new RegExp(search, 'i')}}
+                ]
+            };
+        }
         let options = {};
         let page = parseInt(req.query.page);
         if (typeof req.query.page === "undefined" || req.query.page === null || req.query.page === "0") {
@@ -92,7 +112,8 @@ module.exports = function (app, offerRepository, usersRepository) {
                     amount: req.session.amount,
                     date: req.session.date,
                     pages: pages,
-                    currentPage: page
+                    currentPage: page,
+                    search : search
                 }
                 res.render("offer/ownedList.twig", response);
             }
@@ -109,6 +130,10 @@ module.exports = function (app, offerRepository, usersRepository) {
         })
     })
 
+    /**
+     * Método que borra una oferta de la base de datos y redirige a la lista de ofertas si se borra correctamente,
+     * o redirige a la página de añadir mostrando los errores si ya está vendida o no es del propietario
+     */
     app.get('/offer/delete/:id', function (req, res) {
         let filter = {$and: [{author: req.session.user}, {_id: ObjectId(req.params.id)}, {purchase: false}]};
         let options = {};
@@ -139,6 +164,10 @@ module.exports = function (app, offerRepository, usersRepository) {
         })
     })
 
+    /**
+     * Metodo que devuelve la vista de la lista de ofertas disponibles para el usuario, sin tener en cuenta las propias
+     * y pudiendo filtrar por el titulo de la oferta sin distinguir entre mayusculas y minusculas.
+     */
     app.get('/offer/searchList', function (req, res) {
         let search = req.query.search || '';
         let filter = {author: {$ne: req.session.user}};
@@ -201,6 +230,9 @@ module.exports = function (app, offerRepository, usersRepository) {
         })
     })
 
+    /**
+     * Metodo que retorna las ofertas compradas
+     */
     app.get('/offer/purchasedList', function (req, res) {
         let filter = {buyer: req.session.user};
         let options = {};
@@ -245,6 +277,9 @@ module.exports = function (app, offerRepository, usersRepository) {
         });
     });
 
+    /**
+     * Metodo que marca la oferta com comprada y descuenta el dinero al comprador
+     */
     app.get('/offer/purchase/:id', function (req, res) {
         let search = req.query.search || '';
         let filter = {author: {$ne: req.session.user}};
@@ -354,6 +389,10 @@ module.exports = function (app, offerRepository, usersRepository) {
         });
     });
 
+    /**
+     * Metodo que marca una oferta como destacada y descuenta 20$ de la cuenta
+     * del usuario
+     */
     app.get('/offer/feature/:id', function (req, res) {
         let filter = {author: req.session.user};
         let options = {};
@@ -453,6 +492,11 @@ module.exports = function (app, offerRepository, usersRepository) {
         })
     });
 
+    /**
+     * Método que comprueba si los datos introducidos para crear una oferta son válidos
+     * @param offer oferta a comprobar
+     * @returns {Promise<*[]>} Lista de errores de los atributos
+     */
     async function validateOffer(offer) {
         let errors = [];
         if (typeof offer.title === "undefined" || offer.title === null || offer.title.trim().length <= 3) {
