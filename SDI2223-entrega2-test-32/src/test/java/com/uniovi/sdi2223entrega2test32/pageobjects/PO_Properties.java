@@ -1,4 +1,4 @@
-package com.uniovi.sdi2223entrega2test.n.pageobjects;
+package com.uniovi.sdi2223entrega2test32.pageobjects;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
@@ -9,6 +9,7 @@ public class PO_Properties {
     static final int ENGLISH = 1;
     static final Locale[] idioms = new Locale[]{new Locale("ES"), new Locale("EN")};
     static private String Path;
+
     //static Properties p = new Properties();
     public PO_Properties(String Path) //throws FileNotFoundException, IOException
     {

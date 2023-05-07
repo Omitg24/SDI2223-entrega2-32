@@ -1,5 +1,5 @@
 <div class="container" id="widget-conversation">
-    <h2 class="text-center" >Mensajes</h2>
+    <h2 class="text-center">Mensajes</h2>
     <section>
         <div class="container py-5">
 
@@ -13,9 +13,9 @@
                         </div>
 
                         <div class="card-body" style="position: relative; height: 400px; overflow-y: scroll;">
-                                <div id="messages-list">
-                                </div>
+                            <div id="messages-list">
                             </div>
+                        </div>
 
                         <div class="card-footer text-muted d-flex justify-content-start align-items-center p-3">
                             <div class="input-group mb-0">
@@ -42,6 +42,7 @@
         </div>
     </section>
 </div>
+
 <script>
     var conversationUrl = "/apiclient/client.html?w=conversation"
     window.history.pushState("", "", conversationUrl);
@@ -66,29 +67,31 @@
 
         const headers = new Headers();
         headers.append('Content-Type', 'application/json');
-        headers.append('token',token);
+        headers.append('token', token);
+
+        console.log(offerId)
 
         $.ajax({
-            url: URLbase + "/conversation/"+offerId+"/"+interestedEmail,
+            url: URLbase + "/conversation/" + offerId + "/" + interestedEmail,
             type: "POST",
-            data: { message: messageInput },
+            data: {message: messageInput},
             dataType: "json",
             headers: {"token": token},
-            success: function (response){
+            success: function (response) {
                 $("#div-message-errors").remove();
                 loadConversation();
             },
             error: function (response) {
                 loadConversation();
                 $("#div-message-errors").remove();
-                let current_errors= (typeof response.responseJSON === "undefined") ? null :response.responseJSON.errors;
+                let current_errors = (typeof response.responseJSON === "undefined") ? null : response.responseJSON.errors;
 
-                if(current_errors!==null && current_errors.length>0){
+                if (current_errors !== null && current_errors.length > 0) {
                     $("#button-addon2").after("<div id='div-message-errors' class='alert alert-danger' role='alert'><ul id='ul-errors'></ul></div>");
-                    for(let i=0;i<current_errors.length;i++){
+                    for (let i = 0; i < current_errors.length; i++) {
                         $("#ul-errors").append("<li>" + current_errors[i].msg + "</li>")
                     }
-                }else{
+                } else {
                     $("#button-addon2").after("<div id='div-message-errors' class='alert alert-danger'> Se ha producido un error insesperado</div>")
                 }
             }
@@ -118,7 +121,7 @@
 
     function loadConversation() {
         $.ajax({
-            url: URLbase + "/conversation/"+offerId+"/"+interestedEmail,
+            url: URLbase + "/conversation/" + offerId + "/" + interestedEmail,
             type: "GET",
             data: {},
             dataType: "json",
@@ -126,7 +129,8 @@
             success: function success(response) {
                 let conversation = response.conversation;
                 user = response.user;
-                let messages =response.messages;
+                let messages = response.messages;
+                updateConversation(conversation, messages, user);
                 readMessages(conversation, messages,user);
                 updateConversation(conversation, messages,user);
             },
@@ -137,10 +141,10 @@
         });
     }
 
-    function updateConversation(conversation,messages,user) {
+    function updateConversation(conversation, messages, user) {
         $("#messages-list").empty();
-        if(conversation!=null){
-        for (let i = 0; i < messages.length; i++) {
+        if (conversation != null) {
+            for (let i = 0; i < messages.length; i++) {
 
                 $("#messages-list").append("<div>");
                 let icon;
@@ -177,4 +181,5 @@
             }
         }
     }
+    loadConversation();
 </script>

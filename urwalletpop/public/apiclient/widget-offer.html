@@ -1,5 +1,5 @@
 <div id="widget-offers">
-    <input type="text" class="form-control" placeholder="Filtrar por titulo" id="filter-by-title"/>
+    <input class="form-control" id="filter-by-title" placeholder="Filtrar por titulo" type="text"/>
     <button class="btn btn-dark" onclick="loadOffers()">Actualizar</button>
     <div class="card-deck" id="offers-list">
 
@@ -21,7 +21,7 @@
             success: function success(response) {
                 interested = response.interested;
                 offers = response.offers;
-                updateOffersList(offers,interested);
+                updateOffersList(offers, interested);
             },
             error: function (error) {
                 $("#main-container").load("widget-login.html");
@@ -29,19 +29,19 @@
         });
     }
 
-    function updateOffersList(offers,interested) {
+    function updateOffersList(offers, interested) {
         $("#offers-list").empty();
         for (var i = 0; i < offers.length; i++) {
             $("#offers-list").append(
-                "<div className='card border-dark mb-3' style='max-width: 18rem;min-width: 18rem; '>" +
-                "<div className='card-body'>" +
-                "<img className='card-img-top' height='180' src='/images/Symbol.png' width='180'/>" +
-                "<h3 className='card-title'>" + offers[i].price + " EUR</h3>" +
-                "<h4 className='card-subtitle' id='titleFeatured'>" + offers[i].title + "</h4>" +
-                "<p className='card-text'>" + offers[i].description + "</p>" +
-                "<h6 className='card-link' id='date'>" + offers[i].date + "</h6>" +
-                "<h6 className='card-link' id='author'>" + offers[i].author + "</h6>" +
-                "<a id='createConversation' onclick=\"loadConversation('"+offers[i]._id+"','" + interested + "','" + offers[i].title+"')\"" + "<button class=\"btn btn-dark\">Establecer conversación</button> </a>"+
+                "<div class='card border-dark mb-3' style='max-width: 18rem;min-width: 18rem; '>" +
+                "<div class='card-body'>" +
+                "<img class='card-img-top' height='180' src='/images/Symbol.png' width='180'/>" +
+                "<h3 class='card-title'>" + offers[i].price + " EUR</h3>" +
+                "<h4 class='card-subtitle' id='titleFeatured'>" + offers[i].title + "</h4>" +
+                "<p class='card-text'>" + offers[i].description + "</p>" +
+                "<h6 class='card-link' id='date'>" + offers[i].date + "</h6>" +
+                "<h6 class='card-link' id='author'>" + offers[i].author + "</h6>" +
+                "<a onclick=\"loadConversation('" + offers[i]._id + "','" + interested + "','" + offers[i].title + "')\"" + "<button class=\"btn btn-dark\">Establecer conversación</button> </a>" +
                 "</div>" +
                 "</div>"
             )
@@ -49,11 +49,10 @@
     }
 
 
-
-    async function loadConversation(offerIdVal,interested,offerTitleVal){
-        interestedEmail=interested;
-        offerId=offerIdVal;
-        offerTitle=offerTitleVal;
+    async function loadConversation(offerIdVal, interested, offerTitleVal) {
+        interestedEmail = interested;
+        offerId = offerIdVal;
+        offerTitle = offerTitleVal;
         $("#main-container").load("widget-conversation.html");
     }
 

@@ -5,18 +5,18 @@ module.exports = function (app, logsRepository) {
      * y devuelve una vista que se encargara de mostrarlos
      */
     app.get('/log/list', function (req, res) {
-        let filter={};
+        let filter = {};
         let search = req.query.search || '';
 
         if (search !== '') {
             filter = {"type": {$regex: new RegExp(search, 'i')}};
         }
-        let options={sort:{date:-1}};
-        logsRepository.getLogs(filter,options).then(logs=>{
-            let response={
+        let options = {sort: {date: -1}};
+        logsRepository.getLogs(filter, options).then(logs => {
+            let response = {
                 logList: logs,
             }
-            res.render("log/list.twig",response);
+            res.render("log/list.twig", response);
         }).catch(error => {
         });
     });
@@ -25,7 +25,7 @@ module.exports = function (app, logsRepository) {
      */
     app.get('/log/delete', function (req, res) {
         logsRepository.deleteLogs().then(result => {
-            let response={
+            let response = {
                 deletedCount: result.deletedCount,
             }
             res.redirect('/log/list');
