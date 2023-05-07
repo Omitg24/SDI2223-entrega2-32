@@ -9,7 +9,7 @@ var app = express();
 let rest = require('request');
 app.set('rest', rest);
 
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Credentials", "true");
     res.header("Access-Control-Allow-Methods", "POST, GET, DELETE, UPDATE, PUT");
@@ -31,7 +31,7 @@ app.use(expressSession({
 let crypto = require('crypto');
 let fileUpload = require('express-fileupload');
 app.use(fileUpload({
-    limits: { fileSize: 50 * 1024 * 1024 },
+    limits: {fileSize: 50 * 1024 * 1024},
     createParentPath: true
 }));
 app.set('uploadPath', __dirname);
@@ -87,10 +87,10 @@ app.use("/api/offers/", userTokenRouter);
 app.use("/api/conversation/*", userTokenRouter);
 
 require("./routes/logs.js")(app, logsRepository);
-require("./routes/users.js")(app, usersRepository, offerRepository,logsRepository);
+require("./routes/users.js")(app, usersRepository, offerRepository, logsRepository);
 require("./routes/offers.js")(app, offerRepository, usersRepository);
-require("./routes/api/usersAPI.js")(app,usersRepository,offerRepository,conversationRepository);
-require("./routes/api/conversationAPI.js")(app,offerRepository, conversationRepository,messageRepository);
+require("./routes/api/usersAPI.js")(app, usersRepository, offerRepository, conversationRepository);
+require("./routes/api/conversationAPI.js")(app, offerRepository, conversationRepository, messageRepository);
 
 
 let indexRouter = require('./routes/index');

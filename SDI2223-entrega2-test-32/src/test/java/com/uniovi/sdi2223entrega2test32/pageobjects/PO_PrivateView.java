@@ -1,11 +1,9 @@
-package com.uniovi.sdi2223entrega2test.n.pageobjects;
+package com.uniovi.sdi2223entrega2test32.pageobjects;
 
-import com.uniovi.sdi2223entrega2test.n.util.SeleniumUtils;
 import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.Select;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +14,7 @@ public class PO_PrivateView extends PO_NavView {
      * Método para realizar el login de un usuario
      *
      * @param driver   driver
-     * @param email      dni del usuario
+     * @param email    dni del usuario
      * @param password contraseña del usuario
      */
     static public void login(WebDriver driver, String email, String password) {

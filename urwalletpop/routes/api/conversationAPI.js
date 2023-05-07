@@ -1,7 +1,7 @@
 const {ObjectId} = require("mongodb");
 const {validationResult} = require('express-validator');
-const{messageValidatorInsert} = require('./sendMessageValidate');
-module.exports = function (app, offerRepository, conversationRepository,messageRepository) {
+const {messageValidatorInsert} = require('./sendMessageValidate');
+module.exports = function (app, offerRepository, conversationRepository, messageRepository) {
 
     app.put("/api/messages/:id", function (req, res) {
         let messageId = ObjectId(req.params.id);
@@ -9,8 +9,8 @@ module.exports = function (app, offerRepository, conversationRepository,messageR
         //Si la _id NO no existe, no crea un nuevo documento.
         messageRepository.findMessage(filter, {}).then(message => {
             if (message.read === false) {
-                if(message.interested=== res.user){
-                    message.read=true;
+                if (message.interested === res.user) {
+                    message.read = true;
                     messageRepository.updateMessage(message, filter, {}).then(result => {
                         if (result === null) {
                             res.status(404);
@@ -20,8 +20,7 @@ module.exports = function (app, offerRepository, conversationRepository,messageR
                         else if (result.modifiedCount == 0) {
                             res.status(409);
                             res.json({error: "No se ha modificado ningun mensaje."});
-                        }
-                        else{
+                        } else {
                             res.status(200);
                             res.json({
                                 message: "Mensaje modificado correctamente.",
@@ -30,13 +29,13 @@ module.exports = function (app, offerRepository, conversationRepository,messageR
                         }
                     }).catch(error => {
                         res.status(500);
-                        res.json({error : "Se ha producido un error al modificar el mensaje."})
+                        res.json({error: "Se ha producido un error al modificar el mensaje."})
                     });
                 }
             }
         }).catch(error => {
-                res.status(500);
-                res.json({error: "Error al marcar el mensaje como leído."});
+            res.status(500);
+            res.json({error: "Error al marcar el mensaje como leído."});
         });
     });
 
@@ -58,9 +57,9 @@ module.exports = function (app, offerRepository, conversationRepository,messageR
                 offer: ObjectId(req.params.offerId),
                 interested: req.params.interestedEmail
             }
-            messageRepository.findMessages(messageFilter,{}).then(messages =>{
+            messageRepository.findMessages(messageFilter, {}).then(messages => {
                 res.status(200);
-                res.json({conversation: conversation, messages: messages,user:res.user});
+                res.json({conversation: conversation, messages: messages, user: res.user});
             })
         }).catch(error => {
             res.status(500);
@@ -71,14 +70,14 @@ module.exports = function (app, offerRepository, conversationRepository,messageR
     app.get("/api/conversation/list", function (req, res) {
         let filter = {
             $or: [
-                { interested: res.user },
-                { 'offer.author': res.user }
+                {interested: res.user},
+                {'offer.author': res.user}
             ]
         };
         let options = {};
         conversationRepository.getConversations(filter, options).then(conversations => {
             res.status(200);
-            res.json({conversations: conversations,user:res.user});
+            res.json({conversations: conversations, user: res.user});
         }).catch(error => {
             res.status(500);
             res.json({error: "Error al obtener las conversaciones."});
@@ -87,29 +86,29 @@ module.exports = function (app, offerRepository, conversationRepository,messageR
 
     app.post("/api/conversation/delete/:id", function (req, res) {
         let conversationFilter = {
-            _id:ObjectId(req.params.id)
+            _id: ObjectId(req.params.id)
         };
         let options = {};
-        conversationRepository.findConversation(conversationFilter,options).then(conversation=>{
-            if(conversation.offer.author == res.user || conversation.interested == res.user){
-                let messageFilter={offer:conversation.offer._id,interested:conversation.interested}
-                messageRepository.deleteMessages(messageFilter,options).then(result=>{
-                    conversationRepository.deleteConversation(conversationFilter,options).then(result=>{
+        conversationRepository.findConversation(conversationFilter, options).then(conversation => {
+            if (conversation.offer.author == res.user || conversation.interested == res.user) {
+                let messageFilter = {offer: conversation.offer._id, interested: conversation.interested}
+                messageRepository.deleteMessages(messageFilter, options).then(result => {
+                    conversationRepository.deleteConversation(conversationFilter, options).then(result => {
                         res.status(200);
                         res.json({result: result});
-                    }).catch(error=>{
+                    }).catch(error => {
                         res.status(500);
                         res.json({error: "Error al eliminar las conversaciones."});
                     })
-                }).catch(error=>{
+                }).catch(error => {
                     res.status(500);
                     res.json({error: "Error al eliminar los mensajes."});
                 })
-            }else{
+            } else {
                 res.status(403);
                 res.json({error: "No puedes eliminar la conversación"});
             }
-        }).catch(error=>{
+        }).catch(error => {
             console.log(error);
             res.status(500);
             res.json({error: "Error al obtener la conversacion."});
@@ -118,17 +117,17 @@ module.exports = function (app, offerRepository, conversationRepository,messageR
 
     });
 
-    app.post("/api/conversation/:offerId/:interestedEmail",messageValidatorInsert, function (req, res) {
+    app.post("/api/conversation/:offerId/:interestedEmail", messageValidatorInsert, function (req, res) {
 
         let message = {
             owner: res.user,
-            interested:req.params.interestedEmail,
-            offer : ObjectId(req.params.offerId),
+            interested: req.params.interestedEmail,
+            offer: ObjectId(req.params.offerId),
             date: new Date(),
             text: req.body.message,
             read: false
         }
-        let offerFilter = {_id:ObjectId(req.params.offerId)};
+        let offerFilter = {_id: ObjectId(req.params.offerId)};
         //Obtenemos o creamos la conversación en función de si existe o no
         let conversationFilter = {
             interested: req.params.interestedEmail,
@@ -137,32 +136,32 @@ module.exports = function (app, offerRepository, conversationRepository,messageR
 
         let user = res.user;
         let options = {};
-        offerRepository.findOffer(offerFilter,options).then(offer=>{
-            if(offer.author == user || user ==req.params.interestedEmail) {
+        offerRepository.findOffer(offerFilter, options).then(offer => {
+            if (offer.author == user || user == req.params.interestedEmail) {
                 const errors = validationResult(req);
-                if(!errors.isEmpty()){
+                if (!errors.isEmpty()) {
                     res.status(400);
-                    res.json({errors:errors.array()})
-                }else{
-                    messageRepository.insertMessage(message).then(result =>{
+                    res.json({errors: errors.array()})
+                } else {
+                    messageRepository.insertMessage(message).then(result => {
                         conversationRepository.findConversation(conversationFilter, options).then(conversation => {
-                            if(conversation === null){
+                            if (conversation === null) {
                                 let conver;
                                 if(offer.author != req.params.interestedEmail){
                                     conver={offer:offer,interested:user}
                                     conversationRepository.insertConversation(conver).then(result=>{
                                         res.status(200);
                                         res.json({message: "Conversación insertada"});
-                                    }).catch(error=>{
+                                    }).catch(error => {
                                         res.status(500);
                                         res.json({errors: "Error al insertar la conversacion"});
                                     })
-                                    conver={}
-                                }else{
+                                    conver = {}
+                                } else {
                                     res.status(403);
                                     res.json({errors: "No puedes iniciar una conversación en tu propia oferta"});
                                 }
-                            }else{
+                            } else {
                                 res.status(200);
                                 res.json({message: "Mensaje enviado"});
                             }
@@ -172,12 +171,11 @@ module.exports = function (app, offerRepository, conversationRepository,messageR
                         })
                     })
                 }
-            }else{
+            } else {
                 res.status(403);
                 res.json({errors: "No puedes enviar mensajes para esta oferta"});
             }
-        }).catch(error=>{
-            console.log(error);
+        }).catch(error => {
             res.status(500);
             res.json({errors: "Error al obtener la oferta"});
         })

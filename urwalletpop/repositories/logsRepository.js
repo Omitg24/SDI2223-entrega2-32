@@ -29,7 +29,7 @@ module.exports = {
             throw (error);
         }
     },
-    deleteLogs:async function () {
+    deleteLogs: async function () {
         try {
             const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
             const database = client.db("UrWalletPop");

@@ -1,6 +1,4 @@
-package com.uniovi.sdi2223entrega2test.n.util;
-
-import java.util.List;
+package com.uniovi.sdi2223entrega2test32.util;
 
 import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.By;
@@ -8,6 +6,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.util.List;
 
 public class SeleniumUtils {
 
