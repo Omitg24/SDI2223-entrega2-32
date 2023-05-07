@@ -69,6 +69,8 @@
         headers.append('Content-Type', 'application/json');
         headers.append('token',token);
 
+        console.log(offerId)
+
         $.ajax({
             url: URLbase + "/conversation/"+offerId+"/"+interestedEmail,
             type: "POST",

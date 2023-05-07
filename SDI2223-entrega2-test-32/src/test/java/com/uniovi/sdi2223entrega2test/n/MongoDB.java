@@ -7,6 +7,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import org.bson.types.ObjectId;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -114,7 +115,9 @@ public class MongoDB {
                 .append("buyer", null)
                 .append("feature", false);
         offers.insertOne(offer2);
+        ObjectId objectId = new ObjectId("000000000000000000000001");
         Document offer3 = new Document().append("title", "119").append("author", "user02@email.com")
+                .append("_id",objectId)
                 .append("description", "aaaaaaaaaaaaaaaaaaaaaaaaaaa")
                 .append("price", 150)
                 .append("date", "11/11/2002")

@@ -147,7 +147,7 @@ module.exports = function (app, offerRepository, conversationRepository,messageR
                         conversationRepository.findConversation(conversationFilter, options).then(conversation => {
                             if(conversation === null){
                                 let conver;
-                                if(user == req.params.interestedEmail){
+                                if(offer.author != req.params.interestedEmail){
                                     conver={offer:offer,interested:user}
                                     conversationRepository.insertConversation(conver).then(result=>{
                                         res.status(200);
@@ -176,6 +176,7 @@ module.exports = function (app, offerRepository, conversationRepository,messageR
                 res.json({errors: "No puedes enviar mensajes para esta oferta"});
             }
         }).catch(error=>{
+            console.log(error);
             res.status(500);
             res.json({errors: "Error al obtener la oferta"});
         })

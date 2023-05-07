@@ -3,6 +3,7 @@ package com.uniovi.sdi2223entrega2test.n;
 import com.uniovi.sdi2223entrega2test.n.pageobjects.*;
 import com.uniovi.sdi2223entrega2test.n.util.SeleniumUtils;
 import io.restassured.RestAssured;
+import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.json.simple.JSONObject;
@@ -12,6 +13,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
+import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -177,7 +179,6 @@ class Sdi2223Entrega2TestApplicationTests {
         //Comprobamos que los textos son diferentes
         Assertions.assertNotEquals(checkTextAfterDelete, actualText);
         PO_PrivateView.logout(driver);
-        m.resetMongo();
     }
 
     /**
@@ -255,7 +256,6 @@ class Sdi2223Entrega2TestApplicationTests {
             Assertions.assertNotEquals(textsBeforeDelete.get(i), textsAfterDelete.get(i));
         }
         PO_PrivateView.logout(driver);
-        m.resetMongo();
     }
 
     /**
@@ -914,7 +914,6 @@ class Sdi2223Entrega2TestApplicationTests {
         Assertions.assertTrue(actions.get("LOGOUT")>=2);
         Assertions.assertTrue(actions.get("ALTA")>=2);
 
-        m.resetMongo();
     }
 
     /**
@@ -983,6 +982,53 @@ class Sdi2223Entrega2TestApplicationTests {
         Assertions.assertEquals(m.getTotalOffersCount()-m.getUsersOffersCount("user01@email.com"),
                 offers.size());
         Assertions.assertEquals(200, response2.getStatusCode());
+    }
+
+    /**
+     * PR42. Enviar un mensaje a una oferta. Esta prueba consistirá en comprobar que el servicio
+     * almacena correctamente el mensaje para dicha oferta. Por lo tanto, el usuario tendrá que
+     * identificarse (S1), enviar un mensaje para una oferta de id conocido (S3) y comprobar que el
+     * mensaje ha quedado bien registrado (S4)
+     * Realizado por: Israel
+     */
+    @Test
+    @Order(42)
+    public void PR42() {
+        final String RestAssuredURL = "http://localhost:8081/api";
+        //Llamamos al servicio de login
+        RequestSpecification request = RestAssured.given();
+        JSONObject requestParams = new JSONObject();
+        requestParams.put("email", "user01@email.com");
+        requestParams.put("password", "user01");
+        request.header("Content-Type", "application/json");
+        request.body(requestParams.toJSONString());
+        // Hacemos la petición
+        Response response = request.post(RestAssuredURL+"/users/login");
+        String token = response.jsonPath().getString("token");
+        // Llamamos al servicio de conversaciones
+        RequestSpecification request2 = RestAssured.given();
+        requestParams = new JSONObject();
+        request2.header("Content-Type", "application/json");
+        request2.header("token",token );
+        requestParams.put("message", "Hola me interesa el producto" );
+        request2.body(requestParams.toJSONString());
+        // Hacemos la petición para enviar el mensaje indicando el id de la oferta (una ya insertada) y el correo del interesado (user01...)
+        Response response2 = request2.post(RestAssuredURL+"/conversation/000000000000000000000001/user01@email.com");
+        // Comprobamos que se envia el mensaje correctamente
+        Assertions.assertEquals(200, response2.getStatusCode());
+
+        //Hacemos la petición para obtener los mensajes
+        RequestSpecification request3 = RestAssured.given();
+        request3.header("Content-Type", "application/json");
+        request3.header("token",token );
+        // Hacemos la petición para obtener los mensajes de la conversacion
+        Response response3 = request3.get(RestAssuredURL+"/conversation/000000000000000000000001/user01@email.com");
+        // Guardamos todas los mensajes
+        List<Object> messages = response3.jsonPath().getList("messages");
+        // Comprobamos que se muestran todos los mensajes
+        Assertions.assertEquals(1,
+                messages.size());
+        Assertions.assertEquals(200, response3.getStatusCode());
     }
 
     /**
