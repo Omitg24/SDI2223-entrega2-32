@@ -1,0 +1,49 @@
+{% extends "layout.twig" %}
+{% block title %} Registro {% endblock %}
+
+{% block main_container %}
+    <h2>Registro</h2>
+    <div class="row">
+        <div class="col">
+            <a href="/log/delete">
+                <button class="btn btn-dark" id="delete-logs" type="submit">Eliminar</button>
+            </a>
+        </div>
+        <div id="custom-search-input" class="col">
+            <form method="get" action="/log/list" class="input-group align-items-center">
+                <input id="search" type="text" class="form-control" placeholder="Tipo del log" name="search"/>
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="submit">
+                        <i class="fa fa-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+        <div class="table-responsive overflow-hidden">
+            <table class="table table-hover" id="tableLogs">
+                <thead class="thead-dark">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Fecha</th>
+                    <th scope="col">Método</th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col">Descripción</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for log in logList %}
+                    <tr>
+                        <th scope="row">{{ loop.index }}</th>
+                        <td>{{ log.date }}</td>
+                        <td>{{ log.action }}</td>
+                        <td>{{ log.type }}</td>
+                        <td>{{ log.url }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+{% endblock %}

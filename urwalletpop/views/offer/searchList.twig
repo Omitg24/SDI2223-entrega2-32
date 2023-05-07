@@ -3,55 +3,57 @@
 {% block title %} Buscar ofertas {% endblock %}
 
 {% block main_container %}
-<h2>Ofertas Disponibles</h2>
-<div class="row">
-    <div class="col"></div>
-    <div id="custom-search-input" class="col-xs-12 col-sm-12 col-md-8 col-lg-5 mx-auto">
-        <form method="get" action="/offer/searchList" class="input-group align-items-center">
-            <input id="search" type="text" class="form-control" placeholder="Titulo oferta" name="search"
-            value="{{ search }}"/>
-            <div class="input-group-append">
-                <button class="btn btn-outline-secondary" type="submit">
-                    <i class="fa fa-search"></i>
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-<div class="card-deck">
-    {% for offer in offers %}
-        <div class="card border-dark mb-3" style="max-width: 18rem;min-width: 18rem; ">
-            <div class="card-body">
-                <h5 class="card-title">{{ offer.price }} EUR</h5>
-                <h6 class="card-subtitle" id="titleFeatured">{{ offer.title }}</h6>
-                <p class="card-text">{{ offer.description }}</p>
-                <h6 class="card-link" id="date">{{ offer.date }}</h6>
-                {% if offer.purchase %}
-                    <div class="d-flex flex-row">
-                        <button class="btn btn-info" type="button">
-                            Vendida
-                        </button>
-                    </div>
-                {% else %}
-                    <div class="d-flex flex-row">
-                        <a href='/offer/purchase/{{ offer._id }}'>
-                            <button class="btn btn-success" type="button">
-                                Comprar
-                            </button>
-                        </a>
-                    </div>
-                {% endif%}
-            </div>
+    <h2>Ofertas Disponibles</h2>
+    <div class="row">
+        <div class="col"></div>
+        <div id="custom-search-input" class="col-xs-12 col-sm-12 col-md-8 col-lg-5 mx-auto">
+            <form method="get" action="/offer/searchList" class="input-group align-items-center">
+                <input id="search" type="text" class="form-control" placeholder="Titulo oferta" name="search"
+                       value="{{ search }}"/>
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" id="searchButton" type="submit">
+                        <i class="fa fa-search"></i>
+                    </button>
+                </div>
+            </form>
         </div>
-    {% endfor %}
-</div>
-<div class="row justify-content-center">
-    <ul class="pagination">
-        {% for page in pages %}
-            <li class="page-item {% if currentPage == page %} active {% endif %}" id="pi-{{ page }}">
-                <a class="page-link" href="/offer/searchList/?page={{ page }}{% if search %}&search={{ search }}{% endif %}">{{ page }}</a>
-            </li>
+    </div>
+    <div class="card-deck">
+        {% for offer in offers %}
+            <div class="card border-dark mb-3" style="max-width: 18rem;min-width: 18rem; ">
+                <div class="card-body">
+                    <img class="card-img-top" height="256" src="/images/Symbol.png" width="256"/>
+                    <h3 class="card-title">{{ offer.price }} EUR</h3>
+                    <h4 class="card-subtitle" id="titleFeatured">{{ offer.title }}</h4>
+                    <p class="card-text">{{ offer.description }}</p>
+                    <h6 class="card-link" id="date">{{ offer.date }}</h6>
+                    {% if offer.purchase %}
+                        <div class="d-flex flex-row">
+                            <button class="btn btn-info" type="button">
+                                Vendida
+                            </button>
+                        </div>
+                    {% else %}
+                        <div class="d-flex flex-row">
+                            <a href='/offer/purchase/{{ offer._id }}'>
+                                <button class="btn btn-success" type="button">
+                                    Comprar
+                                </button>
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
         {% endfor %}
-    </ul>
-</div>
+    </div>
+    <div class="row justify-content-center">
+        <ul class="pagination">
+            {% for page in pages %}
+                <li class="page-item {% if currentPage == page %} active {% endif %}" id="pi-{{ page }}">
+                    <a class="page-link"
+                       href="/offer/searchList/?page={{ page }}{% if search %}&search={{ search }}{% endif %}">{{ page }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
 {% endblock %}

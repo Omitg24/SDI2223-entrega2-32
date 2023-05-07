@@ -1,16 +1,18 @@
-package com.uniovi.sdi2223entrega2test.n.pageobjects;
+package com.uniovi.sdi2223entrega2test32.pageobjects;
 
+
+import com.uniovi.sdi2223entrega2test32.pageobjects.PO_NavView;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 public class PO_SignUpView extends PO_NavView {
-    static public void fillForm(WebDriver driver, String dnip, String namep, String lastnamep, String
-            passwordp, String passwordconfp) {
-        WebElement dni = driver.findElement(By.name("dni"));
-        dni.click();
-        dni.clear();
-        dni.sendKeys(dnip);
+    static public void fillForm(WebDriver driver, String emailp, String namep, String lastnamep, String
+            passwordp, String passwordconfp, String datep) {
+        WebElement email = driver.findElement(By.name("email"));
+        email.click();
+        email.clear();
+        email.sendKeys(emailp);
         WebElement name = driver.findElement(By.name("name"));
         name.click();
         name.clear();
@@ -27,6 +29,10 @@ public class PO_SignUpView extends PO_NavView {
         passwordConfirm.click();
         passwordConfirm.clear();
         passwordConfirm.sendKeys(passwordconfp);
+        WebElement date = driver.findElement(By.name("date"));
+        date.click();
+        date.clear();
+        date.sendKeys(datep);
         //Pulsar el boton de Alta.
         By boton = By.className("btn");
         driver.findElement(boton).click();

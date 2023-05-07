@@ -1,0 +1,60 @@
+<div id="widget-offers">
+    <input class="form-control" id="filter-by-title" placeholder="Filtrar por titulo" type="text"/>
+    <button class="btn btn-dark" onclick="loadOffers()">Actualizar</button>
+    <div class="card-deck" id="offers-list">
+
+    </div>
+</div>
+<script>
+    window.history.pushState("", "", "/apiclient/client.html?w=offer");
+    var offers;
+    var interested;
+    var offerTitle;
+
+    function loadOffers() {
+        $.ajax({
+            url: URLbase + "/offers",
+            type: "GET",
+            data: {},
+            dataType: "json",
+            headers: {"token": token},
+            success: function success(response) {
+                interested = response.interested;
+                offers = response.offers;
+                updateOffersList(offers, interested);
+            },
+            error: function (error) {
+                $("#main-container").load("widget-login.html");
+            }
+        });
+    }
+
+    function updateOffersList(offers, interested) {
+        $("#offers-list").empty();
+        for (var i = 0; i < offers.length; i++) {
+            $("#offers-list").append(
+                "<div class='card border-dark mb-3' style='max-width: 18rem;min-width: 18rem; '>" +
+                "<div class='card-body'>" +
+                "<img class='card-img-top' height='180' src='/images/Symbol.png' width='180'/>" +
+                "<h3 class='card-title'>" + offers[i].price + " EUR</h3>" +
+                "<h4 class='card-subtitle' id='titleFeatured'>" + offers[i].title + "</h4>" +
+                "<p class='card-text'>" + offers[i].description + "</p>" +
+                "<h6 class='card-link' id='date'>" + offers[i].date + "</h6>" +
+                "<h6 class='card-link' id='author'>" + offers[i].author + "</h6>" +
+                "<a id='createConversation' onclick=\"loadConversation('"+offers[i]._id+"','" + interested + "','" + offers[i].title+"')\"" + "<button class=\"btn btn-dark\">Establecer conversación</button> </a>"+
+                "</div>" +
+                "</div>"
+            )
+        }
+    }
+
+
+    async function loadConversation(offerIdVal, interested, offerTitleVal) {
+        interestedEmail = interested;
+        offerId = offerIdVal;
+        offerTitle = offerTitleVal;
+        $("#main-container").load("widget-conversation.html");
+    }
+
+    loadOffers();
+</script>

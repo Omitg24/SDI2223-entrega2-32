@@ -1,6 +1,6 @@
-package com.uniovi.sdi2223entrega2test.n.pageobjects;
+package com.uniovi.sdi2223entrega2test32.pageobjects;
 
-import com.uniovi.sdi2223entrega2test.n.util.SeleniumUtils;
+import com.uniovi.sdi2223entrega2test32.util.SeleniumUtils;
 import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;

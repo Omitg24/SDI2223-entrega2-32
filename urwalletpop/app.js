@@ -9,7 +9,7 @@ var app = express();
 let rest = require('request');
 app.set('rest', rest);
 
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Credentials", "true");
     res.header("Access-Control-Allow-Methods", "POST, GET, DELETE, UPDATE, PUT");
@@ -31,7 +31,7 @@ app.use(expressSession({
 let crypto = require('crypto');
 let fileUpload = require('express-fileupload');
 app.use(fileUpload({
-    limits: { fileSize: 50 * 1024 * 1024 },
+    limits: {fileSize: 50 * 1024 * 1024},
     createParentPath: true
 }));
 app.set('uploadPath', __dirname);
@@ -45,33 +45,53 @@ const {MongoClient} = require("mongodb");
 const url = 'mongodb://localhost:27017';
 app.set('connectionStrings', url);
 
+const logsRepository = require("./repositories/logsRepository.js");
+logsRepository.init(app, MongoClient);
+
+const loggerMiddleware = require("./routes/loggerMiddleware");
+
+app.use(logger('dev'));
+app.use(loggerMiddleware(logsRepository));
+
 const userSessionRouter = require('./routes/userSessionRouter');
 app.use('/home', userSessionRouter);
 app.use('/user/*', userSessionRouter);
 app.use('/offer/*', userSessionRouter);
 app.use('/conversation/*', userSessionRouter);
-app.use('/log', userSessionRouter);
 app.use('/users/searchList', userSessionRouter);
 app.use('/users/logout', userSessionRouter);
 
 const userAdminSessionRouter = require('./routes/userAdminSessionRouter');
 app.use('/users/list', userAdminSessionRouter);
+app.use('/log/list', userAdminSessionRouter);
+app.use('/log/delete', userAdminSessionRouter);
 app.use('/users/delete', userAdminSessionRouter);
-app.use('/log', userAdminSessionRouter);
 
 const userStandardSessionRouter = require('./routes/userStandardSessionRouter');
 app.use('/offer/add', userStandardSessionRouter);
 app.use('/offer/ownedList', userStandardSessionRouter);
 app.use('/offer/purchasedList', userStandardSessionRouter);
-app.use('/conversation/list', userStandardSessionRouter);
 
-const usersRepository = require("./repositories/usersRepository.js");
-usersRepository.init(app, MongoClient);
-require("./routes/users.js")(app, usersRepository);
-require("./routes/api/usersAPI.js")(app, usersRepository);
+
 const offerRepository = require("./repositories/offerRepository.js");
+const usersRepository = require("./repositories/usersRepository.js");
+const conversationRepository = require("./repositories/conversationRepository.js");
+const messageRepository = require("./repositories/messageRepository.js");
+usersRepository.init(app, MongoClient);
 offerRepository.init(app, MongoClient);
+conversationRepository.init(app, MongoClient);
+messageRepository.init(app, MongoClient);
+
+const userTokenRouter = require('./routes/userTokenRouter');
+app.use("/api/offers/", userTokenRouter);
+app.use("/api/conversation/*", userTokenRouter);
+
+require("./routes/logs.js")(app, logsRepository);
+require("./routes/users.js")(app, usersRepository, offerRepository, logsRepository,conversationRepository,messageRepository);
 require("./routes/offers.js")(app, offerRepository, usersRepository);
+require("./routes/api/usersAPI.js")(app, usersRepository, offerRepository, conversationRepository);
+require("./routes/api/conversationAPI.js")(app, offerRepository, conversationRepository, messageRepository);
+
 
 let indexRouter = require('./routes/index');
 app.use('/', indexRouter);
@@ -80,7 +100,6 @@ app.use('/', indexRouter);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'twig');
 
-app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());

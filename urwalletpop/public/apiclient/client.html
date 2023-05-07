@@ -27,14 +27,24 @@
     </button>
     <div class="collapse navbar-collapse" id="my-navbarColor02">
         <ul class="navbar-nav mr-auto" id="offer-menu-bar">
-            <li>Ofertas</li>
+            <li class="nav-item ">
+                <a class="nav-link" onclick=widgetOffers()>
+                    Ofertas
+                </a>
+            </li>
+            <li class="nav-item ">
+                <a class="nav-link" onclick=widgetConversations()>
+                    Conversaciones
+                </a>
+            </li>
         </ul>
-        <ul class="navbar-nav mr-auto" id="conversation-menu-bar">
-            <li>Conversaciones</li>
-        </ul>
-        <ul class="nav navbar-nav navbar-right" id="barra-menu-derecha">
-            <!-- Opciones de menú aqui -->
-
+        <ul class="navbar-nav justify-content-end">
+            <li class="nav-item">
+                <a class="nav-link" onclick=widgetLogin() id="login">
+                    <i class='fas fa-sign-in-alt' style='font-size:16px'></i>
+                    <span>Login</span>
+                </a>
+            </li>
         </ul>
     </div>
 </nav>
@@ -46,12 +56,13 @@
     var user;
 
     let token;
-    let URLbase = "https://localhost:8081/api";
+    let URLbase = "http://localhost:8081/api";
     $("#main-container").load("widget-login.html");
 
     if (Cookies.get('token') != null) {
         token = Cookies.get('token');
-        usuario = Cookies.get('user');
+        user = Cookies.get('user');
+        $("#main-container").load("widget-offer.html");
         let url = new URL(window.location.href);
         let w = url.searchParams.get("w");
         if (w === "login") {
@@ -60,9 +71,18 @@
         if (w === "offer") {
             $("#main-container").load("widget-offer.html");
         }
+        if (w === "conversationList") {
+            $("#main-container").load("widget-conversationList.html");
+        }
         if (w === "conversation") {
             $("#main-container").load("widget-conversation.html");
         }
+    } else {
+        $("#main-container").load("widget-login.html");
+    }
+
+    function widgetLogin() {
+        $("#main-container").load("widget-login.html");
     }
 
     function widgetOffers() {
@@ -70,7 +90,7 @@
     }
 
     function widgetConversations() {
-        $("#main-container").load("widget-conversation.html");
+        $("#main-container").load("widget-conversationList.html");
     }
 
 </script>

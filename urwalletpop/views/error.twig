@@ -2,16 +2,19 @@
 
 {% block title %} Vista de errores {% endblock %}
 
+{% block errors_container %} {% endblock %}
+
 {% block main_container %}
     <h2>Errores</h2>
-    <p>Aquí encontrará los errores producidos en la aplicación, en caso de que se haya producido alguno:</p>
+    <p>Aquí encontrará los errores producidos no controlados en la aplicación, como el acceso a una página inexistente,
+        en caso de que se haya producido alguno:</p>
     {% if errors != null %}
-        <div class="alert alert-danger table-responsive">
+        <div class="alert alert-danger table-responsive errors">
             <table class="table table-hover table-borderless">
                 <thead class="thead-dark">
                 <tr>
                     <th scope="col">#</th>
-                    <th scope="col">Campo</th>
+                    <th scope="col">Tipo</th>
                     <th scope="col">Mensaje</th>
                 </tr>
                 </thead>
@@ -19,7 +22,7 @@
                 {% for error in errors %}
                     <tr>
                         <th scope="row">{{ loop.index }}</th>
-                        <td>{{ error.field }}</td>
+                        <td>{{ error.type }}</td>
                         <td>{{ error.message }}</td>
                     </tr>
                 {% endfor %}
@@ -27,7 +30,7 @@
             </table>
         </div>
     {% else %}
-        <div class="alert alert-info">
+        <div class="alert alert-info errors">
             <p>No hay errores.</p>
         </div>
     {% endif %}
