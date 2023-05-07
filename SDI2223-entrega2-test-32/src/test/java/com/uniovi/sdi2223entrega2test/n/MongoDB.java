@@ -177,4 +177,21 @@ public class MongoDB {
 		return result;
 
 	}
+
+	public Document getMessageFromUser(String owner, String interested) {
+		MongoCollection<Document> messages = getMongodb().getCollection("messages");
+		BasicDBObject andQuery = new BasicDBObject();
+
+		List<BasicDBObject> obj = new ArrayList<BasicDBObject>();
+		obj.add(new BasicDBObject("owner", owner));
+		obj.add(new BasicDBObject("interested", interested));
+		andQuery.put("$and", obj);
+
+		System.out.println(andQuery.toString());
+
+		Document result = messages.find(andQuery).first();
+
+		return result;
+
+	}
 }

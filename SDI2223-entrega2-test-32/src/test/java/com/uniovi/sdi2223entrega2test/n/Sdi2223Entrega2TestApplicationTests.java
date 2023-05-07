@@ -4,6 +4,7 @@ import com.uniovi.sdi2223entrega2test.n.pageobjects.PO_HomeView;
 import com.uniovi.sdi2223entrega2test.n.pageobjects.PO_PrivateView;
 import com.uniovi.sdi2223entrega2test.n.pageobjects.PO_Properties;
 import com.uniovi.sdi2223entrega2test.n.pageobjects.PO_View;
+import com.uniovi.sdi2223entrega2test.n.util.SeleniumUtils;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
@@ -503,6 +504,8 @@ class Sdi2223Entrega2TestApplicationTests {
         // Comprobamos que se muestran todas las ofertas
         Assertions.assertEquals("Mensaje modificado correctamente.",result);
         Assertions.assertEquals(200, response2.getStatusCode());
+        message=m.getMessage("user07@email.com", "user05@email.com","645692d93a07e85fc87fefa6");
+        Assertions.assertEquals(true, message.getBoolean("read"));
     }
 
     /**
@@ -519,30 +522,47 @@ class Sdi2223Entrega2TestApplicationTests {
         //Iniciamos sesión como usuario estandar
         PO_PrivateView.loginAPI(driver, "user01@email.com", "user01");
 
-
+        //Creamos la conversación
         PO_PrivateView.checkViewAndClick(driver, "free", "//*[@id=\"createConversation\"]", 0);
 
+        //Añadimos un mensaje con texto:Hola
         List<WebElement> elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"text-message\"]");
         elements.get(0).click();
         elements.get(0).sendKeys("Hola");
         elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"button-addon2\"]");
         elements.get(0).click();
 
-        PO_View.checkElementBy(driver, "text", "Hola");
+        //Comprobamos que aparece el mensaje por pantalla
+        elements=PO_View.checkElementBy(driver, "text", "Hola");
+        Assertions.assertEquals("Hola",elements.get(0).getText());
 
 
-        driver.navigate().to("http://localhost:8081/apiclient/client.html?w=login");
+        //Logeamos con otro usuario
+        PO_PrivateView.checkViewAndClick(driver, "free", "//*[@id=\"login\"]",0);
+        SeleniumUtils.waitLoadElementsBy(driver,"text","Email:",3000);
         //Iniciamos sesión como usuario estandar
         PO_PrivateView.loginAPI(driver, "user02@email.com", "user02");
 
+        //Vamos al menu de conversaciones
         PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(text(), 'Conversaciones')]", 0);
 
-        PO_View.checkElementBy(driver, "text", "1");
+        //Comprobamos que hay un mensaje sin leer
+        elements=PO_View.checkElementBy(driver, "text", "1");
+        Assertions.assertEquals("1",elements.get(2).getText());
 
+        //Entramos a la conversación
         PO_PrivateView.checkViewAndClick(driver, "free", "//*[@id=\"openConversation\"]",0);
-        PO_View.checkElementBy(driver, "text", "Hola");
 
-        //FALTA POR ENCONTRAR EL ICONO DE LEÍDO
+
+        //Comprobamos que aparece el mensaje por pantalla
+        elements=PO_View.checkElementBy(driver, "text", "Hola");
+        Assertions.assertEquals("Hola",elements.get(0).getText());
+
+        //Comprobamos que el mensaje se ha marcado como leído
+        Document message=m.getMessageFromUser("user01@email.com", "user01@email.com");
+        Assertions.assertEquals(true,message.getBoolean("read"));
+
+
     }
 
     /**
@@ -558,9 +578,10 @@ class Sdi2223Entrega2TestApplicationTests {
         //Iniciamos sesión como usuario estandar
         PO_PrivateView.loginAPI(driver, "user01@email.com", "user01");
 
-
+        //Creamos la conversación
         PO_PrivateView.checkViewAndClick(driver, "free", "//*[@id=\"createConversation\"]", 0);
 
+        //Añadimos un mensaje con texto:Hola
         List<WebElement> elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"text-message\"]");
         elements.get(0).click();
         elements.get(0).sendKeys("Hola");
@@ -569,6 +590,8 @@ class Sdi2223Entrega2TestApplicationTests {
 
         PO_View.checkElementBy(driver, "text", "Hola");
 
+
+        //Añadimos un mensaje con texto:que
         elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"text-message\"]");
         elements.get(0).click();
         elements.get(0).sendKeys("que");
@@ -577,6 +600,7 @@ class Sdi2223Entrega2TestApplicationTests {
 
         PO_View.checkElementBy(driver, "text", "que");
 
+        //Añadimos un mensaje con texto:tal
         elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"text-message\"]");
         elements.get(0).click();
         elements.get(0).sendKeys("tal");
@@ -585,14 +609,19 @@ class Sdi2223Entrega2TestApplicationTests {
 
         PO_View.checkElementBy(driver, "text", "tal");
 
-
-        driver.navigate().to("http://localhost:8081/apiclient/client.html?w=login");
+        //Logeamos con otro usuario
+        PO_PrivateView.checkViewAndClick(driver, "free", "//*[@id=\"login\"]",0);
+        SeleniumUtils.waitLoadElementsBy(driver,"text","Email:",3000);
         //Iniciamos sesión como usuario estandar
         PO_PrivateView.loginAPI(driver, "user02@email.com", "user02");
 
+        //Vamos al menu de conversaciones
         PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(text(), 'Conversaciones')]", 0);
 
-        PO_View.checkElementBy(driver, "text", "3");
+        //Comprobamos que hay 3 mensajes sin leer
+        elements=PO_View.checkElementBy(driver, "text", "3");
+
+        Assertions.assertEquals("3",elements.get(0).getText());
     }
 
 
