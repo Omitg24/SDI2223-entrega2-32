@@ -22,8 +22,8 @@ class Sdi2223Entrega2TestApplicationTests {
     static String PathFirefox = "C:\\Program Files\\Mozilla Firefox\\firefox.exe";
     static String Geckodriver = "geckodriver-v0.30.0-win64.exe";
     static String URL = "http://localhost:8081";
-    private MongoDB m;    static WebDriver driver = getDriver(PathFirefox, Geckodriver);
-    private String BASE_API_URL = "http://localhost:8081/apiclient";
+    private MongoDB m;
+    private String BASE_API_URL = "http://localhost:8081/apiclient";    static WebDriver driver = getDriver(PathFirefox, Geckodriver);
 
     public static WebDriver getDriver(String PathFirefox, String Geckodriver) {
         System.setProperty("webdriver.firefox.bin", PathFirefox);
@@ -104,8 +104,6 @@ class Sdi2223Entrega2TestApplicationTests {
         Assertions.assertEquals(dateCheck, dateResult.get(0).getText());
     }
 
-    // 1. Público: Registrarse como usuario
-
     /**
      * PR03. Registro de Usuario con datos inválidos (repetición de contraseña inválida).
      * Realizada por: Omar
@@ -122,6 +120,8 @@ class Sdi2223Entrega2TestApplicationTests {
         List<WebElement> result = PO_View.checkElementBy(driver, "text", checkText);
         Assertions.assertEquals(checkText, result.get(0).getText());
     }
+
+    // 1. Público: Registrarse como usuario
 
     /**
      * PR04. Registro de Usuario con datos inválidos (email existente).
@@ -157,8 +157,6 @@ class Sdi2223Entrega2TestApplicationTests {
         Assertions.assertEquals(checkText, title.getText());
     }
 
-    // 2. Usuario Registrado: Iniciar sesión
-
     /**
      * PR06. Inicio de sesión con datos válidos (usuario estándar).
      * Realizada por: Omar
@@ -175,6 +173,8 @@ class Sdi2223Entrega2TestApplicationTests {
         List<WebElement> result = PO_View.checkElementBy(driver, "text", checkText);
         Assertions.assertEquals(checkText, result.get(0).getText());
     }
+
+    // 2. Usuario Registrado: Iniciar sesión
 
     /**
      * PR07. Inicio de sesión con datos inválidos (usuario estándar, email existente, pero contraseña
@@ -311,12 +311,6 @@ class Sdi2223Entrega2TestApplicationTests {
         PO_PrivateView.logout(driver);
     }
 
-    /* Ejemplos de pruebas de llamada a una API-REST */
-    /* ---- Probamos a obtener lista de canciones sin token ---- */
-//        final String RestAssuredURL = "http://localhost:8081/api/v1.0/songs";
-//        Response response = RestAssured.get(RestAssuredURL);
-//        Assertions.assertEquals(403, response.getStatusCode());
-
     /**
      * PR17. Ir al formulario de alta de oferta, rellenarla con datos inválidos (campo título vacío y precio
      * en negativo) y pulsar el botón Submit
@@ -342,6 +336,12 @@ class Sdi2223Entrega2TestApplicationTests {
         // Hacemos logout
         PO_PrivateView.logout(driver);
     }
+
+    /* Ejemplos de pruebas de llamada a una API-REST */
+    /* ---- Probamos a obtener lista de canciones sin token ---- */
+//        final String RestAssuredURL = "http://localhost:8081/api/v1.0/songs";
+//        Response response = RestAssured.get(RestAssuredURL);
+//        Assertions.assertEquals(403, response.getStatusCode());
 
     /**
      * PR18. Mostrar el listado de ofertas para dicho usuario y comprobar que se muestran todas las que
@@ -487,7 +487,7 @@ class Sdi2223Entrega2TestApplicationTests {
                     "//div[contains(@class, 'card border-dark mb-3')]", PO_View.getTimeout()));
         }
         // Comprobamos que se encuentren todas las ofertas
-        Assertions.assertEquals(m.getTotalOffersCount()-m.getUsersOffersCount("user10@email.com"),
+        Assertions.assertEquals(m.getTotalOffersCount() - m.getUsersOffersCount("user10@email.com"),
                 offerList.size());
         // Hacemos logout
         PO_PrivateView.logout(driver);
@@ -895,7 +895,7 @@ class Sdi2223Entrega2TestApplicationTests {
         // Guardamos todas las ofertas
         List<Object> offers = response2.jsonPath().getList("offers");
         // Comprobamos que se muestran todas las ofertas
-        Assertions.assertEquals(m.getTotalOffersCount()-m.getUsersOffersCount("user01@email.com"),
+        Assertions.assertEquals(m.getTotalOffersCount() - m.getUsersOffersCount("user01@email.com"),
                 offers.size());
         Assertions.assertEquals(200, response2.getStatusCode());
     }
@@ -969,9 +969,10 @@ class Sdi2223Entrega2TestApplicationTests {
         List<WebElement> offerList = SeleniumUtils.waitLoadElementsBy(driver, "free",
                 "//div[contains(@class, 'card border-dark mb-3')]", PO_View.getTimeout());
         // Comprobamos que se muestran todas las ofertas disponibles
-        Assertions.assertEquals(m.getTotalOffersCount()-m.getUsersOffersCount("user01@email.com"),
+        Assertions.assertEquals(m.getTotalOffersCount() - m.getUsersOffersCount("user01@email.com"),
                 offerList.size());
     }
+
 
 
 
