@@ -3,6 +3,10 @@ const {validationResult} = require('express-validator');
 const {messageValidatorInsert} = require('./sendMessageValidate');
 module.exports = function (app, offerRepository, conversationRepository, messageRepository) {
 
+    /**
+     * Método que marca una mensaje como leído a través de una
+     * petición
+     */
     app.put("/api/messages/:id", function (req, res) {
         let messageId = ObjectId(req.params.id);
         let filter = {_id: messageId};
