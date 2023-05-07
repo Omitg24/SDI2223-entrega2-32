@@ -2,7 +2,6 @@ const {ObjectId} = require("mongodb");
 const conversationRepository = require("../repositories/conversationRepository");
 const messageRepository = require("../repositories/messageRepository");
 module.exports = function (app, usersRepository, offerRepository, logsRepository,conversationRepository,messageRepository) {
-module.exports = function (app, usersRepository, offerRepository, logsRepository) {
     /** Método que devuelve la vista del panel principal de la web **/
     app.get('/home', function (req, res) {
         let filter = {feature: true};
@@ -236,20 +235,20 @@ module.exports = function (app, usersRepository, offerRepository, logsRepository
 
         let emailFilter = {email: res.user};
         usersRepository.findUser(emailFilter, {}).then(user => {
-            for (let id of ids){
+            for (let id of ids) {
                 console.log(id)
                 filter = {_id: ObjectId(id)};
                 usersRepository.findUser(filter, {}).then(user => {
                     let offerFilter = {author: user.email}
-                    offerRepository.deleteOffers(offerFilter,{}).then(result=>{
+                    offerRepository.deleteOffers(offerFilter, {}).then(result => {
                         let conversationFilter = {
                             $or: [
                                 {interested: user.email},
                                 {'offer.author': user.email}
                             ]
                         }
-                        conversationRepository.getConversations(conversationFilter,{}).then(conversations=>{
-                            for(let conversation of conversations){
+                        conversationRepository.getConversations(conversationFilter, {}).then(conversations => {
+                            for (let conversation of conversations) {
                                 let messageFilter = {offer: conversation.offer._id, interested: conversation.interested}
                                 messageRepository.deleteMessages(messageFilter, {}).then(result => {
                                     conversationRepository.deleteConversation(conversationFilter, {}).catch(error => {
@@ -259,7 +258,7 @@ module.exports = function (app, usersRepository, offerRepository, logsRepository
                                     res.send("Se ha producido un error al intentar eliminar los mensajes del usuario")
                                 })
                             }
-                            usersRepository.deleteUser(filter,{}).catch(error => {
+                            usersRepository.deleteUser(filter, {}).catch(error => {
                                 res.send("Se ha producido un error al intentar eliminar el usuario")
                             })
                         }).catch(error => {
@@ -269,9 +268,9 @@ module.exports = function (app, usersRepository, offerRepository, logsRepository
                         res.send("Se ha producido un error al intentar eliminar las ofertas del usuario")
                     });
                 })
-                .catch(error=>{
-                    res.send("No se ha podido obtener el usuario");
-                })
+                    .catch(error => {
+                        res.send("No se ha podido obtener el usuario");
+                    })
                 usersRepository.deleteUser(filter, {}).then(result => {
                     if (result === null || result.deletedCount === 0) {
                         res.send("No se ha podido eliminar el registro");
@@ -289,6 +288,7 @@ module.exports = function (app, usersRepository, offerRepository, logsRepository
             });
         });
     });
+
     /** Método que inserta un log en la vista de registro cuando un usuario realiza una petición **/
     function insertLog(req, type, email) {
         let log = {
@@ -301,6 +301,7 @@ module.exports = function (app, usersRepository, offerRepository, logsRepository
             console.log("No se ha podido registrar la peticion " + req.method)
         });
     }
+
     /** Método que valida los datos de login **/
     async function validateLogin(user) {
         let errors = [];
@@ -313,6 +314,7 @@ module.exports = function (app, usersRepository, offerRepository, logsRepository
         }
         return errors;
     }
+
     /** Método que valida los datos de registro **/
     async function validateSignUp(user, confirmPassword) {
         let errors = [];
