@@ -1,26 +1,22 @@
-package com.uniovi.sdi2223entrega2test.n;
-
-import com.mongodb.client.FindIterable;
-import org.bson.Document;
+package com.uniovi.sdi2223entrega2test32;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class MongoDB {
-    private MongoClient mongoClient;
-    private MongoDatabase mongodb;
-
     Mac hmacSHA256 = Mac.getInstance("HmacSHA256");
     SecretKeySpec secretKeySpec;
+    private MongoClient mongoClient;
+    private MongoDatabase mongodb;
     private String secretKey = "abcdefg";
 
     public MongoDB() throws NoSuchAlgorithmException, InvalidKeyException {
@@ -36,12 +32,12 @@ public class MongoDB {
         this.mongoClient = mongoClient;
     }
 
-    public void setMongodb(MongoDatabase mongodb) {
-        this.mongodb = mongodb;
-    }
-
     public MongoDatabase getMongodb() {
         return mongodb;
+    }
+
+    public void setMongodb(MongoDatabase mongodb) {
+        this.mongodb = mongodb;
     }
 
     public void resetMongo() {
@@ -124,7 +120,7 @@ public class MongoDB {
         for (int i = 1; i < 16; i++) {
             String name = "user" + (i < 10 ? "0" : "") + i + "@email.com";
             for (int j = 0; j < 10; j++) {
-                offers.insertOne(new Document().append("title", (j<=4?"Oferta ":"OFERTA ") + i + "" + j)
+                offers.insertOne(new Document().append("title", (j <= 4 ? "Oferta " : "OFERTA ") + i + "" + j)
                         .append("author", name)
                         .append("description", "Oferta nueva")
                         .append("price", 50)
@@ -137,4 +133,7 @@ public class MongoDB {
         }
     }
 
+    public long getUsers() {
+        return getMongodb().getCollection("users").count();
+    }
 }

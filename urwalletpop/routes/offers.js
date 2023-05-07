@@ -37,7 +37,7 @@ module.exports = function (app, offerRepository, usersRepository) {
                 if (offer.feature) {
                     usersRepository.findUser({email: req.session.user}, {}).then(user => {
                             if (user.amount >= 20) {
-                                req.session.amount=req.session.amount-20;
+                                req.session.amount = req.session.amount - 20;
                                 user.amount -= 20;
                                 usersRepository.updateUser(user, {email: user.email}, {}).then();
                             } else {
@@ -231,7 +231,10 @@ module.exports = function (app, offerRepository, usersRepository) {
             res.render("offer/purchasedList.twig", response);
         }).catch(error => {
             let errors = [];
-            errors.push({type: "Listar ofertas", message: "Se ha producido un error al listar las ofertas compradas" + error});
+            errors.push({
+                type: "Listar ofertas",
+                message: "Se ha producido un error al listar las ofertas compradas" + error
+            });
             res.render("offer/purchasedList.twig", {
                 errors: errors,
                 user: req.session.user,
@@ -280,11 +283,14 @@ module.exports = function (app, offerRepository, usersRepository) {
                         offerRepository.updateOffer(offer, filter, {}).then(result => {
                             if (result == null) {
                                 let errors = [];
-                                errors.push({type: "Comprar oferta", message: "Se ha producido un error al comprar la oferta"});
+                                errors.push({
+                                    type: "Comprar oferta",
+                                    message: "Se ha producido un error al comprar la oferta"
+                                });
                                 res.render("offer/searchList.twig", {
-                                    offers : result.offers,
-                                    pages : pages,
-                                    currentPage : page,
+                                    offers: result.offers,
+                                    pages: pages,
+                                    currentPage: page,
                                     errors: errors,
                                     user: req.session.user,
                                     role: req.session.role,
@@ -301,11 +307,14 @@ module.exports = function (app, offerRepository, usersRepository) {
                             }
                         }).catch(error => {
                             let errors = [];
-                            errors.push({type: "Comprar oferta", message: "Se ha producido un error al comprar la oferta"});
+                            errors.push({
+                                type: "Comprar oferta",
+                                message: "Se ha producido un error al comprar la oferta"
+                            });
                             res.render("offer/searchList.twig", {
-                                offers : result.offers,
-                                pages : pages,
-                                currentPage : page,
+                                offers: result.offers,
+                                pages: pages,
+                                currentPage: page,
                                 errors: errors,
                                 user: req.session.user,
                                 role: req.session.role,
@@ -313,13 +322,13 @@ module.exports = function (app, offerRepository, usersRepository) {
                                 date: req.session.date
                             });
                         });
-                    }else{
+                    } else {
                         let errors = [];
                         errors.push({type: "Comprar oferta", message: "El saldo es insuficiente"});
                         res.render("offer/searchList.twig", {
-                            offers : result.offers,
-                            pages : pages,
-                            currentPage : page,
+                            offers: result.offers,
+                            pages: pages,
+                            currentPage: page,
                             errors: errors,
                             user: req.session.user,
                             role: req.session.role,
@@ -331,9 +340,9 @@ module.exports = function (app, offerRepository, usersRepository) {
                     let errors = [];
                     errors.push({type: "Comprar oferta", message: "Se ha producido un error al comprar la oferta"});
                     res.render("offer/searchList.twig", {
-                        offers : result.offers,
-                        pages : pages,
-                        currentPage : page,
+                        offers: result.offers,
+                        pages: pages,
+                        currentPage: page,
                         errors: errors,
                         user: req.session.user,
                         role: req.session.role,
@@ -373,11 +382,14 @@ module.exports = function (app, offerRepository, usersRepository) {
                         offerRepository.updateOffer(offer, filter, {}).then(result => {
                             if (result == null) {
                                 let errors = [];
-                                errors.push({type: "Destacar oferta", message: "Se ha producido un error al destacar la oferta"});
+                                errors.push({
+                                    type: "Destacar oferta",
+                                    message: "Se ha producido un error al destacar la oferta"
+                                });
                                 res.render("offer/ownedList.twig", {
-                                    offers : result.offers,
-                                    pages : pages,
-                                    currentPage : page,
+                                    offers: result.offers,
+                                    pages: pages,
+                                    currentPage: page,
                                     errors: errors,
                                     user: req.session.user,
                                     role: req.session.role,
@@ -394,11 +406,14 @@ module.exports = function (app, offerRepository, usersRepository) {
                             }
                         }).catch(error => {
                             let errors = [];
-                            errors.push({type: "Destacar oferta", message: "Se ha producido un error al destacar la oferta" + error});
+                            errors.push({
+                                type: "Destacar oferta",
+                                message: "Se ha producido un error al destacar la oferta" + error
+                            });
                             res.render("offer/ownedList.twig", {
-                                offers : result.offers,
-                                pages : pages,
-                                currentPage : page,
+                                offers: result.offers,
+                                pages: pages,
+                                currentPage: page,
                                 errors: errors,
                                 user: req.session.user,
                                 role: req.session.role,
@@ -410,9 +425,9 @@ module.exports = function (app, offerRepository, usersRepository) {
                         let errors = [];
                         errors.push({type: "Destacar oferta", message: "El saldo es insuficiente"});
                         res.render("offer/ownedList.twig", {
-                            offers : result.offers,
-                            pages : pages,
-                            currentPage : page,
+                            offers: result.offers,
+                            pages: pages,
+                            currentPage: page,
                             errors: errors,
                             user: req.session.user,
                             role: req.session.role,
@@ -424,9 +439,9 @@ module.exports = function (app, offerRepository, usersRepository) {
                     let errors = [];
                     errors.push({type: "Destacar oferta", message: "Se ha producido un error al destacar la oferta"});
                     res.render("offer/ownedList.twig", {
-                        offers : result.offers,
-                        pages : pages,
-                        currentPage : page,
+                        offers: result.offers,
+                        pages: pages,
+                        currentPage: page,
                         errors: errors,
                         user: req.session.user,
                         role: req.session.role,

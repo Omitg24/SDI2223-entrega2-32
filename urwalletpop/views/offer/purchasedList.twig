@@ -14,7 +14,7 @@
                         <h3 class="card-title">{{ offer.price }} EUR</h3>
                         <h4 class="card-subtitle" id="titleFeatured">{{ offer.title }}</h4>
                         <p class="card-text">{{ offer.description }}</p>
-                        <p class="card-text">{{ offer.author}}</p>
+                        <p class="card-text">{{ offer.author }}</p>
                         <h6 class="card-link" id="date">{{ offer.date }}</h6>
                     </div>
                 </div>
@@ -31,7 +31,7 @@
                 </li>
             {% endfor %}
             <script>
-                $("#pi-"+"{{ currentPage }}").addClass("active");
+                $("#pi-" + "{{ currentPage }}").addClass("active");
             </script>
         </ul>
     </div>

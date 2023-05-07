@@ -1,7 +1,7 @@
-package com.uniovi.sdi2223entrega2test.n;
+package com.uniovi.sdi2223entrega2test32;
 
-import com.uniovi.sdi2223entrega2test.n.pageobjects.*;
-import com.uniovi.sdi2223entrega2test.n.util.SeleniumUtils;
+import com.uniovi.sdi2223entrega2test32.pageobjects.*;
+import com.uniovi.sdi2223entrega2test32.util.SeleniumUtils;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
@@ -14,21 +14,16 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class Sdi2223Entrega2TestApplicationTests {
     static String PathFirefox = "C:\\Program Files\\Mozilla Firefox\\firefox.exe";
-    //static String Geckodriver = "C:\\Path\\geckodriver-v0.30.0-win64.exe";
     static String Geckodriver = "geckodriver-v0.30.0-win64.exe";
-    static String URL = "http://localhost:8081";    //static String PathFirefox = "/Applications/Firefox.app/Contents/MacOS/firefox-bin";
-    //static String Geckodriver = "/Users/USUARIO/selenium/geckodriver-v0.30.0-macos";
-    //Común a Windows y a MACOSX
-    static WebDriver driver = getDriver(PathFirefox, Geckodriver);
-    private MongoDB m;
-
-    private String BASE_API_URL ="http://localhost:8081/apiclient";
-
+    static String URL = "http://localhost:8081";
+    private MongoDB m;    static WebDriver driver = getDriver(PathFirefox, Geckodriver);
+    private String BASE_API_URL = "http://localhost:8081/apiclient";
 
     public static WebDriver getDriver(String PathFirefox, String Geckodriver) {
         System.setProperty("webdriver.firefox.bin", PathFirefox);
@@ -45,7 +40,7 @@ class Sdi2223Entrega2TestApplicationTests {
     //Al finalizar la última prueba
     @AfterAll
     static public void end() {
-//Cerramos el navegador al finalizar las pruebas
+        //Cerramos el navegador al finalizar las pruebas
         driver.quit();
     }
 
@@ -54,9 +49,7 @@ class Sdi2223Entrega2TestApplicationTests {
         driver.navigate().to(URL);
         try {
             m = new MongoDB();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        } catch (InvalidKeyException e) {
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             throw new RuntimeException(e);
         }
         m.resetMongo();
@@ -68,74 +61,225 @@ class Sdi2223Entrega2TestApplicationTests {
         driver.manage().deleteAllCookies();
     }
 
+    /**
+     * PR01. Registro de Usuario con datos válidos.
+     * Realizada por: Omar
+     */
     @Test
     @Order(1)
-    void PR01() {
-        Assertions.assertTrue(true, "PR01 sin hacer");
+    public void PR01() {
+        //Vamos al formulario de registro
+        PO_HomeView.clickOption(driver, "signup", "class", "btn btn-dark");
+        //Rellenamos el formulario.
+        PO_SignUpView.fillForm(driver, "uo123456@uniovi.es", "Adrián", "García Fernández", "123456", "123456", "2000-01-01");
+        //Comprobamos que entramos en la sección privada y nos muestra el texto a buscar
+        String checkText = "Listado Ofertas Propias";
+        List<WebElement> result = PO_View.checkElementBy(driver, "text", checkText);
+        Assertions.assertEquals(checkText, result.get(0).getText());
     }
 
+    /**
+     * PR02. Registro de Usuario con datos inválidos (email, nombre, apellidos y fecha de nacimiento vacíos).
+     * Realizada por: Omar
+     */
     @Test
     @Order(2)
     public void PR02() {
-        Assertions.assertTrue(false, "PR02 sin hacer");
+        //Vamos al formulario de registro
+        PO_HomeView.clickOption(driver, "signup", "class", "btn btn-dark");
+        //Rellenamos el formulario.
+        PO_SignUpView.fillForm(driver, "", "", "", "123456", "123456", "");
+        //Comprobamos los errores
+        String emailCheck = "El email no puede ser vacío.";
+        String nameCheck = "El nombre no puede ser vacío.";
+        String lastNameCheck = "El apellido no puede ser vacío.";
+        String dateCheck = "La fecha de nacimiento no puede ser vacía.";
+        List<WebElement> emailResult = PO_View.checkElementBy(driver, "text", emailCheck);
+        List<WebElement> nameResult = PO_View.checkElementBy(driver, "text", nameCheck);
+        List<WebElement> lastNameResult = PO_View.checkElementBy(driver, "text", lastNameCheck);
+        List<WebElement> dateResult = PO_View.checkElementBy(driver, "text", dateCheck);
+        Assertions.assertEquals(emailCheck, emailResult.get(0).getText());
+        Assertions.assertEquals(nameCheck, nameResult.get(0).getText());
+        Assertions.assertEquals(lastNameCheck, lastNameResult.get(0).getText());
+        Assertions.assertEquals(dateCheck, dateResult.get(0).getText());
     }
 
+    // 1. Público: Registrarse como usuario
+
+    /**
+     * PR03. Registro de Usuario con datos inválidos (repetición de contraseña inválida).
+     * Realizada por: Omar
+     */
     @Test
     @Order(3)
     public void PR03() {
-        Assertions.assertTrue(false, "PR03 sin hacer");
+        //Vamos al formulario de registro
+        PO_HomeView.clickOption(driver, "signup", "class", "btn btn-dark");
+        //Rellenamos el formulario.
+        PO_SignUpView.fillForm(driver, "uo123456@uniovi.es", "Adrián", "García Fernández", "123456", "654321", "2000-01-01");
+        //Comprobamos los errores
+        String checkText = "Las contraseñas deben coincidir.";
+        List<WebElement> result = PO_View.checkElementBy(driver, "text", checkText);
+        Assertions.assertEquals(checkText, result.get(0).getText());
     }
 
+    /**
+     * PR04. Registro de Usuario con datos inválidos (email existente).
+     * Realizada por: Omar
+     */
     @Test
     @Order(4)
     public void PR04() {
-        Assertions.assertTrue(false, "PR04 sin hacer");
+        //Vamos al formulario de registro
+        PO_HomeView.clickOption(driver, "signup", "class", "btn btn-dark");
+        //Rellenamos el formulario.
+        PO_SignUpView.fillForm(driver, "user01@email.com", "Adrián", "García Fernández", "123456", "123456", "2000-01-01");
+        //Comprobamos los errores
+        String checkText = "Este email ya pertenece a otro usuario, user01@email.com.";
+        List<WebElement> result = PO_SignUpView.checkElementBy(driver, "text", checkText);
+        Assertions.assertEquals(checkText, result.get(0).getText());
     }
 
+    /**
+     * PR05. Inicio de sesión con datos válidos (administrador).
+     * Realizada por: Omar
+     */
     @Test
     @Order(5)
     public void PR05() {
-        Assertions.assertTrue(false, "PR05 sin hacer");
+        //Vamos al formulario de logueo
+        PO_HomeView.clickOption(driver, "login", "class", "btn btn-dark");
+        //Rellenamos el formulario.
+        PO_LoginView.fillLoginForm(driver, "admin@email.com", "admin");
+        //Comprobamos que entramos en la sección de listar usuarios
+        String checkText = "Listado de usuarios";
+        WebElement title = driver.findElement(By.xpath("//h2[contains(text(), 'Listado de usuarios')]"));
+        Assertions.assertEquals(checkText, title.getText());
     }
 
+    // 2. Usuario Registrado: Iniciar sesión
+
+    /**
+     * PR06. Inicio de sesión con datos válidos (usuario estándar).
+     * Realizada por: Omar
+     */
     @Test
     @Order(6)
     public void PR06() {
-        Assertions.assertTrue(false, "PR06 sin hacer");
+        //Vamos al formulario de logueo
+        PO_HomeView.clickOption(driver, "login", "class", "btn btn-dark");
+        //Rellenamos el formulario.
+        PO_LoginView.fillLoginForm(driver, "user01@email.com", "user01");
+        //Comprobamos que entramos en la sección de listado de ofertas propias
+        String checkText = "Listado Ofertas Propias";
+        List<WebElement> result = PO_View.checkElementBy(driver, "text", checkText);
+        Assertions.assertEquals(checkText, result.get(0).getText());
     }
 
+    /**
+     * PR07. Inicio de sesión con datos inválidos (usuario estándar, email existente, pero contraseña
+     * incorrecta).
+     * Realizada por: Omar
+     */
     @Test
     @Order(7)
     public void PR07() {
-        Assertions.assertTrue(false, "PR07 sin hacer");
+        //Vamos al formulario de logueo
+        PO_HomeView.clickOption(driver, "login", "class", "btn btn-dark");
+        //Rellenamos el formulario.
+        PO_LoginView.fillLoginForm(driver, "user01@email.com", "user");
+        //Comprobamos los errores
+        String checkText = "Email o password incorrecto";
+        List<WebElement> result = PO_SignUpView.checkElementBy(driver, "text", checkText);
+        Assertions.assertEquals(checkText, result.get(0).getText());
     }
 
+    /**
+     * PR08. Inicio de sesión con datos inválidos (usuario estándar, campo email y contraseña vacíos).
+     * Realizada por: Omar
+     */
     @Test
     @Order(8)
     public void PR08() {
-        Assertions.assertTrue(false, "PR08 sin hacer");
+        //Vamos al formulario de logueo
+        PO_HomeView.clickOption(driver, "login", "class", "btn btn-dark");
+        //Rellenamos el formulario.
+        PO_LoginView.fillLoginForm(driver, "", "");
+        //Comprobamos los errores
+        String emailCheck = "El email no puede ser vacío.";
+        String passwordCheck = "La contraseña no puede ser vacía.";
+        List<WebElement> emailResult = PO_View.checkElementBy(driver, "text", emailCheck);
+        List<WebElement> passwordResult = PO_View.checkElementBy(driver, "text", passwordCheck);
+        Assertions.assertEquals(emailCheck, emailResult.get(0).getText());
+        Assertions.assertEquals(passwordCheck, passwordResult.get(0).getText());
     }
 
+    /**
+     * PR09. Hacer clic en la opción de salir de sesión y comprobar que se redirige a la página de inicio de
+     * sesión (Login).
+     * Realizada por: Omar
+     */
     @Test
     @Order(9)
     public void PR09() {
-        Assertions.assertTrue(false, "PR09 sin hacer");
+        //Vamos al formulario de logueo
+        PO_HomeView.clickOption(driver, "login", "class", "btn btn-dark");
+        //Rellenamos el formulario.
+        PO_LoginView.fillLoginForm(driver, "admin@email.com", "admin");
+        //Nos desconectamos
+        PO_HomeView.clickOption(driver, "logout", "class", "btn btn-dark");
+        //Comprobamos que hemos cerrado la sesión
+        String checkText = "Identificación de usuario";
+        List<WebElement> result = PO_View.checkElementBy(driver, "text", checkText);
+        Assertions.assertEquals(checkText, result.get(0).getText());
     }
 
+    /**
+     * PR10. Comprobar que el botón cerrar sesión no está visible si el usuario no está autenticado.
+     * Realizada por: Omar
+     */
     @Test
     @Order(10)
     public void PR10() {
-        Assertions.assertTrue(false, "PR10 sin hacer");
+        //Comprobamos que el elemento no está
+        List<WebElement> result = driver.findElements(By.xpath("//a[contains(@href, '/logout')]"));
+        Assertions.assertTrue(result.isEmpty());
     }
 
-    /* Ejemplos de pruebas de llamada a una API-REST */
-    /* ---- Probamos a obtener lista de canciones sin token ---- */
+    /**
+     * PR11. Mostrar el listado de usuarios y comprobar que se muestran todos los que existen en el
+     * sistema.
+     * Realizada por: Omar
+     */
     @Test
     @Order(11)
     public void PR11() {
-        final String RestAssuredURL = "http://localhost:8081/api/v1.0/songs";
-        Response response = RestAssured.get(RestAssuredURL);
-        Assertions.assertEquals(403, response.getStatusCode());
+        //Vamos al formulario de logueo
+        PO_HomeView.clickOption(driver, "login", "class", "btn btn-dark");
+        //Rellenamos el formulario.
+        PO_LoginView.fillLoginForm(driver, "admin@email.com", "admin");
+        //Comprobamos que entramos en la sección privada y nos nuestra el texto a buscar
+        PO_View.checkElementBy(driver, "free", "//a[contains(@class, 'page-link')]");
+        List<WebElement> elements;
+        //Añadimos los elementos en la primera página
+        List<WebElement> result = new ArrayList<>(SeleniumUtils.waitLoadElementsBy(driver, "free", "//tbody/tr", PO_View.getTimeout()));
+
+        //Vamos a la segunda pagina y añadimos los elementos
+        elements = PO_View.checkElementBy(driver, "free", "//a[contains(@class, 'page-link')]");
+        elements.get(1).click();
+        result.addAll(SeleniumUtils.waitLoadElementsBy(driver, "free", "//tbody/tr", PO_View.getTimeout()));
+
+        //Vamos a la tercera pagina y añadimos los elementos
+        elements = PO_View.checkElementBy(driver, "free", "//a[contains(@class, 'page-link')]");
+        elements.get(2).click();
+        result.addAll(SeleniumUtils.waitLoadElementsBy(driver, "free", "//tbody/tr", PO_View.getTimeout()));
+
+        //Vamos a la cuarta pagina y añadimos los elementos
+        elements = PO_View.checkElementBy(driver, "free", "//a[contains(@class, 'page-link')]");
+        elements.get(3).click();
+        result.addAll(SeleniumUtils.waitLoadElementsBy(driver, "free", "//tbody/tr", PO_View.getTimeout()));
+
+        Assertions.assertEquals(m.getUsers(), result.size());
     }
 
     /**
@@ -167,6 +311,12 @@ class Sdi2223Entrega2TestApplicationTests {
         PO_PrivateView.logout(driver);
     }
 
+    /* Ejemplos de pruebas de llamada a una API-REST */
+    /* ---- Probamos a obtener lista de canciones sin token ---- */
+//        final String RestAssuredURL = "http://localhost:8081/api/v1.0/songs";
+//        Response response = RestAssured.get(RestAssuredURL);
+//        Assertions.assertEquals(403, response.getStatusCode());
+
     /**
      * PR17. Ir al formulario de alta de oferta, rellenarla con datos inválidos (campo título vacío y precio
      * en negativo) y pulsar el botón Submit
@@ -182,7 +332,7 @@ class Sdi2223Entrega2TestApplicationTests {
         //Esperamos a que aparezca la opción de añadir oferta: //a[contains(@href, 'offer/add')]
         PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@href, 'offer/add')]", 0);
 
-        // Rellenamos el formulario de alta de oferta con datos inválidos(titulo vacío y precio en negativo)
+        // Rellenamos el formulario de alta de oferta con datos inválidos(titulo vacío y precio en negativo)
         PO_PrivateView.fillFormAddOffer(driver, "", "PruebaDescripcion", "-0.21");
 
         // Comprobamos que se muestran los dos menasjes de error
@@ -509,7 +659,6 @@ class Sdi2223Entrega2TestApplicationTests {
         PO_PrivateView.logout(driver);
     }
 
-
     /**
      * PR30. Al crear una oferta, marcar dicha oferta como destacada y a continuación comprobar: i)
      * que aparece en el listado de ofertas destacadas para los usuarios y que el saldo del usuario se
@@ -654,6 +803,10 @@ class Sdi2223Entrega2TestApplicationTests {
         PO_PrivateView.logout(driver);
     }
 
+    /**
+     * PR38. Inicio de sesión con datos válidos.
+     * Realizada por: Omar
+     */
     @Test
     @Order(38)
     public void PR38() {
@@ -672,8 +825,51 @@ class Sdi2223Entrega2TestApplicationTests {
     }
 
     /**
+     * PR39. Inicio de sesión con datos inválidos (email existente, pero contraseña incorrecta).
+     * Realizada por: Omar
+     */
+    @Test
+    @Order(39)
+    public void PR39() {
+        final String RestAssuredURL = "http://localhost:8081/api/users/login";
+        //2. Preparamos el parámetro en formato JSON
+        RequestSpecification request = RestAssured.given();
+        JSONObject requestParams = new JSONObject();
+        requestParams.put("email", "user01@email.com");
+        requestParams.put("password", "user");
+        request.header("Content-Type", "application/json");
+        request.body(requestParams.toJSONString());
+        //3. Hacemos la petición
+        Response response = request.post(RestAssuredURL);
+        //4. Comprobamos que el servicio ha tenido exito
+        Assertions.assertEquals(401, response.getStatusCode());
+    }
+
+    /**
+     * PR40. Inicio de sesión con datos inválidos (campo email o contraseña vacíos).
+     * Realizada por: Omar
+     */
+    @Test
+    @Order(40)
+    public void PR40() {
+        final String RestAssuredURL = "http://localhost:8081/api/users/login";
+        //2. Preparamos el parámetro en formato JSON
+        RequestSpecification request = RestAssured.given();
+        JSONObject requestParams = new JSONObject();
+        requestParams.put("email", "");
+        requestParams.put("password", "");
+        request.header("Content-Type", "application/json");
+        request.body(requestParams.toJSONString());
+        //3. Hacemos la petición
+        Response response = request.post(RestAssuredURL);
+        //4. Comprobamos que el servicio ha tenido exito
+        Assertions.assertEquals(403, response.getStatusCode());
+    }
+
+    /**
      * PR41. Mostrar el listado de ofertas para dicho usuario y comprobar que se muestran todas las que
      * existen para este usuario.
+     * Realizada por: David
      */
     @Test
     @Order(41)
@@ -687,14 +883,14 @@ class Sdi2223Entrega2TestApplicationTests {
         request.header("Content-Type", "application/json");
         request.body(requestParams.toJSONString());
         // Hacemos la petición
-        Response response = request.post(RestAssuredURL+"/users/login");
+        Response response = request.post(RestAssuredURL + "/users/login");
         String token = response.jsonPath().getString("token");
         // Llamamos al servicio de ofertas
         RequestSpecification request2 = RestAssured.given();
         request2.header("Content-Type", "application/json");
-        request2.header("token",token );
+        request2.header("token", token);
         // Hacemos la petición para obtener el listado
-        Response response2 = request2.get(RestAssuredURL+"/offers");
+        Response response2 = request2.get(RestAssuredURL + "/offers");
         // Guardamos todas las ofertas
         List<Object> offers = response2.jsonPath().getList("offers");
         // Comprobamos que se muestran todas las ofertas
@@ -703,14 +899,68 @@ class Sdi2223Entrega2TestApplicationTests {
     }
 
     /**
+     * PR48. Inicio de sesión con datos válidos.
+     * Realizada por: Omar
+     */
+    @Test
+    @Order(48)
+    public void PR48() {
+        // Accedemos a la página de login
+        driver.get(BASE_API_URL + "/client.html?w=login");
+        // Rellenamos el formulario de login
+        PO_LoginView.fillLoginForm(driver, "user01@email.com", "user01");
+
+        // Comprobamos el redireccionamiento a la lista de ofertas
+        Assertions.assertEquals(BASE_API_URL + "/client.html?w=offer", driver.getCurrentUrl());
+    }
+
+    /**
+     * PR49. Inicio de sesión con datos inválidos (email existente, pero contraseña incorrecta).
+     * Realizada por: Omar
+     */
+    @Test
+    @Order(49)
+    public void PR49() {
+        // Accedemos a la página de login
+        driver.get(BASE_API_URL + "/client.html?w=login");
+        // Rellenamos el formulario de login
+        PO_LoginView.fillLoginForm(driver, "user01@email.com", "user");
+        // Comprobamos que se muestra el error
+        String checkText = "Inicio de sesión incorrecto";
+        List<WebElement> result = PO_View.checkElementBy(driver, "text", checkText);
+        Assertions.assertEquals(checkText, result.get(0).getText());
+    }
+
+    /**
+     * PR50. Inicio de sesión con datos inválidos (campo email o contraseña vacíos).
+     * Realizada por: Omar
+     */
+    @Test
+    @Order(50)
+    public void PR50() {
+        // Accedemos a la página de login
+        driver.get(BASE_API_URL + "/client.html?w=login");
+        // Rellenamos el formulario de login
+        PO_LoginView.fillLoginForm(driver, "", "");
+        // Comprobamos que se muestra el error
+        String emailCheck = "El email no puede ser vacío";
+        String passwordCheck = "La contraseña no puede ser vacía";
+        WebElement email = driver.findElement(By.xpath("//div[@id='div-errors']/ul/li[contains(text(), 'El email no puede ser vacío')]"));
+        WebElement password = driver.findElement(By.xpath("//div[@id='div-errors']/ul/li[contains(text(), 'La contraseña no puede ser vacía')]"));
+        Assertions.assertEquals(emailCheck, email.getText());
+        Assertions.assertEquals(passwordCheck, password.getText());
+    }
+
+    /**
      * PR51.  Mostrar el listado de ofertas disponibles y comprobar que se muestran todas las que existen,
      * menos las del usuario identificado.
+     * Realizada por: David
      */
     @Test
     @Order(51)
     public void PR51() {
         // Accedemos a la página de login
-        driver.get(BASE_API_URL+"/client.html?w=login");
+        driver.get(BASE_API_URL + "/client.html?w=login");
         // Rellenamos el formulario de login
         PO_LoginView.fillLoginForm(driver, "user01@email.com", "user01");
         //Guardamos todas las ofertas disponibles
@@ -719,5 +969,7 @@ class Sdi2223Entrega2TestApplicationTests {
         // Comprobamos que se muestran todas las ofertas disponibles
         Assertions.assertTrue(offerList.size() > 0);
     }
+
+
 
 }

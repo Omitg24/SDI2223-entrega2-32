@@ -1,10 +1,10 @@
-package com.uniovi.sdi2223entrega2test.n.pageobjects;
-
-import java.util.List;
+package com.uniovi.sdi2223entrega2test32.pageobjects;
 
 import com.uniovi.sdi2223entrega2test.n.util.SeleniumUtils;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+
+import java.util.List;
 
 public class PO_View {
 

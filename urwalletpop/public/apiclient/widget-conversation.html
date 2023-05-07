@@ -1,5 +1,5 @@
 <div class="container" id="widget-conversation">
-    <h2 class="text-center" >Mensajes</h2>
+    <h2 class="text-center">Mensajes</h2>
     <section>
         <div class="container py-5">
 
@@ -13,9 +13,9 @@
                         </div>
 
                         <div class="card-body" style="position: relative; height: 400px; overflow-y: scroll;">
-                                <div id="messages-list">
-                                </div>
+                            <div id="messages-list">
                             </div>
+                        </div>
 
                         <div class="card-footer text-muted d-flex justify-content-start align-items-center p-3">
                             <div class="input-group mb-0">
@@ -47,7 +47,7 @@
 <script>
     window.history.pushState("", "", "/apiclient/client.html?w=conversation");
 
-    window.setInterval(function(){
+    window.setInterval(function () {
         loadConversation();
     }, 1000);
 
@@ -60,21 +60,23 @@
         const messageInput = document.querySelector('#text-message').value;
         const headers = new Headers();
         headers.append('Content-Type', 'application/json');
-        headers.append('token',token);
+        headers.append('token', token);
 
         fetch(`/api/conversation/${offerId}/${interestedEmail}`, {
             method: 'POST',
             headers,
-            body: JSON.stringify({ message: messageInput })
+            body: JSON.stringify({message: messageInput})
         })
             .then(response => response.json())
-            .then(data => {loadConversation();})
+            .then(data => {
+                loadConversation();
+            })
             .catch(error => console.error(error));
     });
 
     function loadConversation() {
         $.ajax({
-            url: URLbase + "/conversation/"+offerId+"/"+interestedEmail,
+            url: URLbase + "/conversation/" + offerId + "/" + interestedEmail,
             type: "GET",
             data: {},
             dataType: "json",
@@ -82,8 +84,8 @@
             success: function success(response) {
                 let conversation = response.conversation;
                 user = response.user;
-                let messages =response.messages;
-                updateConversation(conversation, messages,user);
+                let messages = response.messages;
+                updateConversation(conversation, messages, user);
             },
             error: function (error) {
                 $("#main-container").load("widget-login.html");
@@ -91,33 +93,33 @@
         });
     }
 
-    function updateConversation(conversation,messages,user) {
+    function updateConversation(conversation, messages, user) {
         $("#messages-list").empty();
-        if(conversation!=null){
-        for (let i = 0; i < messages.length; i++) {
+        if (conversation != null) {
+            for (let i = 0; i < messages.length; i++) {
 
                 $("#messages-list").append("<div>");
-                if(messages[i].owner == user){
+                if (messages[i].owner == user) {
                     $("#messages-list").append("<div class=\"d-flex justify-content-between\">" +
-                        "                                            <p class=\"small mb-1 text-muted\">"+ messages[i].owner+"</p>" +
-                        "                                            <p class=\"small mb-1 text-muted\">"+ messages[i].date+"</p>" +
+                        "                                            <p class=\"small mb-1 text-muted\">" + messages[i].owner + "</p>" +
+                        "                                            <p class=\"small mb-1 text-muted\">" + messages[i].date + "</p>" +
                         "                                        </div>" +
                         "                                        <div class=\"d-flex flex-row justify-content-end mb-4 pt-1\">" +
                         "                                            <div>" +
                         "                                                <p class=\"small p-2 me-3 mb-3 text-white rounded-3 bg-dark\"" +
-                        "                                                   style=\"background-color: #f5f6f7;\">"+ messages[i].text+"</p>" +
+                        "                                                   style=\"background-color: #f5f6f7;\">" + messages[i].text + "</p>" +
                         "                                            </div>" +
                         "                                        </div>");
-                }else{
+                } else {
                     $("#messages-list").append("<div class=\"d-flex justify-content-between\">" +
-                        "                                            <p class=\"small mb-1 text-muted\">"+ messages[i].owner+"</p>" +
-                        "                                            <p class=\"small mb-1 text-muted\">"+ messages[i].date+"</p>" +
+                        "                                            <p class=\"small mb-1 text-muted\">" + messages[i].owner + "</p>" +
+                        "                                            <p class=\"small mb-1 text-muted\">" + messages[i].date + "</p>" +
                         "                                        </div>" +
                         "                                        <div class=\"d-flex flex-row justify-content-start\">" +
                         "                                            <div>" +
                         "                                                <p class=\"small p-2 ms-3 mb-3 rounded-3\"" +
                         "                                                   style=\"background-color: #f5f6f7;\"" +
-                        "                                                   >"+ messages[i].text+"</p>" +
+                        "                                                   >" + messages[i].text + "</p>" +
                         "                                            </div>\n" +
                         "                                        </div>");
                 }

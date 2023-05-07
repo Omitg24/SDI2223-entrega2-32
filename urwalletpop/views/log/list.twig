@@ -22,28 +22,28 @@
     </div>
 
 
-        <div class="table-responsive overflow-hidden">
-            <table class="table table-hover" id="tableUsers">
-                <thead class="thead-dark">
+    <div class="table-responsive overflow-hidden">
+        <table class="table table-hover" id="tableUsers">
+            <thead class="thead-dark">
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">Método</th>
+                <th scope="col">Tipo</th>
+                <th scope="col">Descripción</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for log in logList %}
                 <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Fecha</th>
-                    <th scope="col">Método</th>
-                    <th scope="col">Tipo</th>
-                    <th scope="col">Descripción</th>
+                    <th scope="row">{{ loop.index }}</th>
+                    <td>{{ log.date }}</td>
+                    <td>{{ log.action }}</td>
+                    <td>{{ log.type }}</td>
+                    <td>{{ log.url }}</td>
                 </tr>
-                </thead>
-                <tbody>
-                {% for log in logList %}
-                    <tr>
-                        <th scope="row">{{ loop.index }}</th>
-                        <td>{{ log.date }}</td>
-                        <td>{{ log.action }}</td>
-                        <td>{{ log.type }}</td>
-                        <td>{{ log.url }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}
