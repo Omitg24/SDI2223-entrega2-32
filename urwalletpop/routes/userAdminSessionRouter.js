@@ -1,5 +1,8 @@
 const express = require('express');
 const userSessionRouter = express.Router();
+/**
+ * Método que verifica si el usuario tiene rol de administrador
+ */
 userSessionRouter.use(function (req, res, next) {
     console.log("userAdminSessionRouter");
 

@@ -1,5 +1,6 @@
 const {ObjectId} = require("mongodb");
 module.exports = function (app, usersRepository, offerRepository, logsRepository) {
+    /** Método que devuelve la vista del panel principal de la web **/
     app.get('/home', function (req, res) {
         let filter = {feature: true};
         let page = parseInt(req.query.page);
@@ -27,15 +28,17 @@ module.exports = function (app, usersRepository, offerRepository, logsRepository
                 currentPage: page
             });
         });
-    }),
-        app.get('/users/signup', function (req, res) {
-            res.render("signup.twig", {
-                user: req.session.user,
-                role: req.session.role,
-                amount: req.session.amount,
-                date: req.session.date
-            });
+    });
+    /** Método que devuelve la vista del panel de registro de la web **/
+    app.get('/users/signup', function (req, res) {
+        res.render("signup.twig", {
+            user: req.session.user,
+            role: req.session.role,
+            amount: req.session.amount,
+            date: req.session.date
         });
+    });
+    /** Método que realiza el registro de un usuario nuevo en la web **/
     app.post('/users/signup', function (req, res) {
         let securePassword = app.get("crypto").createHmac('sha256', app.get('clave'))
             .update(req.body.password).digest('hex');
@@ -79,9 +82,11 @@ module.exports = function (app, usersRepository, offerRepository, logsRepository
             }
         })
     });
+    /** Método que devuelve la vista del panel de logeo de la web **/
     app.get('/users/login', function (req, res) {
         res.render("login.twig");
     })
+    /** Método que realiza el logeo de un usuario en la web **/
     app.post('/users/login', function (req, res) {
         let securePassword = app.get("crypto").createHmac('sha256', app.get('clave'))
             .update(req.body.password).digest('hex');
@@ -151,14 +156,16 @@ module.exports = function (app, usersRepository, offerRepository, logsRepository
             }
         })
     });
+    /** Método que realiza el logout de la sesión de un usuario en la web y lo redirige al panel de logeo **/
     app.get('/users/logout', function (req, res) {
-        insertLog(req,"LOGOUT",res.user);
+        insertLog(req, "LOGOUT", res.user);
         req.session.user = null;
         req.session.role = null;
         req.session.amount = null;
         req.session.date = null;
         res.redirect("/users/login");
     });
+    /** Método que muestra una lista de los usuarios registrados en la web **/
     app.get('/users/list', function (req, res) {
         let search = req.query.search || '';
         let filter = {};
@@ -216,12 +223,12 @@ module.exports = function (app, usersRepository, offerRepository, logsRepository
             });
         });
     });
-
+    /** Método que elimina una lista de usuarios de la web **/
     app.post('/users/delete', function (req, res) {
         let ids = req.body.users;
         let filter;
-        if(typeof ids == "string"){
-            ids=[ids];
+        if (typeof ids == "string") {
+            ids = [ids];
         }
 
         let emailFilter = {email: res.user};
@@ -248,7 +255,7 @@ module.exports = function (app, usersRepository, offerRepository, logsRepository
             res.send("Se ha producido un error al intentar eliminar los usuarios")
         });
     });
-
+    /** Método que inserta un log en la vista de registro cuando un usuario realiza una petición **/
     function insertLog(req, type, email) {
         let log = {
             date: Date.now(),
@@ -260,7 +267,7 @@ module.exports = function (app, usersRepository, offerRepository, logsRepository
             console.log("No se ha podido registrar la peticion " + req.method)
         });
     }
-
+    /** Método que valida los datos de login **/
     async function validateLogin(user) {
         let errors = [];
         console.log(user);
@@ -272,7 +279,7 @@ module.exports = function (app, usersRepository, offerRepository, logsRepository
         }
         return errors;
     }
-
+    /** Método que valida los datos de registro **/
     async function validateSignUp(user, confirmPassword) {
         let errors = [];
         if (typeof user.email === "undefined" || user.email.trim().toString().length === 0) {
@@ -332,49 +339,5 @@ module.exports = function (app, usersRepository, offerRepository, logsRepository
             errors.push({type: "Email", message: "Se ha producido un error al buscar el usuario." + error});
         });
         return errors;
-    }
-
-    app.post('/users/delete', function (req, res) {
-        let ids = req.body.users;
-        let filter;
-        if(typeof ids == "string"){
-            ids=[ids];
-        }
-
-        let emailFilter = {email: res.user};
-        usersRepository.findUser(emailFilter, {}).then(user => {
-            if (ids.includes(user._id)) {
-                ids.splice(ids.indexOf(user._id), 1);
-            }
-        }).catch(error => {
-            let errors = [];
-            errors.push({
-                type: "Borrado",
-                message: "Se ha producido un error al buscar al usuario"
-            });
-        });
-
-        filter = {_id: {$in: ids.map(id => ObjectId(id))}};
-        usersRepository.deleteUsers(filter, {}).then(result => {
-            if (result === null || result.deletedCount === 0) {
-                res.send("No se ha podido eliminar el registro");
-            } else {
-                res.redirect("/users/list");
-            }
-        }).catch(error => {
-            res.send("Se ha producido un error al intentar eliminar los usuarios")
-        });
-    });
-
-    function insertLog(req,type,email){
-        let log = {
-            date:Date.now(),
-            action:req.method,
-            url:email,
-            type:type,
-        }
-        logsRepository.insertLog(log).catch(error => {
-            console.log("No se ha podido registrar la peticion " + req.method)
-        });
     }
 }

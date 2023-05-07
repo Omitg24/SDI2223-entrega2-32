@@ -16,7 +16,7 @@ module.exports = function (app, usersRepository, offerRepository) {
             res.json({error: "Error al obtener las ofertas."});
         })
     });
-
+    /** Método que realiza el logeo de un usuario en la web **/
     app.post("/api/users/login", userValidatorLogin, function (req, res) {
         try {
             let securePassword = app.get("crypto").createHmac('sha256', app.get('clave'))

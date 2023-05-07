@@ -112,7 +112,6 @@ public class SeleniumUtils {
             try {
                 driver.wait(seconds * 1000L);
             } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }

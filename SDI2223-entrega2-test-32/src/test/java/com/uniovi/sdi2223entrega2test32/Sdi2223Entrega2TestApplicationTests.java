@@ -1103,8 +1103,10 @@ class Sdi2223Entrega2TestApplicationTests {
         request.body(requestParams.toJSONString());
         //3. Hacemos la petición
         Response response = request.post(RestAssuredURL);
+        String message = response.jsonPath().getString("message");
         //4. Comprobamos que el servicio ha tenido exito
         Assertions.assertEquals(200, response.getStatusCode());
+        Assertions.assertEquals("Inicio de sesión correcto", message);
     }
 
     /**
@@ -1124,8 +1126,11 @@ class Sdi2223Entrega2TestApplicationTests {
         request.body(requestParams.toJSONString());
         //3. Hacemos la petición
         Response response = request.post(RestAssuredURL);
+        String error = response.jsonPath().getString("errors[0].msg");
         //4. Comprobamos que el servicio ha tenido exito
         Assertions.assertEquals(401, response.getStatusCode());
+        Assertions.assertEquals("Inicio de sesión incorrecto", error);
+
     }
 
     /**
@@ -1145,8 +1150,12 @@ class Sdi2223Entrega2TestApplicationTests {
         request.body(requestParams.toJSONString());
         //3. Hacemos la petición
         Response response = request.post(RestAssuredURL);
+        String errorEmail = response.jsonPath().getString("errors[0].msg");
+        String errorPassword = response.jsonPath().getString("errors[1].msg");
         //4. Comprobamos que el servicio ha tenido exito
         Assertions.assertEquals(403, response.getStatusCode());
+        Assertions.assertEquals("El email no puede ser vacío", errorEmail);
+        Assertions.assertEquals("La contraseña no puede ser vacía", errorPassword);
     }
 
     /**
