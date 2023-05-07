@@ -1085,7 +1085,8 @@ class Sdi2223Entrega2TestApplicationTests {
         // Seleccionamos el boton de eliminar y hacemos click
         PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@href, 'log/delete')]", 0);
         // Comprobamos que se han borrado todos los registros
-        List<WebElement> tableRows = driver.findElements(By.xpath("//table[@id='tableLogs']/tbody/tr"));
+        List<WebElement> tableRows = SeleniumUtils.waitLoadElementsBy(driver, "free",
+                "//table[@id='tableLogs']/tbody/tr", PO_View.getTimeout());
         //Comprobamos que el numero es el correcto, es 1 ya que la petición de actualizar la tabla ocurre despues del borrado
         Assertions.assertEquals(1, tableRows.size());
     }
