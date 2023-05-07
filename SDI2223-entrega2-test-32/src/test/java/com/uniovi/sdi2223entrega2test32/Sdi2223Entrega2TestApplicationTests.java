@@ -989,6 +989,10 @@ class Sdi2223Entrega2TestApplicationTests {
     public void PR34() {
         // Accedemos a la lista de usuarios
         driver.navigate().to("http://localhost:8081/apiclient/client.html?w=conversationList");
+
+        List<WebElement> header = SeleniumUtils.waitLoadElementsBy(driver, "free",
+                "//h2[contains(text(), 'Identificación de usuario')]", PO_View.getTimeout());
+        Assertions.assertTrue(header.size()>0);
         // Comprobamos que nos redirige al login
         Assertions.assertEquals("http://localhost:8081/apiclient/client.html?w=login", driver.getCurrentUrl());
     }
@@ -1081,7 +1085,8 @@ class Sdi2223Entrega2TestApplicationTests {
         // Seleccionamos el boton de eliminar y hacemos click
         PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@href, 'log/delete')]", 0);
         // Comprobamos que se han borrado todos los registros
-        List<WebElement> tableRows = driver.findElements(By.xpath("//table[@id='tableLogs']/tbody/tr"));
+        List<WebElement> tableRows = SeleniumUtils.waitLoadElementsBy(driver, "free",
+                "//table[@id='tableLogs']/tbody/tr", PO_View.getTimeout());
         //Comprobamos que el numero es el correcto, es 1 ya que la petición de actualizar la tabla ocurre despues del borrado
         Assertions.assertEquals(1, tableRows.size());
     }

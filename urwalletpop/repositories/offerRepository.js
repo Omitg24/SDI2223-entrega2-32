@@ -56,6 +56,18 @@ module.exports = {
             throw (error);
         }
     },
+    deleteOffers: async function (filter, options) {
+        try {
+            const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
+            const database = client.db("UrWalletPop");
+            const collectionName = 'offers';
+            const offersCollection = database.collection(collectionName);
+            const result = await offersCollection.deleteMany(filter, options);
+            return result;
+        } catch (error) {
+            throw (error);
+        }
+    },
     findOffer: async function (filter, options) {
         try {
             const client = await this.mongoClient.connect(this.app.get('connectionStrings'));

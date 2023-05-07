@@ -4,16 +4,15 @@ var express = require('express');
 var loggerRouter = function (logsRepository) {
 
     let router = express.Router();
-
+    //Interceptamos las peticiones para logearlas
     router.use(function (req, res, next) {
         let url = req.url;
+        //Comprobamos los tipos de peticiones especiales
         if (!url.includes("login")) {
             let type = "PET";
             if (url.includes("signup")) {
                 type = "ALTA";
             }
-
-
             let log = {
                 date: Date.now(),
                 action: req.method,
