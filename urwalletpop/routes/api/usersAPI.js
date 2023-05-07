@@ -2,6 +2,9 @@ const {userValidatorLogin} = require("./userValidator");
 const {validationResult} = require("express-validator");
 module.exports = function (app, usersRepository, offerRepository) {
 
+    /**
+     * Metodo que devuelve todas las ofertas disponibles para el usuario
+     */
     app.get("/api/offers", function (req, res) {
         let filter = {author: {$ne: res.user}};
         let options = {};
