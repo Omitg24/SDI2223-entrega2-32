@@ -25,6 +25,18 @@ public class PO_PrivateView extends PO_NavView {
     }
 
     /**
+     * Método para realizar el login de un usuario
+     *
+     * @param driver   driver
+     * @param email      dni del usuario
+     * @param password contraseña del usuario
+     */
+    static public void loginAPI(WebDriver driver, String email, String password) {
+        PO_LoginView.fillLoginForm(driver, email, password);
+        PO_View.checkElementBy(driver, "text", "Actualizar");
+    }
+
+    /**
      * Método para desconectar a un usuario
      *
      * @param driver driver

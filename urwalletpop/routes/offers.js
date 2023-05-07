@@ -57,6 +57,15 @@ module.exports = function (app, offerRepository, usersRepository) {
 
     app.get('/offer/ownedList', function (req, res) {
         let filter = {author: req.session.user};
+        let search = req.query.search || '';
+        if (search !== '') {
+            filter = {
+                $and: [
+                    {author:  req.session.user},
+                    {title: {$regex: new RegExp(search, 'i')}}
+                ]
+            };
+        }
         let options = {};
         let page = parseInt(req.query.page);
         if (typeof req.query.page === "undefined" || req.query.page === null || req.query.page === "0") {
@@ -92,7 +101,8 @@ module.exports = function (app, offerRepository, usersRepository) {
                     amount: req.session.amount,
                     date: req.session.date,
                     pages: pages,
-                    currentPage: page
+                    currentPage: page,
+                    search : search
                 }
                 res.render("offer/ownedList.twig", response);
             }
