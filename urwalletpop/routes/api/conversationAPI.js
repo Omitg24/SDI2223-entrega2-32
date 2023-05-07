@@ -3,14 +3,18 @@ const {validationResult} = require('express-validator');
 const {messageValidatorInsert} = require('./sendMessageValidate');
 module.exports = function (app, offerRepository, conversationRepository, messageRepository) {
 
+    /**
+     * Método que marca una mensaje como leído a través de una
+     * petición
+     */
     app.put("/api/messages/:id", function (req, res) {
         let messageId = ObjectId(req.params.id);
         let filter = {_id: messageId};
         //Si la _id NO no existe, no crea un nuevo documento.
         messageRepository.findMessage(filter, {}).then(message => {
             if (message.read === false) {
-                if (message.interested === res.user) {
-                    message.read = true;
+                if(message.owner !== res.user){
+                    message.read=true;
                     messageRepository.updateMessage(message, filter, {}).then(result => {
                         if (result === null) {
                             res.status(404);
@@ -20,7 +24,8 @@ module.exports = function (app, offerRepository, conversationRepository, message
                         else if (result.modifiedCount == 0) {
                             res.status(409);
                             res.json({error: "No se ha modificado ningun mensaje."});
-                        } else {
+                        }
+                        else{
                             res.status(200);
                             res.json({
                                 message: "Mensaje modificado correctamente.",
@@ -34,8 +39,8 @@ module.exports = function (app, offerRepository, conversationRepository, message
                 }
             }
         }).catch(error => {
-            res.status(500);
-            res.json({error: "Error al marcar el mensaje como leído."});
+                res.status(500);
+                res.json({error: "Error al marcar el mensaje como leído: "+error});
         });
     });
 
@@ -48,13 +53,14 @@ module.exports = function (app, offerRepository, conversationRepository, message
         let options = {};
         conversationRepository.findConversation(conversationFilter, options).then(conversation => {
 
-            if (conversation != null && !(conversation.offer.author == res.user || req.params.interestedEmail == res.user)) {
+            if(conversation!=null && !(conversation.offer.author == res.user || req.params.interestedEmail ==res.user) && req.params.interestedEmail ==conversation.offer.author){
                 res.status(403);
                 res.json({error: "No puedes obtener la conversación"});
                 return;
             }
             let messageFilter = {
-                offer: ObjectId(req.params.offerId)
+                offer: ObjectId(req.params.offerId),
+                interested: req.params.interestedEmail
             }
             messageRepository.findMessages(messageFilter, {}).then(messages => {
                 res.status(200);
@@ -75,8 +81,33 @@ module.exports = function (app, offerRepository, conversationRepository, message
         };
         let options = {};
         conversationRepository.getConversations(filter, options).then(conversations => {
-            res.status(200);
-            res.json({conversations: conversations, user: res.user});
+            for (let i = 0; i < conversations.length; i++) {
+                let owner;
+                if (res.user === conversations[i].interested) {
+                    owner = conversations[i].offer.author;
+                } else {
+                    owner = conversations[i].interested;
+                }
+                let filter = {
+                    offer: conversations[i].offer._id,
+                    interested: conversations[i].interested,
+                    owner: owner,
+                    read: false
+                }
+                conversations[i].numberMessages = 0;
+                messageRepository.findMessages(filter, {}).then(messages => {
+                    conversations[i].numberMessages = messages.length;
+                    if(i === conversations.length -1){
+                        res.status(200);
+                        res.json({conversations: conversations, user: res.user});
+                    }
+                })
+
+            }
+            if(conversations.length === 0){
+                res.status(200);
+                res.json({conversations: conversations, user: res.user});
+            }
         }).catch(error => {
             res.status(500);
             res.json({error: "Error al obtener las conversaciones."});
@@ -146,9 +177,9 @@ module.exports = function (app, offerRepository, conversationRepository, message
                         conversationRepository.findConversation(conversationFilter, options).then(conversation => {
                             if (conversation === null) {
                                 let conver;
-                                if (user == req.params.interestedEmail) {
-                                    conver = {offer: offer, interested: user}
-                                    conversationRepository.insertConversation(conver).then(result => {
+                                if(offer.author != req.params.interestedEmail){
+                                    conver={offer:offer,interested:user}
+                                    conversationRepository.insertConversation(conver).then(result=>{
                                         res.status(200);
                                         res.json({message: "Conversación insertada"});
                                     }).catch(error => {

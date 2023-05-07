@@ -7,6 +7,7 @@
             <tr>
                 <th>Email</th>
                 <th>Título de oferta</th>
+                <th>Mensajes</th>
                 <th>Abrir</th>
                 <th>Eliminar</th>
             </tr>
@@ -17,79 +18,89 @@
     </div>
 </div>
 
-<script>
-    window.history.pushState("", "", "/apiclient/client.html?w=conversationList");
-    var interestedEmail;
-    var offerId;
+    <script>
+        window.history.pushState("", "", "/apiclient/client.html?w=conversationList");
+        var interestedEmail;
+        var offerId;
 
-    function loadConversations() {
-        $.ajax({
-            url: URLbase + "/conversation/list",
-            type: "GET",
-            data: {},
-            dataType: "json",
-            headers: {"token": token},
-            success: function success(response) {
-                let conversations = response.conversations;
-                user = response.user;
-                updateConversationList(conversations, user);
-            },
-            error: function (error) {
-                $("#main-container").load("widget-login.html");
-            }
-        });
-    }
-
-    function updateConversationList(conversations, user) {
-        $("#conversations-list").empty();
-        for (let i = 0; i < conversations.length; i++) {
-            $("#conversations-list").append("<tr>");
-            if (conversations[i].interested != user) {
-                $("#conversations-list").append(
-                    "<td>" + conversations[i].interested + "</td>"
-                )
-            } else {
-                $("#conversations-list").append(
-                    "<td>" + conversations[i].offer.author + "</td>"
-                )
-            }
-            $("#conversations-list").append(
-                "<td>" + conversations[i].offer.title + "</td>"
-            )
-            $("#conversations-list").append(
-                "<td><a onclick=\"loadConversationFromList('" + conversations[i].offer._id + "','" + conversations[i].interested + "','" + conversations[i].offer.title + "')\""
-                + "<button class=\"btn btn-dark\">Abrir</button>" + "</a></td>" +
-                "<td><a onclick=\"deleteConversation('" + conversations[i]._id + "')\"" + ">"
-                + "<button class=\"btn btn-dark\">Eliminar</button>" + "</a></td>"
-            )
-            $("#conversations-list").append("</tr>");
-        }
-    }
-
-    function loadConversationFromList(offerIdVal, interestedEmailVal, offerTitleVal) {
-        interestedEmail = interestedEmailVal;
-        offerId = offerIdVal;
-        offerTitle = offerTitleVal;
-        console.log("asdadsas")
-        $("#main-container").load("widget-conversation.html");
-    }
-
-    function deleteConversation(conversationId) {
-        $.ajax({
-            url: URLbase + "/conversation/delete/" + conversationId,
-            type: "POST",
-            data: {},
-            dataType: "json",
-            headers: {"token": token},
-            success: function success(response) {
+        var intervalId =window.setInterval(function(){
+            if (window.location.href == ("http://localhost:8081/apiclient/client.html?w=conversationList")) {
                 loadConversations();
-            },
-            error: function (error) {
-                console.log(error);
-                $("#main-container").load("widget-login.html");
+            } else {
+                clearInterval(intervalId);
             }
-        });
-    }
+        }, 1000);
 
-    loadConversations();
-</script>
+        function loadConversations() {
+            $.ajax({
+                url: URLbase + "/conversation/list",
+                type: "GET",
+                data: {},
+                dataType: "json",
+                headers: {"token": token},
+                success: function success(response) {
+                    let conversations = response.conversations;
+                    user = response.user;
+                    updateConversationList(conversations,user);
+                },
+                error: function (error) {
+                    $("#main-container").load("widget-login.html");
+                }
+            });
+        }
+
+        function updateConversationList(conversations,user) {
+            $("#conversations-list").empty();
+            for (let i = 0; i < conversations.length; i++) {
+                $("#conversations-list").append("<tr>");
+                if(conversations[i].interested!=user){
+                    $("#conversations-list").append(
+                        "<td>"+conversations[i].interested +"</td>"
+                    )
+                }else{
+                    $("#conversations-list").append(
+                        "<td>"+conversations[i].offer.author +"</td>"
+                    )
+                }
+                $("#conversations-list").append(
+                    "<td>"+conversations[i].offer.title +"</td>"
+                )
+                $("#conversations-list").append(
+                    "<td>"+conversations[i].numberMessages +"</td>"
+                )
+                $("#conversations-list").append(
+                    "<td><a onclick=\"loadConversationFromList('" + conversations[i].offer._id +"','"+conversations[i].interested +"','"+conversations[i].offer.title+"')\""
+                    +"<button id='openConversation' class=\"btn btn-dark\">Abrir</button>" +"</a></td>" +
+                    "<td><a onclick=\"deleteConversation('"+conversations[i]._id+"')\""+">"
+                    +"<button class=\"btn btn-dark\">Eliminar</button>" +"</a></td>"
+                )
+                $("#conversations-list").append("</tr>");
+            }
+        }
+
+        function loadConversationFromList(offerIdVal,interestedEmailVal,offerTitleVal){
+            interestedEmail=interestedEmailVal;
+            offerId=offerIdVal;
+            offerTitle=offerTitleVal;
+            console.log("asdadsas")
+            $("#main-container").load("widget-conversation.html");
+        }
+
+        function deleteConversation(conversationId){
+            $.ajax({
+                url: URLbase + "/conversation/delete/"+conversationId,
+                type: "POST",
+                data: {},
+                dataType: "json",
+                headers: {"token": token},
+                success: function success(response) {
+                    loadConversations();
+                },
+                error: function (error) {
+                    console.log(error);
+                    $("#main-container").load("widget-login.html");
+                }
+            });
+        }
+        loadConversations();
+    </script>

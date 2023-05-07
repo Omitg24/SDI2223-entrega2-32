@@ -1,5 +1,7 @@
 package com.uniovi.sdi2223entrega2test32.pageobjects;
 
+
+import com.uniovi.sdi2223entrega2test32.pageobjects.PO_NavView;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;

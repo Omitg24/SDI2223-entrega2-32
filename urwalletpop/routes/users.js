@@ -1,3 +1,4 @@
+const {ObjectId} = require("mongodb");
 module.exports = function (app, usersRepository, offerRepository, logsRepository) {
     app.get('/home', function (req, res) {
         let filter = {feature: true};
@@ -151,6 +152,7 @@ module.exports = function (app, usersRepository, offerRepository, logsRepository
         })
     });
     app.get('/users/logout', function (req, res) {
+        insertLog(req,"LOGOUT",res.user);
         req.session.user = null;
         req.session.role = null;
         req.session.amount = null;
@@ -218,22 +220,33 @@ module.exports = function (app, usersRepository, offerRepository, logsRepository
     app.post('/users/delete', function (req, res) {
         let ids = req.body.users;
         let filter;
-        if (typeof ids == "string") {
-            ids = [ids];
+        if(typeof ids == "string"){
+            ids=[ids];
         }
-        for (let i = 0; i < ids.length; i++) {
-            filter = {_id: ObjectId(ids[i])};
-            usersRepository.deleteUser(filter, {}).then(result => {
-                if (result === null || result.deletedCount === 0) {
-                    //res.send(req.body.users)
-                    res.send("No se ha podido eliminar el registro");
-                } else {
-                    res.redirect("list.twig");
-                }
-            }).catch(error => {
-                res.send("Se ha producido un error al intentar eliminar la canción: " + error)
+
+        let emailFilter = {email: res.user};
+        usersRepository.findUser(emailFilter, {}).then(user => {
+            if (ids.includes(user._id)) {
+                ids.splice(ids.indexOf(user._id), 1);
+            }
+        }).catch(error => {
+            let errors = [];
+            errors.push({
+                type: "Borrado",
+                message: "Se ha producido un error al buscar al usuario"
             });
-        }
+        });
+
+        filter = {_id: {$in: ids.map(id => ObjectId(id))}};
+        usersRepository.deleteUsers(filter, {}).then(result => {
+            if (result === null || result.deletedCount === 0) {
+                res.send("No se ha podido eliminar el registro");
+            } else {
+                res.redirect("/users/list");
+            }
+        }).catch(error => {
+            res.send("Se ha producido un error al intentar eliminar los usuarios")
+        });
     });
 
     function insertLog(req, type, email) {
@@ -319,5 +332,49 @@ module.exports = function (app, usersRepository, offerRepository, logsRepository
             errors.push({type: "Email", message: "Se ha producido un error al buscar el usuario." + error});
         });
         return errors;
+    }
+
+    app.post('/users/delete', function (req, res) {
+        let ids = req.body.users;
+        let filter;
+        if(typeof ids == "string"){
+            ids=[ids];
+        }
+
+        let emailFilter = {email: res.user};
+        usersRepository.findUser(emailFilter, {}).then(user => {
+            if (ids.includes(user._id)) {
+                ids.splice(ids.indexOf(user._id), 1);
+            }
+        }).catch(error => {
+            let errors = [];
+            errors.push({
+                type: "Borrado",
+                message: "Se ha producido un error al buscar al usuario"
+            });
+        });
+
+        filter = {_id: {$in: ids.map(id => ObjectId(id))}};
+        usersRepository.deleteUsers(filter, {}).then(result => {
+            if (result === null || result.deletedCount === 0) {
+                res.send("No se ha podido eliminar el registro");
+            } else {
+                res.redirect("/users/list");
+            }
+        }).catch(error => {
+            res.send("Se ha producido un error al intentar eliminar los usuarios")
+        });
+    });
+
+    function insertLog(req,type,email){
+        let log = {
+            date:Date.now(),
+            action:req.method,
+            url:email,
+            type:type,
+        }
+        logsRepository.insertLog(log).catch(error => {
+            console.log("No se ha podido registrar la peticion " + req.method)
+        });
     }
 }

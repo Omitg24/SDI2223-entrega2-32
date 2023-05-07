@@ -3,8 +3,10 @@ package com.uniovi.sdi2223entrega2test32;
 import com.uniovi.sdi2223entrega2test32.pageobjects.*;
 import com.uniovi.sdi2223entrega2test32.util.SeleniumUtils;
 import io.restassured.RestAssured;
+import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import org.bson.Document;
 import org.json.simple.JSONObject;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.By;
@@ -12,9 +14,11 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
+import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -280,6 +284,166 @@ class Sdi2223Entrega2TestApplicationTests {
         result.addAll(SeleniumUtils.waitLoadElementsBy(driver, "free", "//tbody/tr", PO_View.getTimeout()));
 
         Assertions.assertEquals(m.getUsers(), result.size());
+    }
+
+    /**
+     * PR12. Ir a la lista de usuarios, borrar el primer usuario de la lista, comprobar que la lista se actualiza
+     * y dicho usuario desaparece.
+     * Realizada por: Israel
+     */
+    @Test
+    @Order(12)
+    public void PR12() {
+        // Iniciamos sesión como administrador
+        PO_PrivateView.login(driver, "admin@email.com", "admin");
+        //Seleccionamos el dropdown de gestion de usuarios
+        PO_PrivateView.checkViewAndClick(driver, "free", "//li[contains(@class, 'nav-item dropdown')]", 0);
+        //Seleccionamos el enlace de gestión de usuarios
+        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@class, 'dropdown-item')]", 0);
+        //Comprobamos que el texto aparece
+        PO_View.checkElementBy(driver, "free", "//h2[contains(text(), 'Listado de usuarios')]");
+        //Obtenemos la primera fila que contenga un checkBox (ya que el admin no se puede eliminar)
+        WebElement firstRowWithCheckbox = driver.findElement(By.xpath("//table//tr[td/input[@type='checkbox']][1]"));
+        //Obtenemos la celda del checkbox
+        WebElement checkBoxCell = firstRowWithCheckbox.findElement(By.xpath(".//input[@type='checkbox']"));
+        //Clickamos el checkbox
+        checkBoxCell.click();
+        WebElement emailOfFirstRow = firstRowWithCheckbox.findElement(By.xpath(".//td[1]"));
+        //Guardamos el texto para confirmar que se ha eliminado correctamente
+        String checkTextAfterDelete = emailOfFirstRow.getText();
+        //Obtenemos el botón que elimina los usuarios seleccionados
+        WebElement deleteSubmitButton = driver.findElement(By.id("delete-users"));
+        //Hacemos click sobre el boton de eliminar
+        deleteSubmitButton.click();
+        //Volvemos a obtener la primera fila de la tabla para comprobar que se ha eliminado correctamente
+        firstRowWithCheckbox = driver.findElement(By.xpath("//table//tr[td/input[@type='checkbox']][1]"));
+        //Obtenemos la primera celda
+        emailOfFirstRow = firstRowWithCheckbox.findElement(By.xpath(".//td[1]"));
+        //Guardamos el texto para confirmar que se ha eliminado correctamente
+        String actualText = emailOfFirstRow.getText();
+        //Comprobamos que los textos son diferentes
+        Assertions.assertNotEquals(checkTextAfterDelete, actualText);
+        PO_PrivateView.logout(driver);
+    }
+
+    /**
+     * PR13. Ir a la lista de usuarios, borrar el último usuario de la lista, comprobar que la lista se actualiza
+     * y dicho usuario desaparece.
+     * Realizada por: Israel
+     * */
+
+    @Test
+    @Order(13)
+    public void PR13() {
+        // Iniciamos sesión como administrador
+        PO_PrivateView.login(driver, "admin@email.com", "admin");
+        //Seleccionamos el dropdown de gestion de usuarios
+        PO_PrivateView.checkViewAndClick(driver, "free", "//li[contains(@class, 'nav-item dropdown')]", 0);
+        //Seleccionamos el enlace de gestión de usuarios
+        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@class, 'dropdown-item')]", 0);
+        //Vamos a la ultima pagina
+        driver.navigate().to("http://localhost:8081/users/list/?page=4");
+        //Obtenemos el ultimo elemento de la tabla
+        WebElement lastRow =  driver.findElement(By.xpath("//table//tbody//tr[last()]"));
+
+        //Obtenemos la celda del checkbox
+        WebElement checkBoxCell = lastRow.findElement(By.xpath(".//input[@type='checkbox']"));
+        //Clickamos el checkbox
+        checkBoxCell.click();
+        //Obtenemos la primera celda de la tabla
+        WebElement email = lastRow.findElement(By.xpath(".//td[1]"));
+        //Guardamos el texto para confirmar que se ha eliminado correctamente
+        String checkTextBeforeDelete = email.getText();
+
+        //Obtenemos el botón que elimina los usuarios seleccionados
+        WebElement deleteSubmitButton = driver.findElement(By.id("delete-users"));
+        //Hacemos click sobre el boton de eliminar
+        deleteSubmitButton.click();
+        //Vamos a la ultima pagina
+        driver.navigate().to("http://localhost:8081/users/list/?page=4");
+        //Obtenemos el ultimo elemento de la tabla
+        lastRow =  driver.findElement(By.xpath("//table//tbody//tr[last()]"));
+        //Obtenemos el correo de la ultima fila
+        email = lastRow.findElement(By.xpath(".//td[1]"));
+        //Guardamos el texto para confirmar que se ha eliminado correctamente
+        String checkTextAfterDelete = email.getText();
+
+        Assertions.assertNotEquals(checkTextBeforeDelete, checkTextAfterDelete);
+        PO_PrivateView.logout(driver);
+    }
+
+
+    /**
+     * PR14. Ir a la lista de usuarios, borrar 3 usuarios, comprobar que la lista se actualiza y dichos
+     * usuarios desaparecen.
+     * Realizada por: Israel
+     */
+    @Test
+    @Order(14)
+    public void PR14() {
+        // Iniciamos sesión como administrador
+        PO_PrivateView.login(driver, "admin@email.com", "admin");
+        //Seleccionamos el dropdown de gestion de usuarios
+        PO_PrivateView.checkViewAndClick(driver, "free", "//li[contains(@class, 'nav-item dropdown')]", 0);
+        //Seleccionamos el enlace de gestión de usuarios
+        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@class, 'dropdown-item')]", 0);
+
+        //Obtenemos las 3 primeras filas de la tabla que contengan checkbox (menos la del admin)
+        List<String> textsBeforeDelete = PO_PrivateView.clickAndGetFirstCellsOfTable(driver, 3);
+
+        //Obtenemos el botón que elimina los usuarios seleccionados
+        WebElement deleteSubmitButton = driver.findElement(By.id("delete-users"));
+        //Hacemos click sobre el boton de eliminar
+        deleteSubmitButton.click();
+
+        //Obtenemos las 3 primeras filas de la tabla que contengan checkbox (menos la del admin)
+        List<String> textsAfterDelete = PO_PrivateView.clickAndGetFirstCellsOfTable(driver, 3);
+        //Comprobamos que se han eliminado correctamente
+        for (int i = 0; i < 3; i++) {
+            Assertions.assertNotEquals(textsBeforeDelete.get(i), textsAfterDelete.get(i));
+        }
+        PO_PrivateView.logout(driver);
+    }
+
+    /**
+     * PR15. Intentar borrar el usuario que se encuentra en sesión y comprobar que no ha sido borrado
+     * (porque no es un usuario administrador o bien, porque, no se puede borrar a sí mismo, si está
+     * autenticado)
+     * Realizada por: Israel
+     */
+    @Test
+    @Order(15)
+    public void PR15() {
+        PO_PrivateView.login(driver, "admin@email.com", "admin");
+        //Comprobamos que la fila de admin aparece
+        PO_View.checkElementBy(driver, "free", "//td[contains(text(), 'admin@email.com')]");
+        //Hacemos logout
+        PO_PrivateView.logout(driver);
+
+        final String url = "http://localhost:8081/users/";
+        //Llamamos al servicio de login
+        RequestSpecification request = RestAssured.given();
+        JSONObject requestParams = new JSONObject();
+        requestParams.put("email", "admin@email.com");
+        requestParams.put("password", "admin");
+        request.header("Content-Type", "application/json");
+        request.body(requestParams.toJSONString());
+        // Hacemos la petición
+        Response response = request.post(url+"login");
+        // Llamamos al servicio de ofertas
+        RequestSpecification request2 = RestAssured.given();
+        request2.header("Content-Type", "application/json");
+        request2.header("ids","6456a3794000b47f4cf64144");
+        // Hacemos la petición
+        Response response2 = request2.get(url+"delete");
+        //Nos volvemos a logear para comprobar que sigue la fila de admin
+        PO_PrivateView.login(driver, "admin@email.com", "admin");
+        //Comprobamos que la fila de admin aparece
+        WebElement adminCell = driver.findElement(By.xpath("//td[contains(text(), 'admin@email.com')]"));
+        //Hacemos logout
+        PO_PrivateView.logout(driver);
+
+        Assertions.assertTrue(adminCell!=null);
     }
 
     /**
@@ -660,6 +824,7 @@ class Sdi2223Entrega2TestApplicationTests {
         PO_PrivateView.logout(driver);
     }
 
+
     /**
      * PR30. Al crear una oferta, marcar dicha oferta como destacada y a continuación comprobar: i)
      * que aparece en el listado de ofertas destacadas para los usuarios y que el saldo del usuario se
@@ -684,11 +849,11 @@ class Sdi2223Entrega2TestApplicationTests {
         // Rellenamos el formulario de alta de oferta con datos validos
         PO_PrivateView.fillFormAddOfferFeatured(driver, "Prueba37", "PruebaDescripcion37", "0.37");
 
-        // Vamos a la tercera pagina de la lista de ofertas propias del usuario
-        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@class, 'page-link')]", 2);
-
         // Comprobamos que la oferta recien añadida sale en la lista de ofertas propias
         // del usuario
+
+        PO_PrivateView.makeSearch(driver, "Prueba37");
+
         PO_PrivateView.checkElement(driver, "Prueba37");
         PO_PrivateView.checkElement(driver, "PruebaDescripcion37");
         PO_PrivateView.checkElement(driver, "0.37 EUR");
@@ -734,11 +899,10 @@ class Sdi2223Entrega2TestApplicationTests {
         // Rellenamos el formulario de alta de oferta con datos validos
         PO_PrivateView.fillFormAddOffer(driver, "Prueba37", "PruebaDescripcion37", "0.37");
 
-        // Vamos a la tercera pagina de la lista de ofertas propias del usuario
-        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@class, 'page-link')]", 2);
-
         // Comprobamos que la oferta recien añadida sale en la lista de ofertas propias
         // del usuario
+        PO_PrivateView.makeSearch(driver, "Prueba37");
+
         PO_PrivateView.checkElement(driver, "Prueba37");
         PO_PrivateView.checkElement(driver, "PruebaDescripcion37");
         PO_PrivateView.checkElement(driver, "0.37 EUR");
@@ -783,11 +947,10 @@ class Sdi2223Entrega2TestApplicationTests {
         // Rellenamos el formulario de alta de oferta con datos validos
         PO_PrivateView.fillFormAddOffer(driver, "Prueba37", "PruebaDescripcion37", "0.37");
 
-        // Vamos a la tercera pagina de la lista de ofertas propias del usuario
-        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@class, 'page-link')]", 2);
-
         // Comprobamos que la oferta recien añadida sale en la lista de ofertas propias
         // del usuario
+        PO_PrivateView.makeSearch(driver, "Prueba37");
+
         PO_PrivateView.checkElement(driver, "Prueba37");
         PO_PrivateView.checkElement(driver, "PruebaDescripcion37");
         PO_PrivateView.checkElement(driver, "0.37 EUR");
@@ -802,6 +965,125 @@ class Sdi2223Entrega2TestApplicationTests {
 
         //Cierro sesion
         PO_PrivateView.logout(driver);
+    }
+
+    /**
+     * PR33. Intentar acceder sin estar autenticado a la opción de listado de usuarios. Se devuelve al login
+     * Realizada por: Israel
+     * */
+
+    @Test
+    @Order(33)
+    public void PR33() {
+        // Accedemos a la lista de usuarios
+        driver.navigate().to("http://localhost:8081/users/list");
+        // Comprobamos que nos redirige al login
+        Assertions.assertEquals("http://localhost:8081/users/login", driver.getCurrentUrl());
+    }
+    /**
+     * PR34. Intentar acceder sin estar autenticado a la opción de listado de conversaciones. Se devuelve al login
+     * Realizada por: Israel
+     */
+    @Test
+    @Order(34)
+    public void PR34() {
+        // Accedemos a la lista de usuarios
+        driver.navigate().to("http://localhost:8081/apiclient/client.html?w=conversationList");
+        // Comprobamos que nos redirige al login
+        Assertions.assertEquals("http://localhost:8081/apiclient/client.html?w=login", driver.getCurrentUrl());
+    }
+
+    /**
+     * PR35. Estando autenticado como usuario estándar intentar acceder a una opción disponible solo
+     * para usuarios administradores (Añadir menú de auditoria (visualizar logs)). Se deberá indicar un
+     * mensaje de acción prohibida
+     * Realizada por: Israel
+     */
+    @Test
+    @Order(35)
+    public void PR35() {
+        //Iniciamos sesión como usuario estandar
+        PO_PrivateView.login(driver, "user03@email.com", "user03");
+        // Intentamos acceder a la lista de logs
+        driver.navigate().to("http://localhost:8081/log/list");
+        // Comprobamos que aparece un mensaje de error
+        WebElement errorMessage = driver.findElement(By.xpath("//td[contains(text(), 'No tienes permisos de administrador para acceder a esta página')]"));
+        Assertions.assertTrue(errorMessage != null);
+    }
+
+    /**
+     * PR36. Estando autenticado como usuario administrador visualizar todos los logs generados en
+     * una serie de interacciones. Esta prueba deberá generar al menos dos interacciones de cada tipo y
+     * comprobar que el listado incluye los logs correspondientes.
+     * Realizada por: Israel
+     */
+    @Test
+    @Order(36)
+    public void PR36() {
+        PO_PrivateView.login(driver, "user05@email.com", "user05");
+        PO_PrivateView.logout(driver);
+
+        //Vamos a la opcion de registro
+        PO_HomeView.clickOption(driver, "signup", "class", "btn btn-dark");
+        //Rellenamos el formulario.
+        PO_SignUpView.fillForm(driver, "uo123456@uniovi.es", "Adrián", "García Fernández", "123456", "123456","2013-05-07");
+        //Desconectamos al usuario
+        PO_PrivateView.logout(driver);
+
+        //Repetimos lo mismo con otro usuario
+        PO_HomeView.clickOption(driver, "signup", "class", "btn btn-dark");
+        PO_SignUpView.fillForm(driver, "uo1234567@uniovi.es", "Adrián", "García Fernández", "1234567", "1234567","2013-05-07");
+        PO_PrivateView.logout(driver);
+
+        //Nos logeamos incorrectamente
+        PO_LoginView.fillLoginForm(driver, "user055@email.com", "user055");
+
+        //Nos logeamos incorrectamente otra vez
+        PO_LoginView.fillLoginForm(driver, "user0556@email.com", "user0556");
+
+        PO_PrivateView.login(driver, "admin@email.com", "admin");
+        //Accedemos a la pestaña de logging
+        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@href, '/log')]", 0);
+        //Obtenemos las filas de la tabla de logging
+        List<WebElement> rows = driver.findElements(By.xpath("//table//tbody//tr"));
+        //Creamos un diccionario para luego comprobar el numero de acciones
+        HashMap<String,Integer> actions = new HashMap<>();
+        WebElement aux;
+        //Recorremos las filas y vamos añadiendo para cada tipo un contador para luego comprobar que funciona correctamente
+        for(WebElement row:rows){
+            aux = row.findElement(By.xpath(".//td[3]"));
+            if(!actions.containsKey(aux.getText())){
+                actions.put(aux.getText(), 1);
+            }else{
+                actions.put(aux.getText(),actions.get(aux.getText())+1);
+            }
+        }
+
+        Assertions.assertTrue(actions.get("PET")>=2);
+        Assertions.assertTrue(actions.get("LOGIN-EX")>=2);
+        Assertions.assertTrue(actions.get("LOGIN-ERR")>=2);
+        Assertions.assertTrue(actions.get("LOGOUT")>=2);
+        Assertions.assertTrue(actions.get("ALTA")>=2);
+
+    }
+
+    /**
+     * PR37. Autenticado como administrador, vamos a la vista de logs y borramos los registros.
+     * Realizada por: Israel
+     */
+    @Test
+    @Order(37)
+    public void PR37() {
+        // Iniciamos sesión como administrador
+        PO_PrivateView.login(driver, "admin@email.com", "admin");
+        //Accedemos a la pestaña de conversaciones
+        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@href, 'log/list')]", 0);
+        // Seleccionamos el boton de eliminar y hacemos click
+        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@href, 'log/delete')]", 0);
+        // Comprobamos que se han borrado todos los registros
+        List<WebElement> tableRows = driver.findElements(By.xpath("//table[@id='tableLogs']/tbody/tr"));
+        //Comprobamos que el numero es el correcto, es 1 ya que la petición de actualizar la tabla ocurre despues del borrado
+        Assertions.assertEquals(1, tableRows.size());
     }
 
     /**
@@ -901,6 +1183,245 @@ class Sdi2223Entrega2TestApplicationTests {
     }
 
     /**
+     * PR42. Enviar un mensaje a una oferta. Esta prueba consistirá en comprobar que el servicio
+     * almacena correctamente el mensaje para dicha oferta. Por lo tanto, el usuario tendrá que
+     * identificarse (S1), enviar un mensaje para una oferta de id conocido (S3) y comprobar que el
+     * mensaje ha quedado bien registrado (S4)
+     * Realizado por: Israel
+     */
+    @Test
+    @Order(42)
+    public void PR42() {
+        final String RestAssuredURL = "http://localhost:8081/api";
+        //Llamamos al servicio de login
+        RequestSpecification request = RestAssured.given();
+        JSONObject requestParams = new JSONObject();
+        requestParams.put("email", "user01@email.com");
+        requestParams.put("password", "user01");
+        request.header("Content-Type", "application/json");
+        request.body(requestParams.toJSONString());
+        // Hacemos la petición
+        Response response = request.post(RestAssuredURL+"/users/login");
+        String token = response.jsonPath().getString("token");
+        // Llamamos al servicio de conversaciones
+        RequestSpecification request2 = RestAssured.given();
+        requestParams = new JSONObject();
+        request2.header("Content-Type", "application/json");
+        request2.header("token",token );
+        requestParams.put("message", "Hola me interesa el producto" );
+        request2.body(requestParams.toJSONString());
+        // Hacemos la petición para enviar el mensaje indicando el id de la oferta (una ya insertada) y el correo del interesado (user01...)
+        Response response2 = request2.post(RestAssuredURL+"/conversation/000000000000000000000001/user01@email.com");
+        // Comprobamos que se envia el mensaje correctamente
+        Assertions.assertEquals(200, response2.getStatusCode());
+
+        //Hacemos la petición para obtener los mensajes
+        RequestSpecification request3 = RestAssured.given();
+        request3.header("Content-Type", "application/json");
+        request3.header("token",token );
+        // Hacemos la petición para obtener los mensajes de la conversacion
+        Response response3 = request3.get(RestAssuredURL+"/conversation/000000000000000000000001/user01@email.com");
+        // Guardamos todas los mensajes
+        List<Object> messages = response3.jsonPath().getList("messages");
+        // Comprobamos que se muestran todos los mensajes
+        Assertions.assertEquals(1,
+                messages.size());
+        Assertions.assertEquals(200, response3.getStatusCode());
+    }
+
+    /**
+     * PR43. Enviar un primer mensaje una oferta propia y comprobar que no se inicia la conversación.
+     * En este caso de prueba, el propietario de la oferta tendrá que identificarse (S1), enviar un mensaje
+     * para una oferta propia (S3) y comprobar que el mensaje no se almacena (S4)
+     * Realizado por: Israel
+     */
+    @Test
+    @Order(43)
+    public void PR43() {
+        final String RestAssuredURL = "http://localhost:8081/api";
+        //Llamamos al servicio de login
+        RequestSpecification request = RestAssured.given();
+        JSONObject requestParams = new JSONObject();
+        requestParams.put("email", "user02@email.com");
+        requestParams.put("password", "user02");
+        request.header("Content-Type", "application/json");
+        request.body(requestParams.toJSONString());
+        // Hacemos la petición
+        Response response = request.post(RestAssuredURL+"/users/login");
+        String token = response.jsonPath().getString("token");
+        // Llamamos al servicio de conversaciones
+        RequestSpecification request2 = RestAssured.given();
+        requestParams = new JSONObject();
+        request2.header("Content-Type", "application/json");
+        request2.header("token",token );
+        requestParams.put("message", "Hola me interesa el producto" );
+        request2.body(requestParams.toJSONString());
+        // Hacemos la petición para enviar el mensaje indicando el id de la oferta (una ya insertada) y el correo del interesado (user02...)
+        Response response2 = request2.post(RestAssuredURL+"/conversation/000000000000000000000001/user02@email.com");
+        // Comprobamos que se lanza el error correctamente
+        Assertions.assertEquals(403, response2.getStatusCode());
+
+        //Hacemos la petición para obtener los mensajes
+        RequestSpecification request3 = RestAssured.given();
+        request3.header("Content-Type", "application/json");
+        request3.header("token",token );
+        // Hacemos la petición para obtener los mensajes de la conversacion
+        Response response3 = request3.get(RestAssuredURL+"/conversation/000000000000000000000001/user02@email.com");
+        //Comprobamos que no podemos acceder
+        Assertions.assertEquals(403, response2.getStatusCode());
+    }
+
+    /**
+     * PR44. Obtener los mensajes de una conversación. Esta prueba consistirá en comprobar que el
+     * servicio retorna el número correcto de mensajes para una conversación. El ID de la conversación
+     * deberá conocerse a priori. Por lo tanto, se tendrá primero que invocar al servicio de identificación
+     * (S1), y solicitar el listado de mensajes de una conversación de id conocido a continuación (S4),
+     * comprobando que se retornan los mensajes adecuados
+     * Realizado por: Israel
+     */
+    @Test
+    @Order(44)
+    public void PR44() {
+        final String RestAssuredURL = "http://localhost:8081/api";
+        //Llamamos al servicio de login
+        RequestSpecification request = RestAssured.given();
+        JSONObject requestParams = new JSONObject();
+        requestParams.put("email", "user01@email.com");
+        requestParams.put("password", "user01");
+        request.header("Content-Type", "application/json");
+        request.body(requestParams.toJSONString());
+        // Hacemos la petición
+        Response response = request.post(RestAssuredURL+"/users/login");
+        String token = response.jsonPath().getString("token");
+
+        //Hacemos la petición para obtener los mensajes
+        RequestSpecification request2 = RestAssured.given();
+        request2.header("Content-Type", "application/json");
+        request2.header("token",token );
+        // Hacemos la petición para obtener los mensajes de la conversacion
+        Response response2 = request2.get(RestAssuredURL+"/conversation/000000000000000000000005/user01@email.com");
+        //Comprobamos que obtenemos los mensajes correctamente
+        List<Object> messages = response2.jsonPath().getList("messages");
+        // Comprobamos que se muestran todos los mensajes
+        Assertions.assertEquals(1,
+                messages.size());
+        Assertions.assertEquals(200, response2.getStatusCode());
+    }
+
+    /**
+     * PR45. Obtener la lista de conversaciones de un usuario. Esta prueba consistirá en comprobar que
+     * el servicio retorna el número correcto de conversaciones para dicho usuario. Por lo tanto, se tendrá
+     * primero que invocar al servicio de identificación (S1), y solicitar el listado de conversaciones a
+     * continuación (S5) comprobando que se retornan las conversaciones adecuadas
+     * Realizado por: Israel
+     */
+    @Test
+    @Order(45)
+    public void PR45() {
+        final String RestAssuredURL = "http://localhost:8081/api";
+        //Llamamos al servicio de login con un usuario que tiene una conversacion
+        RequestSpecification request = RestAssured.given();
+        JSONObject requestParams = new JSONObject();
+        requestParams.put("email", "user02@email.com");
+        requestParams.put("password", "user02");
+        request.header("Content-Type", "application/json");
+        request.body(requestParams.toJSONString());
+        // Hacemos la petición
+        Response response = request.post(RestAssuredURL+"/users/login");
+        String token = response.jsonPath().getString("token");
+
+        //Hacemos la petición para obtener las conversaciones
+        RequestSpecification request2 = RestAssured.given();
+        request2.header("Content-Type", "application/json");
+        request2.header("token",token );
+        Response response2 = request2.get(RestAssuredURL+"/conversation/list");
+
+        //Comprobamos que obtenemos las conversaciones correctamente
+        List<Object> conversations = response2.jsonPath().getList("conversations");
+        Assertions.assertEquals(2,
+                conversations.size());
+        Assertions.assertEquals(200, response2.getStatusCode());
+    }
+
+    /**
+     * PR46. Eliminar una conversación de ID conocido. Esta prueba consistirá en comprobar que se
+     * elimina correctamente una conversación concreta. Por lo tanto, se tendrá primero que invocar al
+     * servicio de identificación (S1), eliminar la conversación ID (S6) y solicitar el listado de
+     * conversaciones a continuación (S5), comprobando que se retornan las conversaciones adecuadas
+     * Realizado por: Israel
+     */
+    @Test
+    @Order(46)
+    public void PR46() {
+        final String RestAssuredURL = "http://localhost:8081/api";
+        //Llamamos al servicio de login con un usuario que tiene una conversacion
+        RequestSpecification request = RestAssured.given();
+        JSONObject requestParams = new JSONObject();
+        requestParams.put("email", "user01@email.com");
+        requestParams.put("password", "user01");
+        request.header("Content-Type", "application/json");
+        request.body(requestParams.toJSONString());
+        // Hacemos la petición
+        Response response = request.post(RestAssuredURL+"/users/login");
+        String token = response.jsonPath().getString("token");
+
+        //Hacemos la petición para eliminar las conversaciones
+        RequestSpecification request2 = RestAssured.given();
+        request2.header("Content-Type", "application/json");
+        request2.header("token",token );
+        Response response2 = request2.post(RestAssuredURL+"/conversation/delete/000000000000000000000002");
+        JsonPath a = response2.jsonPath();
+        Assertions.assertEquals(200, response2.getStatusCode());
+
+        RequestSpecification request3 = RestAssured.given();
+        request3.header("Content-Type", "application/json");
+        request3.header("token",token );
+        Response response3 = request3.get(RestAssuredURL+"/conversation/list");
+        List<Object> conversations = response3.jsonPath().getList("conversations");
+        Assertions.assertEquals(0,
+                conversations.size());
+        Assertions.assertEquals(200, response3.getStatusCode());
+    }
+
+    /**
+     * PR47. Marcar como leído un mensaje de ID conocido. Esta prueba consistirá en comprobar que
+     * el mensaje marcado de ID conocido queda marcado correctamente a true como leído. Por lo
+     * tanto, se tendrá primero que invocar al servicio de identificación (S1), solicitar el servicio de
+     * marcado (S7), comprobando que el mensaje marcado ha quedado marcado a true como leído (S4)
+     * Realizado por: Álvaro
+     */
+    @Test
+    @Order(47)
+    public void PR47() {
+        final String RestAssuredURL = "http://localhost:8081/api";
+        //Llamamos al servicio de login
+        RequestSpecification request = RestAssured.given();
+        JSONObject requestParams = new JSONObject();
+        requestParams.put("email", "user05@email.com");
+        requestParams.put("password", "user05");
+        request.header("Content-Type", "application/json");
+        request.body(requestParams.toJSONString());
+        // Hacemos la petición
+        Response response = request.post(RestAssuredURL+"/users/login");
+        String token = response.jsonPath().getString("token");
+        // Llamamos al servicio de mensajes
+        RequestSpecification request2 = RestAssured.given();
+        request2.header("Content-Type", "application/json");
+        request2.header("token",token );
+        // Hacemos la petición para marcar el mensaje como leído
+        Document message=m.getMessage("user07@email.com", "user05@email.com","645692d93a07e85fc87fefa6");
+        String id= message.getObjectId("_id").toString();
+        Response response2 = request2.put(RestAssuredURL+"/messages/"+id);
+        // Guardamos todas las ofertas
+        String result = response2.jsonPath().getString("message");
+        // Comprobamos que se muestran todas las ofertas
+        Assertions.assertEquals("Mensaje modificado correctamente.",result);
+        Assertions.assertEquals(200, response2.getStatusCode());
+        message=m.getMessage("user07@email.com", "user05@email.com","645692d93a07e85fc87fefa6");
+        Assertions.assertEquals(true, message.getBoolean("read"));
+    }
+
+    /**
      * PR48. Inicio de sesión con datos válidos.
      * Realizada por: Omar
      */
@@ -973,7 +1494,245 @@ class Sdi2223Entrega2TestApplicationTests {
                 offerList.size());
     }
 
+    /**
+     * PR52. Sobre listado de ofertas disponibles (a elección de desarrollador), enviar un mensaje a una
+     * oferta concreta. Se abriría dicha conversación por primera vez. Comprobar que el mensaje aparece
+     * en el listado de mensajes
+     * Realizado por: Israel
+     */
+    @Test
+    @Order(52)
+    public void PR52() {
+        // Accedemos a la página de login
+        driver.get(BASE_API_URL+"/client.html?w=login");
+        // Rellenamos el formulario de login
+        PO_LoginView.fillLoginForm(driver, "user03@email.com", "user03");
+        //Esperamos a que se carguen las ofertas
+        //List<WebElement> cards = SeleniumUtils.waitLoadElementsBy(driver, "free","//div[contains(@class, 'card border-dark mb-3')]", PO_View.getTimeout());
+        //Assertions.assertTrue(cards.size()>0);
+        //Hacemos click en la primera oferta para establecer una conversacion
+        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@onclick, 'loadConversation')]", 0);
+        //Obtenemos el input para enviar los mensajes
+        WebElement inputMessage = driver.findElement(By.xpath("//input[contains(@class, 'form-control')]"));
+        String checkText = "Hola, soy un mensaje";
+        //Escribimos el mensaje
+        inputMessage.sendKeys(checkText);
+        //Hacemos click en el boton de enviar mensaje
+        PO_PrivateView.checkViewAndClick(driver, "free", "//button[contains(@class, 'btn')]", 0);
+        //Obtenemos el parrafo con el mensaje enviado
+        WebElement textMessage = driver.findElement(By.xpath("//p[contains(text(), 'Hola, soy un mensaje')]"));
+        // Comprobamos que se ha enviado correctamente
+        Assertions.assertTrue(textMessage!=null);
+    }
+
+    /**
+     * PR53. Sobre el listado de conversaciones enviar un mensaje a una conversación ya abierta.
+     * Comprobar que el mensaje aparece en el listado de mensajes
+     * Realizado por: Israel
+     */
+    @Test
+    @Order(53)
+    public void PR53() {
+        // Accedemos a la página de login
+        driver.get(BASE_API_URL+"/client.html?w=login");
+        // Rellenamos el formulario de login
+        PO_LoginView.fillLoginForm(driver, "user02@email.com", "user02");
+
+        driver.navigate().to(BASE_API_URL+"/client.html?w=conversationList");
+        //Esperamos a que se carguen las ofertas
+        //List<WebElement> cards = SeleniumUtils.waitLoadElementsBy(driver, "free","//div[contains(@class, 'card border-dark mb-3')]", PO_View.getTimeout());
+        //Assertions.assertTrue(cards.size()>0);
+
+        //Hacemos click en la primera oferta para reanudar la conversacion
+        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@onclick, 'loadConversation')]", 0);
+        //Obtenemos el parrafo con el mensaje
+        WebElement textMessage = driver.findElement(By.xpath("//p[contains(text(), 'Me interesa la oferta')]"));
+        // Comprobamos que el mensaje existe
+        Assertions.assertTrue(textMessage!=null);
+    }
+
+    /**
+     * PR54. Mostrar el listado de conversaciones ya abiertas. Comprobar que el listado contiene la
+     * cantidad correcta de conversaciones
+     * Realizado por: Israel
+     */
+    @Test
+    @Order(54)
+    public void PR54() {
+        // Accedemos a la página de login
+        driver.get(BASE_API_URL+"/client.html?w=login");
+        // Rellenamos el formulario de login
+        PO_LoginView.fillLoginForm(driver, "user02@email.com", "user02");
+        //Vamos a listar las conversaciones
+        driver.navigate().to(BASE_API_URL+"/client.html?w=conversationList");
+        //Obtenemos las filas de la tabla
+        List<WebElement> rows = SeleniumUtils.waitLoadElementsBy(driver, "free",
+                "//a[contains(@onclick, 'loadConversation')]", PO_View.getTimeout());
+        // Comprobamos que la cantidad es correcta
+        Assertions.assertEquals(2,rows.size());
+    }
+
+    /**
+     * PR55. Sobre el listado de conversaciones ya abiertas. Pinchar el enlace Eliminar en la primera y
+     * comprobar que el listado se actualiza correctamente
+     * Realizado por: Israel
+     */
+    @Test
+    @Order(55)
+    public void PR55() {
+        // Accedemos a la página de login
+        driver.get(BASE_API_URL+"/client.html?w=login");
+        // Rellenamos el formulario de login
+        PO_LoginView.fillLoginForm(driver, "user02@email.com", "user02");
+        //Vamos a listar las conversaciones
+        driver.navigate().to(BASE_API_URL+"/client.html?w=conversationList");
+        //Hacemos click en el primer boton de eliminar
+        PO_PrivateView.checkViewAndClick(driver, "free", "//button[contains(text(), 'Eliminar')]", 0);
+        //Obtenemos las filas de la tabla
+        List<WebElement> rows = SeleniumUtils.waitLoadElementsBy(driver, "free",
+                "//a[contains(@onclick, 'loadConversation')]", PO_View.getTimeout());
+        // Comprobamos que se ha borrado
+        Assertions.assertEquals(1,rows.size());
+    }
+
+    /**
+     * PR56. Sobre el listado de conversaciones ya abiertas. Pinchar el enlace Eliminar en la última y
+     * comprobar que el listado se actualiza correctamente
+     * Realizado por: Israel
+     */
+    @Test
+    @Order(56)
+    public void PR56() {
+        // Accedemos a la página de login
+        driver.get(BASE_API_URL+"/client.html?w=login");
+        // Rellenamos el formulario de login
+        PO_LoginView.fillLoginForm(driver, "user02@email.com", "user02");
+        //Vamos a listar las conversaciones
+        driver.navigate().to(BASE_API_URL+"/client.html?w=conversationList");
+        //Hacemos click en el primer boton de eliminar
+        PO_PrivateView.checkViewAndClick(driver, "free", "//button[contains(text(), 'Eliminar')]", 1);
+        //Obtenemos las filas de la tabla
+        List<WebElement> rows = SeleniumUtils.waitLoadElementsBy(driver, "free",
+                "//a[contains(@onclick, 'loadConversation')]", PO_View.getTimeout());
+        // Comprobamos que se ha borrado
+        Assertions.assertEquals(1,rows.size());
+    }
+
+    /**
+     * PR57.  Identificarse en la aplicación y enviar un mensaje a una oferta, validar que el mensaje
+     * enviado aparece en el chat. Identificarse después con el usuario propietario de la oferta y validar
+     * que tiene un mensaje sin leer, entrar en el chat y comprobar que el mensaje pasa a tener el estado
+     * leído.
+     * Realizada por: Álvaro
+     */
+    @Test
+    @Order(57)
+    public void PR57() {
+        driver.navigate().to("http://localhost:8081/apiclient/client.html?w=login");
+        //Iniciamos sesión como usuario estandar
+        PO_PrivateView.loginAPI(driver, "user01@email.com", "user01");
+
+        //Creamos la conversación
+        PO_PrivateView.checkViewAndClick(driver, "free", "//*[@id=\"createConversation\"]", 0);
+
+        //Añadimos un mensaje con texto:Hola
+        List<WebElement> elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"text-message\"]");
+        elements.get(0).click();
+        elements.get(0).sendKeys("Hola");
+        elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"button-addon2\"]");
+        elements.get(0).click();
+
+        //Comprobamos que aparece el mensaje por pantalla
+        elements=PO_View.checkElementBy(driver, "text", "Hola");
+        Assertions.assertEquals("Hola",elements.get(0).getText());
 
 
+        //Logeamos con otro usuario
+        PO_PrivateView.checkViewAndClick(driver, "free", "//*[@id=\"login\"]",0);
+        SeleniumUtils.waitLoadElementsBy(driver,"text","Email:",3000);
+        //Iniciamos sesión como usuario estandar
+        PO_PrivateView.loginAPI(driver, "user02@email.com", "user02");
+
+        //Vamos al menu de conversaciones
+        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(text(), 'Conversaciones')]", 0);
+
+        //Comprobamos que hay un mensaje sin leer
+        elements=PO_View.checkElementBy(driver, "text", "1");
+        Assertions.assertEquals("1",elements.get(4).getText());
+
+        //Entramos a la conversación
+        PO_PrivateView.checkViewAndClick(driver, "free", "//*[@id=\"openConversation\"]",2);
+
+
+        //Comprobamos que aparece el mensaje por pantalla
+        SeleniumUtils.waitSeconds(driver,2);
+        elements=PO_View.checkElementBy(driver, "text", "Hola");
+        Assertions.assertEquals("Hola",elements.get(0).getText());
+
+        //Comprobamos que el mensaje se ha marcado como leído
+        Document message=m.getMessageFromUser("user01@email.com", "user01@email.com");
+        Assertions.assertEquals(true,message.getBoolean("read"));
+
+
+    }
+
+    /**
+     * PR58.  Identificarse en la aplicación y enviar tres mensajes a una oferta, validar que los mensajes
+     * enviados aparecen en el chat. Identificarse después con el usuario propietario de la oferta y validar
+     * que el número de mensajes sin leer aparece en su oferta.
+     * Realizada por: Álvaro
+     */
+    @Test
+    @Order(58)
+    public void PR58() {
+        driver.navigate().to("http://localhost:8081/apiclient/client.html?w=login");
+        //Iniciamos sesión como usuario estandar
+        PO_PrivateView.loginAPI(driver, "user01@email.com", "user01");
+
+        //Creamos la conversación
+        PO_PrivateView.checkViewAndClick(driver, "free", "//*[@id=\"createConversation\"]", 0);
+
+        //Añadimos un mensaje con texto:Hola
+        List<WebElement> elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"text-message\"]");
+        elements.get(0).click();
+        elements.get(0).sendKeys("Hola");
+        elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"button-addon2\"]");
+        elements.get(0).click();
+
+        PO_View.checkElementBy(driver, "text", "Hola");
+
+
+        //Añadimos un mensaje con texto:que
+        elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"text-message\"]");
+        elements.get(0).click();
+        elements.get(0).sendKeys("que");
+        elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"button-addon2\"]");
+        elements.get(0).click();
+
+        PO_View.checkElementBy(driver, "text", "que");
+
+        //Añadimos un mensaje con texto:tal
+        elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"text-message\"]");
+        elements.get(0).click();
+        elements.get(0).sendKeys("tal");
+        elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"button-addon2\"]");
+        elements.get(0).click();
+
+        PO_View.checkElementBy(driver, "text", "tal");
+
+        //Logeamos con otro usuario
+        PO_PrivateView.checkViewAndClick(driver, "free", "//*[@id=\"login\"]",0);
+        SeleniumUtils.waitLoadElementsBy(driver,"text","Email:",3000);
+        //Iniciamos sesión como usuario estandar
+        PO_PrivateView.loginAPI(driver, "user02@email.com", "user02");
+
+        //Vamos al menu de conversaciones
+        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(text(), 'Conversaciones')]", 0);
+
+        //Comprobamos que hay 3 mensajes sin leer
+        elements=PO_View.checkElementBy(driver, "text", "3");
+
+        Assertions.assertEquals("3",elements.get(1).getText());
+    }
 
 }

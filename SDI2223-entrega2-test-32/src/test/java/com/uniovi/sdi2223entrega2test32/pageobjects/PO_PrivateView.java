@@ -1,10 +1,12 @@
 package com.uniovi.sdi2223entrega2test32.pageobjects;
 
+import com.uniovi.sdi2223entrega2test32.util.SeleniumUtils;
 import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PO_PrivateView extends PO_NavView {
@@ -20,6 +22,18 @@ public class PO_PrivateView extends PO_NavView {
         PO_HomeView.clickOption(driver, "login", "class", "btn btn-dark");
         PO_LoginView.fillLoginForm(driver, email, password);
         PO_View.checkElementBy(driver, "text", email);
+    }
+
+    /**
+     * Método para realizar el login de un usuario
+     *
+     * @param driver   driver
+     * @param email      dni del usuario
+     * @param password contraseña del usuario
+     */
+    static public void loginAPI(WebDriver driver, String email, String password) {
+        PO_LoginView.fillLoginForm(driver, email, password);
+        PO_View.checkElementBy(driver, "text", "Actualizar");
     }
 
     /**
@@ -119,5 +133,20 @@ public class PO_PrivateView extends PO_NavView {
         driver.findElement(boton).click();
     }
 
+    public static List<String> clickAndGetFirstCellsOfTable(WebDriver driver, int n) {
+        List<WebElement> rows = driver.findElements(By.xpath("//table//tr[td/input[@type='checkbox']]"));
 
+        List<String> textsBeforeDelete = new ArrayList<String>();
+        for (int i = 0; i < n; i++) {
+            //Obtenemos la celda del checkbox
+            WebElement checkBoxCell = rows.get(i).findElement(By.xpath(".//input[@type='checkbox']"));
+            //Clickamos el checkbox
+            checkBoxCell.click();
+            //Obtenemos la primera celda de la tabla
+            WebElement email = rows.get(i).findElement(By.xpath(".//td[1]"));
+            //Lo añadimos a la lista para comprobar que se han borrado correctamente
+            textsBeforeDelete.add(email.getText());
+        }
+        return textsBeforeDelete;
+    }
 }
