@@ -329,6 +329,7 @@ class Sdi2223Entrega2TestApplicationTests {
      * PR13. Ir a la lista de usuarios, borrar el último usuario de la lista, comprobar que la lista se actualiza
      * y dicho usuario desaparece.
      * Realizada por: Israel
+     * */
 
     @Test
     @Order(13)
@@ -339,7 +340,8 @@ class Sdi2223Entrega2TestApplicationTests {
         PO_PrivateView.checkViewAndClick(driver, "free", "//li[contains(@class, 'nav-item dropdown')]", 0);
         //Seleccionamos el enlace de gestión de usuarios
         PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@class, 'dropdown-item')]", 0);
-        PO_PrivateView.goLastPage(driver);
+        //Vamos a la ultima pagina
+        driver.navigate().to("http://localhost:8081/users/list/?page=4");
         //Obtenemos el ultimo elemento de la tabla
         WebElement lastRow =  driver.findElement(By.xpath("//table//tbody//tr[last()]"));
 
@@ -356,7 +358,8 @@ class Sdi2223Entrega2TestApplicationTests {
         WebElement deleteSubmitButton = driver.findElement(By.id("delete-users"));
         //Hacemos click sobre el boton de eliminar
         deleteSubmitButton.click();
-        PO_PrivateView.goLastPage(driver);
+        //Vamos a la ultima pagina
+        driver.navigate().to("http://localhost:8081/users/list/?page=4");
         //Obtenemos el ultimo elemento de la tabla
         lastRow =  driver.findElement(By.xpath("//table//tbody//tr[last()]"));
         //Obtenemos el correo de la ultima fila
@@ -366,9 +369,8 @@ class Sdi2223Entrega2TestApplicationTests {
 
         Assertions.assertNotEquals(checkTextBeforeDelete, checkTextAfterDelete);
         PO_PrivateView.logout(driver);
-        m.resetMongo();
     }
-     */
+
 
     /**
      * PR14. Ir a la lista de usuarios, borrar 3 usuarios, comprobar que la lista se actualiza y dichos
