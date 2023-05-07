@@ -7,6 +7,7 @@ import com.uniovi.sdi2223entrega2test.n.pageobjects.PO_View;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import org.bson.Document;
 import org.json.simple.JSONObject;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.By;
@@ -478,7 +479,30 @@ class Sdi2223Entrega2TestApplicationTests {
     @Test
     @Order(47)
     public void PR47() {
-
+        final String RestAssuredURL = "http://localhost:8081/api";
+        //Llamamos al servicio de login
+        RequestSpecification request = RestAssured.given();
+        JSONObject requestParams = new JSONObject();
+        requestParams.put("email", "user05@email.com");
+        requestParams.put("password", "user05");
+        request.header("Content-Type", "application/json");
+        request.body(requestParams.toJSONString());
+        // Hacemos la petición
+        Response response = request.post(RestAssuredURL+"/users/login");
+        String token = response.jsonPath().getString("token");
+        // Llamamos al servicio de mensajes
+        RequestSpecification request2 = RestAssured.given();
+        request2.header("Content-Type", "application/json");
+        request2.header("token",token );
+        // Hacemos la petición para marcar el mensaje como leído
+        Document message=m.getMessage("user07@email.com", "user05@email.com","645692d93a07e85fc87fefa6");
+        String id= message.getObjectId("_id").toString();
+        Response response2 = request2.put(RestAssuredURL+"/messages/"+id);
+        // Guardamos todas las ofertas
+        String result = response2.jsonPath().getString("message");
+        // Comprobamos que se muestran todas las ofertas
+        Assertions.assertEquals("Mensaje modificado correctamente.",result);
+        Assertions.assertEquals(200, response2.getStatusCode());
     }
 
     /**

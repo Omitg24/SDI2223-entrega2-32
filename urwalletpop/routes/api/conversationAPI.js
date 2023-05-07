@@ -37,7 +37,7 @@ module.exports = function (app, offerRepository, conversationRepository,messageR
             }
         }).catch(error => {
                 res.status(500);
-                res.json({error: "Error al marcar el mensaje como leído."});
+                res.json({error: "Error al marcar el mensaje como leído: "+error});
         });
     });
 

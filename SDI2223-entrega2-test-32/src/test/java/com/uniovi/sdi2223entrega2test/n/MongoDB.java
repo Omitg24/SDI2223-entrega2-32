@@ -1,10 +1,8 @@
 package com.uniovi.sdi2223entrega2test.n;
 
-import com.mongodb.client.FindIterable;
+import com.mongodb.*;
 import org.bson.Document;
 
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.types.ObjectId;
@@ -13,8 +11,10 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 public class MongoDB {
 	private MongoClient mongoClient;
@@ -145,12 +145,36 @@ public class MongoDB {
 		MongoCollection<Document> offers = getMongodb().getCollection("messages");
 		Document offer1 = new Document()
 				.append("owner", "user07@email.com")
-				.append("interested", "user05@emial.com")
-				.append("date","11/11/2002")
+				.append("interested", "user05@email.com")
 				.append("offer", new ObjectId("645692d93a07e85fc87fefa6"))
+				.append("date" , new Date())
 				.append("text","Hola")
 				.append("read",false);
 		offers.insertOne(offer1);
 	}
 
+	private long getUsers(){
+		MongoCollection<Document> users = getMongodb().getCollection("users");
+		return users.count();
+	}
+
+
+
+	public Document getMessage(String owner, String interested, String offer) {
+		MongoCollection<Document> messages = getMongodb().getCollection("messages");
+		BasicDBObject andQuery = new BasicDBObject();
+
+		List<BasicDBObject> obj = new ArrayList<BasicDBObject>();
+		obj.add(new BasicDBObject("owner", owner));
+		obj.add(new BasicDBObject("interested", interested));
+		obj.add(new BasicDBObject("offer", new ObjectId(offer)));
+		andQuery.put("$and", obj);
+
+		System.out.println(andQuery.toString());
+
+		Document result = messages.find(andQuery).first();
+
+		return result;
+
+	}
 }
