@@ -1,5 +1,7 @@
 const {ObjectId} = require("mongodb");
-module.exports = function (app, usersRepository, offerRepository, logsRepository) {
+const conversationRepository = require("../repositories/conversationRepository");
+const messageRepository = require("../repositories/messageRepository");
+module.exports = function (app, usersRepository, offerRepository, logsRepository,conversationRepository,messageRepository) {
     app.get('/home', function (req, res) {
         let filter = {feature: true};
         let page = parseInt(req.query.page);
@@ -217,6 +219,7 @@ module.exports = function (app, usersRepository, offerRepository, logsRepository
         });
     });
 
+
     app.post('/users/delete', function (req, res) {
         let ids = req.body.users;
         let filter;
@@ -226,9 +229,51 @@ module.exports = function (app, usersRepository, offerRepository, logsRepository
 
         let emailFilter = {email: res.user};
         usersRepository.findUser(emailFilter, {}).then(user => {
-            if (ids.includes(user._id)) {
-                ids.splice(ids.indexOf(user._id), 1);
+            for (let id of ids){
+                console.log(id)
+                filter = {_id: ObjectId(id)};
+                usersRepository.findUser(filter, {}).then(user => {
+                    let offerFilter = {author: user.email}
+                    offerRepository.deleteOffers(offerFilter,{}).then(result=>{
+                        let conversationFilter = {
+                            $or: [
+                                {interested: user.email},
+                                {'offer.author': user.email}
+                            ]
+                        }
+                        conversationRepository.getConversations(conversationFilter,{}).then(conversations=>{
+                            for(let conversation of conversations){
+                                let messageFilter = {offer: conversation.offer._id, interested: conversation.interested}
+                                messageRepository.deleteMessages(messageFilter, {}).then(result => {
+                                    conversationRepository.deleteConversation(conversationFilter, {}).catch(error => {
+                                        res.send("Se ha producido un error al intentar eliminar las conversaciones del usuario")
+                                    })
+                                }).catch(error => {
+                                    res.send("Se ha producido un error al intentar eliminar los mensajes del usuario")
+                                })
+                            }
+                            usersRepository.deleteUser(filter,{}).catch(error => {
+                                res.send("Se ha producido un error al intentar eliminar el usuario")
+                            })
+                        }).catch(error => {
+                            res.send("Se ha producido un error al intentar buscar las conversaciones del usuario")
+                        });
+                    }).catch(error => {
+                        res.send("Se ha producido un error al intentar eliminar las ofertas del usuario")
+                    });
+                })
+                .catch(error=>{
+                    res.send("No se ha podido obtener el usuario");
+                })
+                usersRepository.deleteUser(filter, {}).then(result => {
+                    if (result === null || result.deletedCount === 0) {
+                        res.send("No se ha podido eliminar el registro");
+                    }
+                }).catch(error => {
+                    res.send("Se ha producido un error al intentar eliminar los usuarios")
+                });
             }
+            res.redirect("/users/list");
         }).catch(error => {
             let errors = [];
             errors.push({
@@ -237,16 +282,7 @@ module.exports = function (app, usersRepository, offerRepository, logsRepository
             });
         });
 
-        filter = {_id: {$in: ids.map(id => ObjectId(id))}};
-        usersRepository.deleteUsers(filter, {}).then(result => {
-            if (result === null || result.deletedCount === 0) {
-                res.send("No se ha podido eliminar el registro");
-            } else {
-                res.redirect("/users/list");
-            }
-        }).catch(error => {
-            res.send("Se ha producido un error al intentar eliminar los usuarios")
-        });
+
     });
 
     function insertLog(req, type, email) {
@@ -334,47 +370,4 @@ module.exports = function (app, usersRepository, offerRepository, logsRepository
         return errors;
     }
 
-    app.post('/users/delete', function (req, res) {
-        let ids = req.body.users;
-        let filter;
-        if(typeof ids == "string"){
-            ids=[ids];
-        }
-
-        let emailFilter = {email: res.user};
-        usersRepository.findUser(emailFilter, {}).then(user => {
-            if (ids.includes(user._id)) {
-                ids.splice(ids.indexOf(user._id), 1);
-            }
-        }).catch(error => {
-            let errors = [];
-            errors.push({
-                type: "Borrado",
-                message: "Se ha producido un error al buscar al usuario"
-            });
-        });
-
-        filter = {_id: {$in: ids.map(id => ObjectId(id))}};
-        usersRepository.deleteUsers(filter, {}).then(result => {
-            if (result === null || result.deletedCount === 0) {
-                res.send("No se ha podido eliminar el registro");
-            } else {
-                res.redirect("/users/list");
-            }
-        }).catch(error => {
-            res.send("Se ha producido un error al intentar eliminar los usuarios")
-        });
-    });
-
-    function insertLog(req,type,email){
-        let log = {
-            date:Date.now(),
-            action:req.method,
-            url:email,
-            type:type,
-        }
-        logsRepository.insertLog(log).catch(error => {
-            console.log("No se ha podido registrar la peticion " + req.method)
-        });
-    }
 }

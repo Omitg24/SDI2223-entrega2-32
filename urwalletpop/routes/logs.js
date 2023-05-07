@@ -1,7 +1,7 @@
 module.exports = function (app, logsRepository) {
 
     /**
-     * Metodo que obtiene los logs de la base de datos y si hay una busqueda obtiene los logs en funcion del texto
+     * Obtiene los logs de la base de datos y si hay una busqueda obtiene los logs en funcion del texto
      * y devuelve una vista que se encargara de mostrarlos
      */
     app.get('/log/list', function (req, res) {
@@ -20,8 +20,9 @@ module.exports = function (app, logsRepository) {
         }).catch(error => {
         });
     });
+
     /**
-     * Metodo que elimina todos los logs de la base de datos
+     * Elimina todos los logs de la base de datos
      */
     app.get('/log/delete', function (req, res) {
         logsRepository.deleteLogs().then(result => {

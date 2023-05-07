@@ -39,20 +39,24 @@ module.exports = function (app, offerRepository, conversationRepository, message
         });
     });
 
+    /**
+     * Metodo que obtiene la conversacion dada una oferta y el interesado y obtiene sus mensajes
+     * La conversacion solo la puede obtener el dueno de la oferta y el intersado
+     */
     app.get("/api/conversation/:offerId/:interestedEmail", function (req, res) {
-        //Obtenemos o creamos la conversación en función de si existe o no
         let conversationFilter = {
             interested: req.params.interestedEmail,
             'offer._id': ObjectId(req.params.offerId)
         };
         let options = {};
         conversationRepository.findConversation(conversationFilter, options).then(conversation => {
-
+            //Si no es ni interesado ni vendedor
             if(conversation!=null && !(conversation.offer.author == res.user || req.params.interestedEmail ==res.user) && req.params.interestedEmail ==conversation.offer.author){
                 res.status(403);
                 res.json({error: "No puedes obtener la conversación"});
                 return;
             }
+            //Mensajes que sean de la conversacion concreta
             let messageFilter = {
                 offer: ObjectId(req.params.offerId),
                 interested: req.params.interestedEmail
@@ -67,7 +71,11 @@ module.exports = function (app, offerRepository, conversationRepository, message
         })
     });
 
+    /**
+     * Metodo que devuelve las conversaciones en las que aparece la persona que lo solicita,como interesado o como vendedor
+     */
     app.get("/api/conversation/list", function (req, res) {
+        //Conversaciones del usuario como interesado o como author
         let filter = {
             $or: [
                 {interested: res.user},
@@ -84,6 +92,9 @@ module.exports = function (app, offerRepository, conversationRepository, message
         })
     });
 
+    /**
+     * Metodo que elimina un conversacion y sus mensajes dado un id (de conversacion)
+     */
     app.post("/api/conversation/delete/:id", function (req, res) {
         let conversationFilter = {
             _id: ObjectId(req.params.id)
@@ -117,8 +128,11 @@ module.exports = function (app, offerRepository, conversationRepository, message
 
     });
 
+    /**
+     * Metodo que envia un mensaje en la conversacion, si no se ha enviado un mensaje en la conversacion, se crea
+     */
     app.post("/api/conversation/:offerId/:interestedEmail", messageValidatorInsert, function (req, res) {
-
+        //Creamos el mensaje
         let message = {
             owner: res.user,
             interested: req.params.interestedEmail,
@@ -128,7 +142,6 @@ module.exports = function (app, offerRepository, conversationRepository, message
             read: false
         }
         let offerFilter = {_id: ObjectId(req.params.offerId)};
-        //Obtenemos o creamos la conversación en función de si existe o no
         let conversationFilter = {
             interested: req.params.interestedEmail,
             'offer._id': ObjectId(req.params.offerId)
@@ -136,17 +149,22 @@ module.exports = function (app, offerRepository, conversationRepository, message
 
         let user = res.user;
         let options = {};
+        //Obtenemos la oferta asociada al id
         offerRepository.findOffer(offerFilter, options).then(offer => {
+            //Si no es ni author ni interesado no envia mensaje
             if (offer.author == user || user == req.params.interestedEmail) {
                 const errors = validationResult(req);
+                //Validamos el mensaje
                 if (!errors.isEmpty()) {
                     res.status(400);
                     res.json({errors: errors.array()})
                 } else {
+                    //Insertamos el mensaje
                     messageRepository.insertMessage(message).then(result => {
                         conversationRepository.findConversation(conversationFilter, options).then(conversation => {
                             if (conversation === null) {
                                 let conver;
+                                //Comprobamos que no se puede iniciar una conversacion en tu propia oferta
                                 if(offer.author != req.params.interestedEmail){
                                     conver={offer:offer,interested:user}
                                     conversationRepository.insertConversation(conver).then(result=>{
