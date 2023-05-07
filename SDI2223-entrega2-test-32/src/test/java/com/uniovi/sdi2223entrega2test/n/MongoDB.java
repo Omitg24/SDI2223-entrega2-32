@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Date;
 
 public class MongoDB {
     private MongoClient mongoClient;
@@ -97,6 +98,26 @@ public class MongoDB {
         }
     }
 
+    private void insertConversationAndMessage(Document offer,String interestedEmail,String objectIdVal){
+        MongoCollection<Document> conversations = getMongodb().getCollection("conversations");
+        ObjectId objectId = new ObjectId(objectIdVal);
+        Document conversation = new Document()
+                .append("_id",objectId)
+                .append("offer", offer)
+                .append("interested", interestedEmail);
+        conversations.insertOne(conversation);
+
+        MongoCollection<Document> messages = getMongodb().getCollection("messages");
+        Document message = new Document()
+                .append("offer", new ObjectId("000000000000000000000005"))
+                .append("owner", interestedEmail)
+                .append("interested", interestedEmail)
+                .append("read",false)
+                .append("text","Me interesa la oferta")
+                .append("date", new Date());
+        messages.insertOne(message);
+    }
+
     private void insertOffers() {
         MongoCollection<Document> offers = getMongodb().getCollection("offers");
         Document offer1 = new Document().append("title", "117").append("author", "user02@email.com")
@@ -107,7 +128,9 @@ public class MongoDB {
                 .append("buyer", null)
                 .append("feature", false);
         offers.insertOne(offer1);
+        ObjectId objectId = new ObjectId("000000000000000000000005");
         Document offer2 = new Document().append("title", "118").append("author", "user02@email.com")
+                .append("_id",objectId)
                 .append("description", "aaaaaaaaaaaaaaaaaaaaaaaaaaa")
                 .append("price", 100)
                 .append("date", "11/11/2002")
@@ -115,9 +138,11 @@ public class MongoDB {
                 .append("buyer", null)
                 .append("feature", false);
         offers.insertOne(offer2);
-        ObjectId objectId = new ObjectId("000000000000000000000001");
+        insertConversationAndMessage(offer2,"user03@email.com","000000000000000000000003");
+        insertConversationAndMessage(offer2,"user01@email.com","000000000000000000000002");
+        ObjectId objectId2 = new ObjectId("000000000000000000000001");
         Document offer3 = new Document().append("title", "119").append("author", "user02@email.com")
-                .append("_id",objectId)
+                .append("_id",objectId2)
                 .append("description", "aaaaaaaaaaaaaaaaaaaaaaaaaaa")
                 .append("price", 150)
                 .append("date", "11/11/2002")

@@ -49,13 +49,14 @@ module.exports = function (app, offerRepository, conversationRepository,messageR
         let options = {};
         conversationRepository.findConversation(conversationFilter, options).then(conversation => {
 
-            if(conversation!=null && !(conversation.offer.author == res.user || req.params.interestedEmail ==res.user)){
+            if(conversation!=null && !(conversation.offer.author == res.user || req.params.interestedEmail ==res.user) && req.params.interestedEmail ==conversation.offer.author){
                 res.status(403);
                 res.json({error: "No puedes obtener la conversación"});
                 return;
             }
             let messageFilter = {
-                offer: ObjectId(req.params.offerId)
+                offer: ObjectId(req.params.offerId),
+                interested: req.params.interestedEmail
             }
             messageRepository.findMessages(messageFilter,{}).then(messages =>{
                 res.status(200);
