@@ -149,6 +149,7 @@ module.exports = function (app, offerRepository, usersRepository) {
         })
     })
 
+
     app.get('/offer/searchList', function (req, res) {
         let search = req.query.search || '';
         let filter = {author: {$ne: req.session.user}};
@@ -211,6 +212,9 @@ module.exports = function (app, offerRepository, usersRepository) {
         })
     })
 
+    /**
+     * Metodo que retorna las ofertas compradas
+     */
     app.get('/offer/purchasedList', function (req, res) {
         let filter = {buyer: req.session.user};
         let options = {};
@@ -255,6 +259,9 @@ module.exports = function (app, offerRepository, usersRepository) {
         });
     });
 
+    /**
+     * Metodo que marca la oferta com comprada y descuenta el dinero al comprador
+     */
     app.get('/offer/purchase/:id', function (req, res) {
         let search = req.query.search || '';
         let filter = {author: {$ne: req.session.user}};
@@ -364,6 +371,10 @@ module.exports = function (app, offerRepository, usersRepository) {
         });
     });
 
+    /**
+     * Metodo que marca una oferta como destacada y descuenta 20$ de la cuenta
+     * del usuario
+     */
     app.get('/offer/feature/:id', function (req, res) {
         let filter = {author: req.session.user};
         let options = {};
