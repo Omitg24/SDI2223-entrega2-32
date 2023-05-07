@@ -366,7 +366,7 @@ class Sdi2223Entrega2TestApplicationTests {
         offerList.addAll(SeleniumUtils.waitLoadElementsBy(driver, "free",
                 "//div[contains(@class, 'card border-dark mb-3')]", PO_View.getTimeout()));
         // Comprobamos que se encuentren todas las ofertas
-        Assertions.assertEquals(10, offerList.size());
+        Assertions.assertEquals(m.getUsersOffersCount("user04@email.com"), offerList.size());
         // Hacemos logout
         PO_PrivateView.logout(driver);
     }
@@ -487,7 +487,8 @@ class Sdi2223Entrega2TestApplicationTests {
                     "//div[contains(@class, 'card border-dark mb-3')]", PO_View.getTimeout()));
         }
         // Comprobamos que se encuentren todas las ofertas
-        Assertions.assertEquals(143, offerList.size());
+        Assertions.assertEquals(m.getTotalOffersCount()-m.getUsersOffersCount("user10@email.com"),
+                offerList.size());
         // Hacemos logout
         PO_PrivateView.logout(driver);
     }
@@ -539,7 +540,7 @@ class Sdi2223Entrega2TestApplicationTests {
         offerList.addAll(SeleniumUtils.waitLoadElementsBy(driver, "free",
                 "//div[contains(@class, 'card border-dark mb-3')]", PO_View.getTimeout()));
         // Comprobamos que se encuentren todas las ofertas
-        Assertions.assertEquals(10, offerList.size());
+        Assertions.assertEquals(m.getOffersByTitleCount("oferta 4"), offerList.size());
         // Hacemos logout
         PO_PrivateView.logout(driver);
     }
@@ -894,7 +895,8 @@ class Sdi2223Entrega2TestApplicationTests {
         // Guardamos todas las ofertas
         List<Object> offers = response2.jsonPath().getList("offers");
         // Comprobamos que se muestran todas las ofertas
-        Assertions.assertEquals(143, offers.size());
+        Assertions.assertEquals(m.getTotalOffersCount()-m.getUsersOffersCount("user01@email.com"),
+                offers.size());
         Assertions.assertEquals(200, response2.getStatusCode());
     }
 
@@ -967,7 +969,8 @@ class Sdi2223Entrega2TestApplicationTests {
         List<WebElement> offerList = SeleniumUtils.waitLoadElementsBy(driver, "free",
                 "//div[contains(@class, 'card border-dark mb-3')]", PO_View.getTimeout());
         // Comprobamos que se muestran todas las ofertas disponibles
-        Assertions.assertTrue(offerList.size() > 0);
+        Assertions.assertEquals(m.getTotalOffersCount()-m.getUsersOffersCount("user01@email.com"),
+                offerList.size());
     }
 
 
