@@ -41,7 +41,7 @@
                 "<p class='card-text'>" + offers[i].description + "</p>" +
                 "<h6 class='card-link' id='date'>" + offers[i].date + "</h6>" +
                 "<h6 class='card-link' id='author'>" + offers[i].author + "</h6>" +
-                "<a onclick=\"loadConversation('" + offers[i]._id + "','" + interested + "','" + offers[i].title + "')\"" + "<button class=\"btn btn-dark\">Establecer conversación</button> </a>" +
+                "<a id='createConversation' onclick=\"loadConversation('"+offers[i]._id+"','" + interested + "','" + offers[i].title+"')\"" + "<button class=\"btn btn-dark\">Establecer conversación</button> </a>"+
                 "</div>" +
                 "</div>"
             )

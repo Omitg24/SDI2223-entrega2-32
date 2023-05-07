@@ -100,6 +100,10 @@ module.exports = function (app, offerRepository, conversationRepository, message
                 })
 
             }
+            if(conversations.length === 0){
+                res.status(200);
+                res.json({conversations: conversations, user: res.user});
+            }
         }).catch(error => {
             res.status(500);
             res.json({error: "Error al obtener las conversaciones."});

@@ -6,6 +6,7 @@ import io.restassured.RestAssured;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import org.bson.Document;
 import org.json.simple.JSONObject;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.By;
@@ -823,6 +824,7 @@ class Sdi2223Entrega2TestApplicationTests {
         PO_PrivateView.logout(driver);
     }
 
+
     /**
      * PR30. Al crear una oferta, marcar dicha oferta como destacada y a continuación comprobar: i)
      * que aparece en el listado de ofertas destacadas para los usuarios y que el saldo del usuario se
@@ -847,11 +849,11 @@ class Sdi2223Entrega2TestApplicationTests {
         // Rellenamos el formulario de alta de oferta con datos validos
         PO_PrivateView.fillFormAddOfferFeatured(driver, "Prueba37", "PruebaDescripcion37", "0.37");
 
-        // Vamos a la tercera pagina de la lista de ofertas propias del usuario
-        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@class, 'page-link')]", 2);
-
         // Comprobamos que la oferta recien añadida sale en la lista de ofertas propias
         // del usuario
+
+        PO_PrivateView.makeSearch(driver, "Prueba37");
+
         PO_PrivateView.checkElement(driver, "Prueba37");
         PO_PrivateView.checkElement(driver, "PruebaDescripcion37");
         PO_PrivateView.checkElement(driver, "0.37 EUR");
@@ -897,11 +899,10 @@ class Sdi2223Entrega2TestApplicationTests {
         // Rellenamos el formulario de alta de oferta con datos validos
         PO_PrivateView.fillFormAddOffer(driver, "Prueba37", "PruebaDescripcion37", "0.37");
 
-        // Vamos a la tercera pagina de la lista de ofertas propias del usuario
-        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@class, 'page-link')]", 2);
-
         // Comprobamos que la oferta recien añadida sale en la lista de ofertas propias
         // del usuario
+        PO_PrivateView.makeSearch(driver, "Prueba37");
+
         PO_PrivateView.checkElement(driver, "Prueba37");
         PO_PrivateView.checkElement(driver, "PruebaDescripcion37");
         PO_PrivateView.checkElement(driver, "0.37 EUR");
@@ -946,11 +947,10 @@ class Sdi2223Entrega2TestApplicationTests {
         // Rellenamos el formulario de alta de oferta con datos validos
         PO_PrivateView.fillFormAddOffer(driver, "Prueba37", "PruebaDescripcion37", "0.37");
 
-        // Vamos a la tercera pagina de la lista de ofertas propias del usuario
-        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@class, 'page-link')]", 2);
-
         // Comprobamos que la oferta recien añadida sale en la lista de ofertas propias
         // del usuario
+        PO_PrivateView.makeSearch(driver, "Prueba37");
+
         PO_PrivateView.checkElement(driver, "Prueba37");
         PO_PrivateView.checkElement(driver, "PruebaDescripcion37");
         PO_PrivateView.checkElement(driver, "0.37 EUR");
@@ -1384,6 +1384,44 @@ class Sdi2223Entrega2TestApplicationTests {
     }
 
     /**
+     * PR47. Marcar como leído un mensaje de ID conocido. Esta prueba consistirá en comprobar que
+     * el mensaje marcado de ID conocido queda marcado correctamente a true como leído. Por lo
+     * tanto, se tendrá primero que invocar al servicio de identificación (S1), solicitar el servicio de
+     * marcado (S7), comprobando que el mensaje marcado ha quedado marcado a true como leído (S4)
+     * Realizado por: Álvaro
+     */
+    @Test
+    @Order(47)
+    public void PR47() {
+        final String RestAssuredURL = "http://localhost:8081/api";
+        //Llamamos al servicio de login
+        RequestSpecification request = RestAssured.given();
+        JSONObject requestParams = new JSONObject();
+        requestParams.put("email", "user05@email.com");
+        requestParams.put("password", "user05");
+        request.header("Content-Type", "application/json");
+        request.body(requestParams.toJSONString());
+        // Hacemos la petición
+        Response response = request.post(RestAssuredURL+"/users/login");
+        String token = response.jsonPath().getString("token");
+        // Llamamos al servicio de mensajes
+        RequestSpecification request2 = RestAssured.given();
+        request2.header("Content-Type", "application/json");
+        request2.header("token",token );
+        // Hacemos la petición para marcar el mensaje como leído
+        Document message=m.getMessage("user07@email.com", "user05@email.com","645692d93a07e85fc87fefa6");
+        String id= message.getObjectId("_id").toString();
+        Response response2 = request2.put(RestAssuredURL+"/messages/"+id);
+        // Guardamos todas las ofertas
+        String result = response2.jsonPath().getString("message");
+        // Comprobamos que se muestran todas las ofertas
+        Assertions.assertEquals("Mensaje modificado correctamente.",result);
+        Assertions.assertEquals(200, response2.getStatusCode());
+        message=m.getMessage("user07@email.com", "user05@email.com","645692d93a07e85fc87fefa6");
+        Assertions.assertEquals(true, message.getBoolean("read"));
+    }
+
+    /**
      * PR48. Inicio de sesión con datos válidos.
      * Realizada por: Omar
      */
@@ -1578,6 +1616,123 @@ class Sdi2223Entrega2TestApplicationTests {
                 "//a[contains(@onclick, 'loadConversation')]", PO_View.getTimeout());
         // Comprobamos que se ha borrado
         Assertions.assertEquals(1,rows.size());
+    }
+
+    /**
+     * PR57.  Identificarse en la aplicación y enviar un mensaje a una oferta, validar que el mensaje
+     * enviado aparece en el chat. Identificarse después con el usuario propietario de la oferta y validar
+     * que tiene un mensaje sin leer, entrar en el chat y comprobar que el mensaje pasa a tener el estado
+     * leído.
+     * Realizada por: Álvaro
+     */
+    @Test
+    @Order(57)
+    public void PR57() {
+        driver.navigate().to("http://localhost:8081/apiclient/client.html?w=login");
+        //Iniciamos sesión como usuario estandar
+        PO_PrivateView.loginAPI(driver, "user01@email.com", "user01");
+
+        //Creamos la conversación
+        PO_PrivateView.checkViewAndClick(driver, "free", "//*[@id=\"createConversation\"]", 0);
+
+        //Añadimos un mensaje con texto:Hola
+        List<WebElement> elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"text-message\"]");
+        elements.get(0).click();
+        elements.get(0).sendKeys("Hola");
+        elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"button-addon2\"]");
+        elements.get(0).click();
+
+        //Comprobamos que aparece el mensaje por pantalla
+        elements=PO_View.checkElementBy(driver, "text", "Hola");
+        Assertions.assertEquals("Hola",elements.get(0).getText());
+
+
+        //Logeamos con otro usuario
+        PO_PrivateView.checkViewAndClick(driver, "free", "//*[@id=\"login\"]",0);
+        SeleniumUtils.waitLoadElementsBy(driver,"text","Email:",3000);
+        //Iniciamos sesión como usuario estandar
+        PO_PrivateView.loginAPI(driver, "user02@email.com", "user02");
+
+        //Vamos al menu de conversaciones
+        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(text(), 'Conversaciones')]", 0);
+
+        //Comprobamos que hay un mensaje sin leer
+        elements=PO_View.checkElementBy(driver, "text", "1");
+        Assertions.assertEquals("1",elements.get(4).getText());
+
+        //Entramos a la conversación
+        PO_PrivateView.checkViewAndClick(driver, "free", "//*[@id=\"openConversation\"]",2);
+
+
+        //Comprobamos que aparece el mensaje por pantalla
+        SeleniumUtils.waitSeconds(driver,2);
+        elements=PO_View.checkElementBy(driver, "text", "Hola");
+        Assertions.assertEquals("Hola",elements.get(0).getText());
+
+        //Comprobamos que el mensaje se ha marcado como leído
+        Document message=m.getMessageFromUser("user01@email.com", "user01@email.com");
+        Assertions.assertEquals(true,message.getBoolean("read"));
+
+
+    }
+
+    /**
+     * PR58.  Identificarse en la aplicación y enviar tres mensajes a una oferta, validar que los mensajes
+     * enviados aparecen en el chat. Identificarse después con el usuario propietario de la oferta y validar
+     * que el número de mensajes sin leer aparece en su oferta.
+     * Realizada por: Álvaro
+     */
+    @Test
+    @Order(58)
+    public void PR58() {
+        driver.navigate().to("http://localhost:8081/apiclient/client.html?w=login");
+        //Iniciamos sesión como usuario estandar
+        PO_PrivateView.loginAPI(driver, "user01@email.com", "user01");
+
+        //Creamos la conversación
+        PO_PrivateView.checkViewAndClick(driver, "free", "//*[@id=\"createConversation\"]", 0);
+
+        //Añadimos un mensaje con texto:Hola
+        List<WebElement> elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"text-message\"]");
+        elements.get(0).click();
+        elements.get(0).sendKeys("Hola");
+        elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"button-addon2\"]");
+        elements.get(0).click();
+
+        PO_View.checkElementBy(driver, "text", "Hola");
+
+
+        //Añadimos un mensaje con texto:que
+        elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"text-message\"]");
+        elements.get(0).click();
+        elements.get(0).sendKeys("que");
+        elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"button-addon2\"]");
+        elements.get(0).click();
+
+        PO_View.checkElementBy(driver, "text", "que");
+
+        //Añadimos un mensaje con texto:tal
+        elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"text-message\"]");
+        elements.get(0).click();
+        elements.get(0).sendKeys("tal");
+        elements = PO_View.checkElementBy(driver, "free", "//*[@id=\"button-addon2\"]");
+        elements.get(0).click();
+
+        PO_View.checkElementBy(driver, "text", "tal");
+
+        //Logeamos con otro usuario
+        PO_PrivateView.checkViewAndClick(driver, "free", "//*[@id=\"login\"]",0);
+        SeleniumUtils.waitLoadElementsBy(driver,"text","Email:",3000);
+        //Iniciamos sesión como usuario estandar
+        PO_PrivateView.loginAPI(driver, "user02@email.com", "user02");
+
+        //Vamos al menu de conversaciones
+        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(text(), 'Conversaciones')]", 0);
+
+        //Comprobamos que hay 3 mensajes sin leer
+        elements=PO_View.checkElementBy(driver, "text", "3");
+
+        Assertions.assertEquals("3",elements.get(1).getText());
     }
 
 }
