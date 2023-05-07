@@ -987,6 +987,10 @@ class Sdi2223Entrega2TestApplicationTests {
     public void PR34() {
         // Accedemos a la lista de usuarios
         driver.navigate().to("http://localhost:8081/apiclient/client.html?w=conversationList");
+
+        List<WebElement> header = SeleniumUtils.waitLoadElementsBy(driver, "free",
+                "//h2[contains(text(), 'Identificación de usuario')]", PO_View.getTimeout());
+        Assertions.assertTrue(header.size()>0);
         // Comprobamos que nos redirige al login
         Assertions.assertEquals("http://localhost:8081/apiclient/client.html?w=login", driver.getCurrentUrl());
     }
