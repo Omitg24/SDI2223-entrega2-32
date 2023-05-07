@@ -1594,14 +1594,16 @@ class Sdi2223Entrega2TestApplicationTests {
     @Test
     @Order(55)
     public void PR55() {
-        // Accedemos a la página de login
+// Accedemos a la página de login
         driver.get(BASE_API_URL+"/client.html?w=login");
         // Rellenamos el formulario de login
         PO_LoginView.fillLoginForm(driver, "user02@email.com", "user02");
         //Vamos a listar las conversaciones
         driver.navigate().to(BASE_API_URL+"/client.html?w=conversationList");
         //Hacemos click en el primer boton de eliminar
-        PO_PrivateView.checkViewAndClick(driver, "free", "//button[contains(text(), 'Eliminar')]", 0);
+        List<WebElement> buttons = SeleniumUtils.waitLoadElementsBy(driver, "free",
+                "//button[contains(text(), 'Eliminar')]", PO_View.getTimeout());
+        buttons.get(0).click();
         //Obtenemos las filas de la tabla
         List<WebElement> rows = SeleniumUtils.waitLoadElementsBy(driver, "free",
                 "//a[contains(@onclick, 'loadConversation')]", PO_View.getTimeout());
@@ -1624,7 +1626,9 @@ class Sdi2223Entrega2TestApplicationTests {
         //Vamos a listar las conversaciones
         driver.navigate().to(BASE_API_URL+"/client.html?w=conversationList");
         //Hacemos click en el primer boton de eliminar
-        PO_PrivateView.checkViewAndClick(driver, "free", "//button[contains(text(), 'Eliminar')]", 1);
+        List<WebElement> buttons = SeleniumUtils.waitLoadElementsBy(driver, "free",
+                "//button[contains(text(), 'Eliminar')]", PO_View.getTimeout());
+        buttons.get(1).click();
         //Obtenemos las filas de la tabla
         List<WebElement> rows = SeleniumUtils.waitLoadElementsBy(driver, "free",
                 "//a[contains(@onclick, 'loadConversation')]", PO_View.getTimeout());
