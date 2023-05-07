@@ -60,6 +60,7 @@ public class MongoDB {
 
     private void deleteData() {
         getMongodb().getCollection("offers").drop();
+        getMongodb().getCollection("logs").drop();
         getMongodb().getCollection("users").drop();
         getMongodb().getCollection("conversations").drop();
         getMongodb().getCollection("messages").drop();

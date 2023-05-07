@@ -69,13 +69,13 @@ module.exports = {
             throw (error);
         }
     },
-    deleteUser: async function (filter, options) {
+    deleteUsers: async function (filter, options) {
         try {
             const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
             const database = client.db("UrWalletPop");
             const collectionName = 'users';
             const usersCollection = database.collection(collectionName);
-            const result = await usersCollection.deleteOne(filter, options);
+            const result = await usersCollection.deleteMany(filter, options);
             return result;
         } catch (error) {
             throw (error);

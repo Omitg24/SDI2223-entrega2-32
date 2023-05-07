@@ -14,6 +14,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.List;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -136,6 +137,166 @@ class Sdi2223Entrega2TestApplicationTests {
         final String RestAssuredURL = "http://localhost:8081/api/v1.0/songs";
         Response response = RestAssured.get(RestAssuredURL);
         Assertions.assertEquals(403, response.getStatusCode());
+    }
+
+    /**
+     * PR12. Ir a la lista de usuarios, borrar el primer usuario de la lista, comprobar que la lista se actualiza
+     * y dicho usuario desaparece.
+     * Realizada por: Israel
+     */
+    @Test
+    @Order(12)
+    public void PR12() {
+        // Iniciamos sesión como administrador
+        PO_PrivateView.login(driver, "admin@email.com", "admin");
+        //Seleccionamos el dropdown de gestion de usuarios
+        PO_PrivateView.checkViewAndClick(driver, "free", "//li[contains(@class, 'nav-item dropdown')]", 0);
+        //Seleccionamos el enlace de gestión de usuarios
+        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@class, 'dropdown-item')]", 0);
+        //Comprobamos que el texto aparece
+        PO_View.checkElementBy(driver, "free", "//h2[contains(text(), 'Listado de usuarios')]");
+        //Obtenemos la primera fila que contenga un checkBox (ya que el admin no se puede eliminar)
+        WebElement firstRowWithCheckbox = driver.findElement(By.xpath("//table//tr[td/input[@type='checkbox']][1]"));
+        //Obtenemos la celda del checkbox
+        WebElement checkBoxCell = firstRowWithCheckbox.findElement(By.xpath(".//input[@type='checkbox']"));
+        //Clickamos el checkbox
+        checkBoxCell.click();
+        WebElement emailOfFirstRow = firstRowWithCheckbox.findElement(By.xpath(".//td[1]"));
+        //Guardamos el texto para confirmar que se ha eliminado correctamente
+        String checkTextAfterDelete = emailOfFirstRow.getText();
+        //Obtenemos el botón que elimina los usuarios seleccionados
+        WebElement deleteSubmitButton = driver.findElement(By.id("delete-users"));
+        //Hacemos click sobre el boton de eliminar
+        deleteSubmitButton.click();
+        //Volvemos a obtener la primera fila de la tabla para comprobar que se ha eliminado correctamente
+        firstRowWithCheckbox = driver.findElement(By.xpath("//table//tr[td/input[@type='checkbox']][1]"));
+        //Obtenemos la primera celda
+        emailOfFirstRow = firstRowWithCheckbox.findElement(By.xpath(".//td[1]"));
+        //Guardamos el texto para confirmar que se ha eliminado correctamente
+        String actualText = emailOfFirstRow.getText();
+        //Comprobamos que los textos son diferentes
+        Assertions.assertNotEquals(checkTextAfterDelete, actualText);
+        PO_PrivateView.logout(driver);
+        m.resetMongo();
+    }
+
+    /**
+     * PR13. Ir a la lista de usuarios, borrar el último usuario de la lista, comprobar que la lista se actualiza
+     * y dicho usuario desaparece.
+     * Realizada por: Israel
+
+    @Test
+    @Order(13)
+    public void PR13() {
+        // Iniciamos sesión como administrador
+        PO_PrivateView.login(driver, "admin@email.com", "admin");
+        //Seleccionamos el dropdown de gestion de usuarios
+        PO_PrivateView.checkViewAndClick(driver, "free", "//li[contains(@class, 'nav-item dropdown')]", 0);
+        //Seleccionamos el enlace de gestión de usuarios
+        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@class, 'dropdown-item')]", 0);
+        PO_PrivateView.goLastPage(driver);
+        //Obtenemos el ultimo elemento de la tabla
+        WebElement lastRow =  driver.findElement(By.xpath("//table//tbody//tr[last()]"));
+
+        //Obtenemos la celda del checkbox
+        WebElement checkBoxCell = lastRow.findElement(By.xpath(".//input[@type='checkbox']"));
+        //Clickamos el checkbox
+        checkBoxCell.click();
+        //Obtenemos la primera celda de la tabla
+        WebElement email = lastRow.findElement(By.xpath(".//td[1]"));
+        //Guardamos el texto para confirmar que se ha eliminado correctamente
+        String checkTextBeforeDelete = email.getText();
+
+        //Obtenemos el botón que elimina los usuarios seleccionados
+        WebElement deleteSubmitButton = driver.findElement(By.id("delete-users"));
+        //Hacemos click sobre el boton de eliminar
+        deleteSubmitButton.click();
+        PO_PrivateView.goLastPage(driver);
+        //Obtenemos el ultimo elemento de la tabla
+        lastRow =  driver.findElement(By.xpath("//table//tbody//tr[last()]"));
+        //Obtenemos el correo de la ultima fila
+        email = lastRow.findElement(By.xpath(".//td[1]"));
+        //Guardamos el texto para confirmar que se ha eliminado correctamente
+        String checkTextAfterDelete = email.getText();
+
+        Assertions.assertNotEquals(checkTextBeforeDelete, checkTextAfterDelete);
+        PO_PrivateView.logout(driver);
+        m.resetMongo();
+    }
+     */
+
+    /**
+     * PR14. Ir a la lista de usuarios, borrar 3 usuarios, comprobar que la lista se actualiza y dichos
+     * usuarios desaparecen.
+     * Realizada por: Israel
+     */
+    @Test
+    @Order(14)
+    public void PR14() {
+        // Iniciamos sesión como administrador
+        PO_PrivateView.login(driver, "admin@email.com", "admin");
+        //Seleccionamos el dropdown de gestion de usuarios
+        PO_PrivateView.checkViewAndClick(driver, "free", "//li[contains(@class, 'nav-item dropdown')]", 0);
+        //Seleccionamos el enlace de gestión de usuarios
+        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@class, 'dropdown-item')]", 0);
+
+        //Obtenemos las 3 primeras filas de la tabla que contengan checkbox (menos la del admin)
+        List<String> textsBeforeDelete = PO_PrivateView.clickAndGetFirstCellsOfTable(driver, 3);
+
+        //Obtenemos el botón que elimina los usuarios seleccionados
+        WebElement deleteSubmitButton = driver.findElement(By.id("delete-users"));
+        //Hacemos click sobre el boton de eliminar
+        deleteSubmitButton.click();
+
+        //Obtenemos las 3 primeras filas de la tabla que contengan checkbox (menos la del admin)
+        List<String> textsAfterDelete = PO_PrivateView.clickAndGetFirstCellsOfTable(driver, 3);
+        //Comprobamos que se han eliminado correctamente
+        for (int i = 0; i < 3; i++) {
+            Assertions.assertNotEquals(textsBeforeDelete.get(i), textsAfterDelete.get(i));
+        }
+        PO_PrivateView.logout(driver);
+        m.resetMongo();
+    }
+
+    /**
+     * PR15. Intentar borrar el usuario que se encuentra en sesión y comprobar que no ha sido borrado
+     * (porque no es un usuario administrador o bien, porque, no se puede borrar a sí mismo, si está
+     * autenticado)
+     * Realizada por: Israel
+     */
+    @Test
+    @Order(15)
+    public void PR15() {
+        PO_PrivateView.login(driver, "admin@email.com", "admin");
+        //Comprobamos que la fila de admin aparece
+        PO_View.checkElementBy(driver, "free", "//td[contains(text(), 'admin@email.com')]");
+        //Hacemos logout
+        PO_PrivateView.logout(driver);
+
+        final String url = "http://localhost:8081/users/";
+        //Llamamos al servicio de login
+        RequestSpecification request = RestAssured.given();
+        JSONObject requestParams = new JSONObject();
+        requestParams.put("email", "admin@email.com");
+        requestParams.put("password", "admin");
+        request.header("Content-Type", "application/json");
+        request.body(requestParams.toJSONString());
+        // Hacemos la petición
+        Response response = request.post(url+"login");
+        // Llamamos al servicio de ofertas
+        RequestSpecification request2 = RestAssured.given();
+        request2.header("Content-Type", "application/json");
+        request2.header("ids","6456a3794000b47f4cf64144");
+        // Hacemos la petición
+        Response response2 = request2.get(url+"delete");
+        //Nos volvemos a logear para comprobar que sigue la fila de admin
+        PO_PrivateView.login(driver, "admin@email.com", "admin");
+        //Comprobamos que la fila de admin aparece
+        WebElement adminCell = driver.findElement(By.xpath("//td[contains(text(), 'admin@email.com')]"));
+        //Hacemos logout
+        PO_PrivateView.logout(driver);
+
+        Assertions.assertTrue(adminCell!=null);
     }
 
     /**
@@ -653,6 +814,126 @@ class Sdi2223Entrega2TestApplicationTests {
 
         //Cierro sesion
         PO_PrivateView.logout(driver);
+    }
+
+    /**
+     * PR33. Intentar acceder sin estar autenticado a la opción de listado de usuarios. Se devuelve al login
+     * Realizada por: Israel
+     * */
+
+    @Test
+    @Order(33)
+    public void PR33() {
+        // Accedemos a la lista de usuarios
+        driver.navigate().to("http://localhost:8081/users/list");
+        // Comprobamos que nos redirige al login
+        Assertions.assertEquals("http://localhost:8081/users/login", driver.getCurrentUrl());
+    }
+    /**
+     * PR34. Intentar acceder sin estar autenticado a la opción de listado de conversaciones. Se devuelve al login
+     * Realizada por: Israel
+     */
+    @Test
+    @Order(34)
+    public void PR34() {
+        // Accedemos a la lista de usuarios
+        driver.navigate().to("http://localhost:8081/apiclient/client.html?w=conversationList");
+        // Comprobamos que nos redirige al login
+        Assertions.assertEquals("http://localhost:8081/apiclient/client.html?w=login", driver.getCurrentUrl());
+    }
+
+    /**
+     * PR35. Estando autenticado como usuario estándar intentar acceder a una opción disponible solo
+     * para usuarios administradores (Añadir menú de auditoria (visualizar logs)). Se deberá indicar un
+     * mensaje de acción prohibida
+     * Realizada por: Israel
+     */
+    @Test
+    @Order(35)
+    public void PR35() {
+        //Iniciamos sesión como usuario estandar
+        PO_PrivateView.login(driver, "user03@email.com", "user03");
+        // Intentamos acceder a la lista de logs
+        driver.navigate().to("http://localhost:8081/log/list");
+        // Comprobamos que aparece un mensaje de error
+        WebElement errorMessage = driver.findElement(By.xpath("//td[contains(text(), 'No tienes permisos de administrador para acceder a esta página')]"));
+        Assertions.assertTrue(errorMessage != null);
+    }
+
+    /**
+     * PR36. Estando autenticado como usuario administrador visualizar todos los logs generados en
+     * una serie de interacciones. Esta prueba deberá generar al menos dos interacciones de cada tipo y
+     * comprobar que el listado incluye los logs correspondientes.
+     * Realizada por: Israel
+     */
+    @Test
+    @Order(36)
+    public void PR36() {
+        PO_PrivateView.login(driver, "user05@email.com", "user05");
+        PO_PrivateView.logout(driver);
+
+        //Vamos a la opcion de registro
+        PO_HomeView.clickOption(driver, "signup", "class", "btn btn-dark");
+        //Rellenamos el formulario.
+        PO_SignUpView.fillForm(driver, "uo123456@uniovi.es", "Adrián", "García Fernández", "123456", "123456","2013-05-07");
+        //Desconectamos al usuario
+        PO_PrivateView.logout(driver);
+
+        //Repetimos lo mismo con otro usuario
+        PO_HomeView.clickOption(driver, "signup", "class", "btn btn-dark");
+        PO_SignUpView.fillForm(driver, "uo1234567@uniovi.es", "Adrián", "García Fernández", "1234567", "1234567","2013-05-07");
+        PO_PrivateView.logout(driver);
+
+        //Nos logeamos incorrectamente
+        PO_LoginView.fillLoginForm(driver, "user055@email.com", "user055");
+
+        //Nos logeamos incorrectamente otra vez
+        PO_LoginView.fillLoginForm(driver, "user0556@email.com", "user0556");
+
+        PO_PrivateView.login(driver, "admin@email.com", "admin");
+        //Accedemos a la pestaña de logging
+        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@href, '/log')]", 0);
+        //Obtenemos las filas de la tabla de logging
+        List<WebElement> rows = driver.findElements(By.xpath("//table//tbody//tr"));
+        //Creamos un diccionario para luego comprobar el numero de acciones
+        HashMap<String,Integer> actions = new HashMap<>();
+        WebElement aux;
+        //Recorremos las filas y vamos añadiendo para cada tipo un contador para luego comprobar que funciona correctamente
+        for(WebElement row:rows){
+            aux = row.findElement(By.xpath(".//td[3]"));
+            if(!actions.containsKey(aux.getText())){
+                actions.put(aux.getText(), 1);
+            }else{
+                actions.put(aux.getText(),actions.get(aux.getText())+1);
+            }
+        }
+
+        Assertions.assertTrue(actions.get("PET")>=2);
+        Assertions.assertTrue(actions.get("LOGIN-EX")>=2);
+        Assertions.assertTrue(actions.get("LOGIN-ERR")>=2);
+        Assertions.assertTrue(actions.get("LOGOUT")>=2);
+        Assertions.assertTrue(actions.get("ALTA")>=2);
+
+        m.resetMongo();
+    }
+
+    /**
+     * PR37. Autenticado como administrador, vamos a la vista de logs y borramos los registros.
+     * Realizada por: Israel
+     */
+    @Test
+    @Order(37)
+    public void PR37() {
+        // Iniciamos sesión como administrador
+        PO_PrivateView.login(driver, "admin@email.com", "admin");
+        //Accedemos a la pestaña de conversaciones
+        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@href, 'log/list')]", 0);
+        // Seleccionamos el boton de eliminar y hacemos click
+        PO_PrivateView.checkViewAndClick(driver, "free", "//a[contains(@href, 'log/delete')]", 0);
+        // Comprobamos que se han borrado todos los registros
+        List<WebElement> tableRows = driver.findElements(By.xpath("//table[@id='tableLogs']/tbody/tr"));
+        //Comprobamos que el numero es el correcto, es 1 ya que la petición de actualizar la tabla ocurre despues del borrado
+        Assertions.assertEquals(1, tableRows.size());
     }
 
     @Test

@@ -7,6 +7,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PO_PrivateView extends PO_NavView {
@@ -122,5 +123,30 @@ public class PO_PrivateView extends PO_NavView {
     }
 
 
+    public static void goLastPage(WebDriver driver) {
+        WebElement previousLink;
+        WebElement lastPageLink;
+        do {
+            previousLink= driver.findElement(By.xpath("(//a[contains(@class, 'page-link')])[last()]"));
+            previousLink.click();
+            lastPageLink = driver.findElement(By.xpath("(//a[contains(@class, 'page-link')])[last()]"));
+        }while(previousLink.getText() != lastPageLink.getText());
+    }
 
+    public static List<String> clickAndGetFirstCellsOfTable(WebDriver driver, int n) {
+        List<WebElement> rows = driver.findElements(By.xpath("//table//tr[td/input[@type='checkbox']]"));
+
+        List<String> textsBeforeDelete = new ArrayList<String>();
+        for (int i = 0; i < n; i++) {
+            //Obtenemos la celda del checkbox
+            WebElement checkBoxCell = rows.get(i).findElement(By.xpath(".//input[@type='checkbox']"));
+            //Clickamos el checkbox
+            checkBoxCell.click();
+            //Obtenemos la primera celda de la tabla
+            WebElement email = rows.get(i).findElement(By.xpath(".//td[1]"));
+            //Lo añadimos a la lista para comprobar que se han borrado correctamente
+            textsBeforeDelete.add(email.getText());
+        }
+        return textsBeforeDelete;
+    }
 }

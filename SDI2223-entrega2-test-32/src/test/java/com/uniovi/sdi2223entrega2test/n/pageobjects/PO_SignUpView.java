@@ -6,8 +6,8 @@ import org.openqa.selenium.WebElement;
 
 public class PO_SignUpView extends PO_NavView {
     static public void fillForm(WebDriver driver, String dnip, String namep, String lastnamep, String
-            passwordp, String passwordconfp) {
-        WebElement dni = driver.findElement(By.name("dni"));
+            passwordp, String passwordconfp,String date) {
+        WebElement dni = driver.findElement(By.name("email"));
         dni.click();
         dni.clear();
         dni.sendKeys(dnip);
@@ -27,6 +27,13 @@ public class PO_SignUpView extends PO_NavView {
         passwordConfirm.click();
         passwordConfirm.clear();
         passwordConfirm.sendKeys(passwordconfp);
+        WebElement dateInput = driver.findElement(By.name("date"));
+        dateInput.click();
+        dateInput.clear();
+        String[] dayMonthYear = date.split("/");
+        for(int i=0;i<dayMonthYear.length;i++){
+            dateInput.sendKeys(dayMonthYear[i]);
+        }
         //Pulsar el boton de Alta.
         By boton = By.className("btn");
         driver.findElement(boton).click();
