@@ -1,4 +1,4 @@
-module.exports = function (app, usersRepository,offerRepository,logsRepository) {
+module.exports = function (app, usersRepository, offerRepository, logsRepository) {
     app.get('/home', function (req, res) {
         let filter = {feature: true};
         let page = parseInt(req.query.page);
@@ -27,14 +27,14 @@ module.exports = function (app, usersRepository,offerRepository,logsRepository) 
             });
         });
     }),
-    app.get('/users/signup', function (req, res) {
-        res.render("signup.twig", {
-            user: req.session.user,
-            role: req.session.role,
-            amount: req.session.amount,
-            date: req.session.date
+        app.get('/users/signup', function (req, res) {
+            res.render("signup.twig", {
+                user: req.session.user,
+                role: req.session.role,
+                amount: req.session.amount,
+                date: req.session.date
+            });
         });
-    });
     app.post('/users/signup', function (req, res) {
         let securePassword = app.get("crypto").createHmac('sha256', app.get('clave'))
             .update(req.body.password).digest('hex');
@@ -56,7 +56,13 @@ module.exports = function (app, usersRepository,offerRepository,logsRepository) 
         }
         validateSignUp(user, passwordConfirm).then(errors => {
             if (errors != null && errors.length > 0) {
-                res.render("signup.twig", {errors: errors});
+                res.render("signup", {
+                    errors: errors,
+                    user: req.session.user,
+                    role: req.session.role,
+                    amount: req.session.amount,
+                    date: req.session.date
+                });
             } else {
                 usersRepository.insertUser(user).then(userId => {
                     req.session.user = user.email;
@@ -70,7 +76,7 @@ module.exports = function (app, usersRepository,offerRepository,logsRepository) 
                         "&messageType=alert-danger");
                 });
             }
-        });
+        })
     });
     app.get('/users/login', function (req, res) {
         res.render("login.twig");
@@ -78,20 +84,17 @@ module.exports = function (app, usersRepository,offerRepository,logsRepository) 
     app.post('/users/login', function (req, res) {
         let securePassword = app.get("crypto").createHmac('sha256', app.get('clave'))
             .update(req.body.password).digest('hex');
+        let user = {
+            email: req.body.email,
+            password: req.body.password
+        }
         let filter = {
             email: req.body.email,
             password: securePassword
         }
         let options = {};
-        usersRepository.findUser(filter, options).then(user => {
-            if (user == null) {
-                insertLog(req,"LOGIN-ERR",req.body.email);
-                req.session.user = null;
-                req.session.role = null;
-                req.session.amount = null;
-                req.session.date = null;
-                let errors = [];
-                errors.push({type: "Email", message: "Email o password incorrecto"});
+        validateLogin(user).then(errors => {
+            if (errors !== null && errors.length > 0) {
                 res.render("login", {
                     errors: errors,
                     user: req.session.user,
@@ -100,32 +103,51 @@ module.exports = function (app, usersRepository,offerRepository,logsRepository) 
                     date: req.session.date
                 });
             } else {
-                insertLog(req,"LOGIN-EX",req.body.email);
-                req.session.user = user.email;
-                req.session.role = user.role;
-                req.session.amount = user.amount;
-                req.session.date = user.date;
-                if (user.role === "admin") {
-                    res.redirect("/users/list");
-                } else {
-                    res.redirect("/offer/ownedList");
-                }
+                usersRepository.findUser(filter, options).then(user => {
+                    if (user == null) {
+                        insertLog(req, "LOGIN-ERR", req.body.email);
+                        req.session.user = null;
+                        req.session.role = null;
+                        req.session.amount = null;
+                        req.session.date = null;
+                        let errors = [];
+                        errors.push({type: "Email", message: "Email o password incorrecto"});
+                        res.render("login", {
+                            errors: errors,
+                            user: req.session.user,
+                            role: req.session.role,
+                            amount: req.session.amount,
+                            date: req.session.date
+                        });
+                    } else {
+                        insertLog(req, "LOGIN-EX", req.body.email);
+                        req.session.user = user.email;
+                        req.session.role = user.role;
+                        req.session.amount = user.amount;
+                        req.session.date = user.date;
+                        if (user.role === "admin") {
+                            res.redirect("/users/list");
+                        } else {
+                            res.redirect("/offer/ownedList");
+                        }
+                    }
+                }).catch(error => {
+                    insertLog(req, "LOGIN-ERR", req.body.email);
+                    req.session.user = null;
+                    req.session.role = null;
+                    req.session.amount = null;
+                    req.session.date = null;
+                    let errors = [];
+                    errors.push({type: "Email", message: "Se ha producido un error al buscar el usuario"});
+                    res.render("login.twig", {
+                        errors: errors,
+                        user: req.session.user,
+                        role: req.session.role,
+                        amount: req.session.amount,
+                        date: req.session.date
+                    });
+                })
             }
-        }).catch(error => {
-            insertLog(req,"LOGIN-ERR",req.body.email);
-            req.session.user = null;
-            req.session.role = null;
-            req.session.amount = null;
-            req.session.date = null;
-            let errors = [];
-            errors.push({type: "Email", message: "Se ha producido un error al buscar el usuario"});
-            res.render("login.twig", {
-                errors: errors,
-                user: req.session.user,
-                role: req.session.role,
-                amount: req.session.amount,
-                date: req.session.date
-            });
         })
     });
     app.get('/users/logout', function (req, res) {
@@ -193,71 +215,13 @@ module.exports = function (app, usersRepository,offerRepository,logsRepository) 
         });
     });
 
-    async function validateSignUp(user, confirmPassword) {
-        let errors = [];
-        if (user.email.trim().toString().length === 0) {
-            errors.push({type: "Email", message: "El email no puede ser vacío."});
-        }
-        if (user.name.trim().toString().length === 0) {
-            errors.push({type: "Nombre", message: "El nombre no puede ser vacío."});
-        }
-        if (user.lastName.trim().toString().length === 0) {
-            errors.push({type: "Apellido", message: "El apellido no puede ser vacío."});
-        }
-        if (user.password.trim().toString().length === 0) {
-            errors.push({type: "Contraseña", message: "La contraseña no puede ser vacía."});
-        }
-        if (confirmPassword === undefined || confirmPassword.trim().toString().length === 0) {
-            errors.push({
-                type: "Confirmar contraseña",
-                message: "La confirmación de contraseña no puede ser vacía."
-            });
-        }
-        if (user.password !== confirmPassword) {
-            errors.push({type: "Contraseñas", message: "Las contraseñas no coinciden."});
-        }
-        if (user.password.length < 4 && user.password.length > 24) {
-            errors.push({
-                type: "Contraseña",
-                message: "La contraseña debe de tener un mínimo de 4 caracteres y un máximo de 24."
-            });
-        }
-        if (!user.email.includes("@")) {
-            errors.push({type: "Contraseña", message: "El email debe seguir el siguiente formato: \"x@y\"."});
-        }
-        let dateString = user.date;
-        let dateParts = dateString.split("/");
-        let dateObject = new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]);
-        if (new Date(dateObject).getTime() >= new Date().getTime()) {
-            errors.push({
-                type: "Fecha de nacimiento",
-                message: "La fecha de nacimiento no puede ser la fecha actual."
-            });
-        }
-        let filter = {"email": user.email};
-        usersRepository.findUser(filter, {}).then(user => {
-            if (user !== null) {
-                errors.push({
-                    type: "Email",
-                    message: "Este email ya pertenece a otro usuario, " + user.email + "."
-                });
-            }
-            if (errors.length <= 0) {
-                return null;
-            }
-        }).catch(error => {
-            errors.push({type: "Email", message: "Se ha producido un error al buscar el usuario." + error});
-        });
-        return errors;
-    }
-
     app.post('/users/delete', function (req, res) {
         let ids = req.body.users;
         let filter;
-        if(typeof ids == "string"){
-            ids=[ids];
+        if (typeof ids == "string") {
+            ids = [ids];
         }
-        for(let i=0;i<ids.length;i++){
+        for (let i = 0; i < ids.length; i++) {
             filter = {_id: ObjectId(ids[i])};
             usersRepository.deleteUser(filter, {}).then(result => {
                 if (result === null || result.deletedCount === 0) {
@@ -272,15 +236,88 @@ module.exports = function (app, usersRepository,offerRepository,logsRepository) 
         }
     });
 
-    function insertLog(req,type,email){
+    function insertLog(req, type, email) {
         let log = {
-            date:Date.now(),
-            action:req.method,
-            url:email,
-            type:type,
+            date: Date.now(),
+            action: req.method,
+            url: email,
+            type: type,
         }
         logsRepository.insertLog(log).catch(error => {
             console.log("No se ha podido registrar la peticion " + req.method)
         });
+    }
+
+    async function validateLogin(user) {
+        let errors = [];
+        console.log(user);
+        if (typeof user.email === "undefined" || user.email.trim().toString().length === 0) {
+            errors.push({type: "Email", message: "El email no puede ser vacío."});
+        }
+        if (typeof user.password === "undefined" || user.password.trim().toString().length === 0) {
+            errors.push({type: "Contraseña", message: "La contraseña no puede ser vacía."});
+        }
+        return errors;
+    }
+
+    async function validateSignUp(user, confirmPassword) {
+        let errors = [];
+        if (typeof user.email === "undefined" || user.email.trim().toString().length === 0) {
+            errors.push({type: "Email", message: "El email no puede ser vacío."});
+        }
+        if (typeof user.name === "undefined" || user.name.trim().toString().length === 0) {
+            errors.push({type: "Nombre", message: "El nombre no puede ser vacío."});
+        }
+        if (typeof user.lastName === "undefined" || user.lastName.trim().toString().length === 0) {
+            errors.push({type: "Apellido", message: "El apellido no puede ser vacío."});
+        }
+        if (typeof user.password === "undefined" || user.password.trim().toString().length === 0) {
+            errors.push({type: "Contraseña", message: "La contraseña no puede ser vacía."});
+        }
+        if (typeof confirmPassword === "undefined" || confirmPassword === undefined || confirmPassword.trim().toString().length === 0) {
+            errors.push({
+                type: "Confirmar contraseña",
+                message: "La confirmación de contraseña no puede ser vacía."
+            });
+        }
+        if (typeof user.date === "undefined" || user.date.trim().toString().length === 0 || user.date.includes("NaN")) {
+            errors.push({type: "Fecha de nacimiento", message: "La fecha de nacimiento no puede ser vacía."});
+        }
+        if (user.password !== confirmPassword) {
+            errors.push({type: "Contraseñas", message: "Las contraseñas deben coincidir."});
+        }
+        if (user.password.length < 4 && user.password.length > 24) {
+            errors.push({
+                type: "Contraseña",
+                message: "La contraseña debe de tener un mínimo de 4 caracteres y un máximo de 24."
+            });
+        }
+        if (!user.email.includes("@")) {
+            errors.push({type: "Email", message: "El email debe seguir el siguiente formato: \"x@y\"."});
+        }
+        let dateString = user.date;
+        let dateParts = dateString.split("/");
+        let dateObject = new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]);
+        if (new Date(dateObject).getTime() >= new Date().getTime()) {
+            errors.push({
+                type: "Fecha de nacimiento",
+                message: "La fecha de nacimiento no puede ser la fecha actual."
+            });
+        }
+        let filter = {"email": user.email};
+        await usersRepository.findUser(filter, {}).then(user => {
+            if (user !== null) {
+                errors.push({
+                    type: "Email",
+                    message: "Este email ya pertenece a otro usuario, " + user.email + "."
+                });
+            }
+            if (errors.length === 0) {
+                return null;
+            }
+        }).catch(error => {
+            errors.push({type: "Email", message: "Se ha producido un error al buscar el usuario." + error});
+        });
+        return errors;
     }
 }

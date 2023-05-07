@@ -57,7 +57,7 @@ module.exports = {
             throw (error);
         }
     },
-    updateUser: async function(newUser, filter, options) {
+    updateUser: async function (newUser, filter, options) {
         try {
             const client = await this.mongoClient.connect(this.app.get('connectionStrings'));
             const database = client.db("UrWalletPop");
